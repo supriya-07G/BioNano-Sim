@@ -1,0 +1,107 @@
+{
+  "_provenance": {
+    "status": "CONFIGURABLE_DEMONSTRATION_PRESETS",
+    "statement": "These are configurable demonstration presets for the BioNano-Sim MVP. The dose, duration and temperature values are illustrative order-of-magnitude placeholders chosen so the interface has sensible defaults. They are NOT authoritative NASA, ESA or ICRP reference values and must not be cited as measured mission environments.",
+    "ml_coupling": "The ML bundle consumes only the categorical fields scenario_id, radiation_class and environment. It has no dose, duration, temperature or force input, so changing the numeric values below does NOT change the ML degradation estimate. Numeric values drive the OpenMM simulation temperature and the radiation-damage parameterisation only.",
+    "trained_scenarios": [
+      "GCR_DEEP_SPACE_REFERENCE",
+      "MARS_SURFACE_REFERENCE",
+      "SPE_REFERENCE_EVENT"
+    ]
+  },
+  "scenarios": [
+    {
+      "scenario_id": "GCR_DEEP_SPACE_REFERENCE",
+      "label": "Deep-space GCR reference",
+      "summary": "Galactic cosmic ray background in free space, outside any planetary magnetosphere.",
+      "radiation_class": "GCR",
+      "environment": "free_space",
+      "particle_group": "high_z_high_energy_ions",
+      "ml_supported": true,
+      "defaults": {
+        "dose": 0.5,
+        "dose_unit": "Gy",
+        "exposure_duration_days": 180.0,
+        "temperature_kelvin": 300.0,
+        "mechanical_force_pn": 0.0
+      },
+      "notes": "This is the reference scenario the mock model was trained on for free-space GCR exposure."
+    },
+    {
+      "scenario_id": "SPE_REFERENCE_EVENT",
+      "label": "Solar particle event reference",
+      "summary": "Acute solar energetic particle event, dominated by high-flux protons over hours to days.",
+      "radiation_class": "SPE",
+      "environment": "free_space",
+      "particle_group": "solar_energetic_protons",
+      "ml_supported": true,
+      "defaults": {
+        "dose": 1.5,
+        "dose_unit": "Gy",
+        "exposure_duration_days": 2.0,
+        "temperature_kelvin": 300.0,
+        "mechanical_force_pn": 0.0
+      },
+      "notes": "Carries the highest mean proxy degradation in the mock training data; radiation_class is the single most influential feature in the model."
+    },
+    {
+      "scenario_id": "MARS_SURFACE_REFERENCE",
+      "label": "Mars-surface reference",
+      "summary": "Mars surface, where the thin atmosphere and bulk shielding attenuate the GCR flux relative to free space.",
+      "radiation_class": "GCR",
+      "environment": "mars_surface",
+      "particle_group": "attenuated_gcr_and_secondaries",
+      "ml_supported": true,
+      "defaults": {
+        "dose": 0.2,
+        "dose_unit": "Gy",
+        "exposure_duration_days": 300.0,
+        "temperature_kelvin": 260.0,
+        "mechanical_force_pn": 0.0
+      },
+      "notes": "The only trained scenario with environment = mars_surface."
+    },
+    {
+      "scenario_id": "MECHANICAL_STRESS_TEST",
+      "label": "Mechanical stress test",
+      "summary": "Mechanical loading with no radiation term, for probing structural response alone.",
+      "radiation_class": null,
+      "environment": "free_space",
+      "particle_group": null,
+      "ml_supported": false,
+      "ml_unsupported_reason": "The ML bundle's scenario_id vocabulary contains only the three trained reference scenarios, and its radiation_class vocabulary contains only GCR and SPE. A mechanical-only configuration has no valid encoding, so no ML degradation estimate is produced. The OpenMM simulation still runs.",
+      "defaults": {
+        "dose": 0.0,
+        "dose_unit": "Gy",
+        "exposure_duration_days": 0.0,
+        "temperature_kelvin": 310.0,
+        "mechanical_force_pn": 150.0
+      },
+      "notes": "Simulation-only preset. Use it to compare structural drift under load against a radiation scenario."
+    },
+    {
+      "scenario_id": "BASELINE_NO_RADIATION",
+      "label": "Baseline / no-radiation control",
+      "summary": "Unperturbed control run: no radiation term and no applied load.",
+      "radiation_class": null,
+      "environment": "free_space",
+      "particle_group": null,
+      "ml_supported": false,
+      "ml_unsupported_reason": "The training data contains no zero-radiation control condition, so the ML model has no encoding for it. Requesting an ML estimate here would be extrapolation outside the trained vocabulary. The OpenMM simulation still runs and provides the structural baseline.",
+      "defaults": {
+        "dose": 0.0,
+        "dose_unit": "Gy",
+        "exposure_duration_days": 0.0,
+        "temperature_kelvin": 300.0,
+        "mechanical_force_pn": 0.0
+      },
+      "notes": "Simulation-only control. This is the correct reference for judging whether drift in a radiation run exceeds thermal noise."
+    }
+  ],
+  "dose_units": [
+    { "unit": "Gy", "label": "gray (Gy)", "to_gray": 1.0 },
+    { "unit": "mGy", "label": "milligray (mGy)", "to_gray": 0.001 },
+    { "unit": "kGy", "label": "kilogray (kGy)", "to_gray": 1000.0 },
+    { "unit": "rad", "label": "rad", "to_gray": 0.01 }
+  ]
+}

@@ -1,0 +1,44 @@
+# BioNano-Sim backend runtime dependencies
+#
+# Version pins are deliberate. The shipped ML bundle
+# (models/bionano_mock_model_bundle.pkl) was serialised by joblib under
+# scikit-learn 1.7.1 with a NumPy 2.x memory layout (the pickle references
+# `numpy._core.multiarray`, which only exists on NumPy >= 2.0).
+#
+# Unpickling a scikit-learn estimator under a different minor version raises
+# InconsistentVersionWarning and is not guaranteed to reproduce the training
+# transforms, so scikit-learn is pinned exactly. Do not relax it without
+# re-verifying the deterministic smoke test in scripts/validate_model.py.
+#
+# Target interpreter: Python 3.11 (3.13/3.14 are not supported by this pin set).
+
+# --- Web framework ---
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.5
+pydantic-settings==2.7.1
+python-multipart==0.0.20
+
+# --- Scientific / numeric core ---
+numpy==2.1.3
+pandas==2.2.3
+scipy==1.14.1
+
+# --- ML bundle (pins must match the training environment) ---
+scikit-learn==1.7.1
+xgboost==2.1.3
+joblib==1.4.2
+
+# --- Structural biology ---
+biopython==1.84
+
+# --- Molecular dynamics ---
+# OpenMM publishes cp311 win_amd64 / manylinux / macos wheels on PyPI from 8.5+,
+# so no conda installation is required for this MVP.
+openmm==8.6.0
+# MDTraj is used for trajectory analysis where available. The backend degrades
+# gracefully to its own NumPy DCD reader if this import fails.
+# NOTE: mdtraj <= 1.10.x caps numpy < 2.0, which conflicts with the NumPy 2.x
+# memory layout required by the ML bundle. 1.11.x is the first line that
+# declares `numpy ~=2.0` and ships cp311 wheels, so it is the floor here.
+mdtraj==1.11.1.post2

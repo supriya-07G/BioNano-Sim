@@ -1,0 +1,2410 @@
+{
+  "job_id": "precomputed-1UBQ",
+  "status": "completed",
+  "engine": "precomputed",
+  "result_label": "Precomputed OpenMM Result",
+  "metrics": {
+    "preset_id": "rapid_demo",
+    "engine": "openmm",
+    "result_label": "Rapid OpenMM Simulation",
+    "dynamics_run": true,
+    "n_frames": 60,
+    "n_atoms": 1231,
+    "n_ca_atoms": 76,
+    "trajectory_reader": "mdtraj 1.11.1.post2",
+    "steps_total": 6000,
+    "timestep_fs": 2.0,
+    "report_interval": 100,
+    "simulated_time_ps": 12.0,
+    "requested_temperature_kelvin": 300.0,
+    "minimisation": {
+      "potential_energy_before_kj_mol": -12444.7431,
+      "potential_energy_after_kj_mol": -15170.6247,
+      "delta_kj_mol": -2725.8815,
+      "max_iterations": 500
+    },
+    "rmsd_nm": {
+      "final": 0.13602,
+      "max": 0.156341,
+      "mean": 0.110621
+    },
+    "radius_of_gyration_nm": {
+      "initial": 1.147395,
+      "final": 1.153367,
+      "relative_change": 0.005205
+    },
+    "rmsf_nm": {
+      "mean": 0.060498,
+      "max": 0.290112
+    },
+    "potential_energy_kj_mol": {
+      "initial": -12954.5868,
+      "final": -11663.5209,
+      "mean": -11643.8268
+    },
+    "temperature_kelvin": {
+      "mean": 290.113,
+      "std": 23.83
+    },
+    "degradation_proxy": {
+      "percent": 16.937,
+      "label": "Simulation-derived degradation proxy",
+      "formula": "degradation_proxy_percent = 100 * clip(0.5*min(1, final_rmsd_nm/0.6) + 0.2*min(1, |rg_final - rg_initial|/rg_initial/0.25) + 0.3*min(1, mean_rmsf_nm/0.35), 0, 1)",
+      "components": {
+        "rmsd": {
+          "value_nm": 0.13602,
+          "normalised": 0.2267,
+          "weight": 0.5,
+          "contribution_percent": 11.335
+        },
+        "radius_of_gyration": {
+          "initial_nm": 1.147395,
+          "final_nm": 1.153367,
+          "relative_change": 0.005205,
+          "normalised": 0.020821,
+          "weight": 0.2,
+          "contribution_percent": 0.4164
+        },
+        "rmsf": {
+          "mean_nm": 0.060498,
+          "normalised": 0.172852,
+          "weight": 0.3,
+          "contribution_percent": 5.1856
+        }
+      },
+      "reference_scales": {
+        "rmsd_reference_nm": 0.6,
+        "rg_relative_reference": 0.25,
+        "rmsf_reference_nm": 0.35,
+        "weights": {
+          "rmsd": 0.5,
+          "radius_of_gyration": 0.2,
+          "rmsf": 0.3
+        },
+        "note": "Engineering constants for this MVP, not physical constants."
+      },
+      "caveats": [
+        "This is a structural-drift score computed by BioNano-Sim from the trajectory. It is NOT experimentally measured degradation and NOT a radiation-damage yield.",
+        "The reference scales (RMSD 0.60 nm, \u0394Rg 25 %, RMSF 0.35 nm) are engineering constants chosen for this MVP, not physical constants. Changing them changes the number without changing the underlying physics.",
+        "A short run at 300 K produces non-zero drift from thermal motion alone. Use the BASELINE_NO_RADIATION preset as a control to see that floor.",
+        "The ML estimate and this proxy are different quantities on different scales. Their difference measures disagreement between two proxies, and does not tell you which is closer to reality."
+      ]
+    }
+  },
+  "series": {
+    "rmsd": [
+      {
+        "x": 0.0,
+        "y": 0.0
+      },
+      {
+        "x": 0.2,
+        "y": 0.031488
+      },
+      {
+        "x": 0.4,
+        "y": 0.05061
+      },
+      {
+        "x": 0.6,
+        "y": 0.064
+      },
+      {
+        "x": 0.8,
+        "y": 0.069099
+      },
+      {
+        "x": 1.0,
+        "y": 0.06809
+      },
+      {
+        "x": 1.2,
+        "y": 0.068699
+      },
+      {
+        "x": 1.4,
+        "y": 0.070018
+      },
+      {
+        "x": 1.6,
+        "y": 0.074291
+      },
+      {
+        "x": 1.8,
+        "y": 0.076616
+      },
+      {
+        "x": 2.0,
+        "y": 0.077887
+      },
+      {
+        "x": 2.2,
+        "y": 0.085028
+      },
+      {
+        "x": 2.4,
+        "y": 0.087339
+      },
+      {
+        "x": 2.6,
+        "y": 0.091924
+      },
+      {
+        "x": 2.8,
+        "y": 0.090478
+      },
+      {
+        "x": 3.0,
+        "y": 0.091361
+      },
+      {
+        "x": 3.2,
+        "y": 0.091263
+      },
+      {
+        "x": 3.4,
+        "y": 0.09771
+      },
+      {
+        "x": 3.6,
+        "y": 0.102856
+      },
+      {
+        "x": 3.8,
+        "y": 0.105177
+      },
+      {
+        "x": 4.0,
+        "y": 0.103913
+      },
+      {
+        "x": 4.2,
+        "y": 0.103294
+      },
+      {
+        "x": 4.4,
+        "y": 0.105715
+      },
+      {
+        "x": 4.6,
+        "y": 0.107669
+      },
+      {
+        "x": 4.8,
+        "y": 0.106658
+      },
+      {
+        "x": 5.0,
+        "y": 0.106546
+      },
+      {
+        "x": 5.2,
+        "y": 0.106849
+      },
+      {
+        "x": 5.4,
+        "y": 0.109074
+      },
+      {
+        "x": 5.6,
+        "y": 0.11073
+      },
+      {
+        "x": 5.8,
+        "y": 0.112602
+      },
+      {
+        "x": 6.0,
+        "y": 0.118671
+      },
+      {
+        "x": 6.2,
+        "y": 0.122066
+      },
+      {
+        "x": 6.4,
+        "y": 0.128939
+      },
+      {
+        "x": 6.6,
+        "y": 0.133841
+      },
+      {
+        "x": 6.8,
+        "y": 0.13234
+      },
+      {
+        "x": 7.0,
+        "y": 0.130925
+      },
+      {
+        "x": 7.2,
+        "y": 0.133738
+      },
+      {
+        "x": 7.4,
+        "y": 0.133503
+      },
+      {
+        "x": 7.6,
+        "y": 0.136239
+      },
+      {
+        "x": 7.8,
+        "y": 0.143061
+      },
+      {
+        "x": 8.0,
+        "y": 0.149097
+      },
+      {
+        "x": 8.2,
+        "y": 0.156341
+      },
+      {
+        "x": 8.4,
+        "y": 0.151826
+      },
+      {
+        "x": 8.6,
+        "y": 0.147751
+      },
+      {
+        "x": 8.8,
+        "y": 0.14462
+      },
+      {
+        "x": 9.0,
+        "y": 0.141199
+      },
+      {
+        "x": 9.2,
+        "y": 0.136042
+      },
+      {
+        "x": 9.4,
+        "y": 0.129292
+      },
+      {
+        "x": 9.6,
+        "y": 0.123726
+      },
+      {
+        "x": 9.8,
+        "y": 0.128101
+      },
+      {
+        "x": 10.0,
+        "y": 0.132542
+      },
+      {
+        "x": 10.2,
+        "y": 0.133538
+      },
+      {
+        "x": 10.4,
+        "y": 0.136249
+      },
+      {
+        "x": 10.6,
+        "y": 0.135771
+      },
+      {
+        "x": 10.8,
+        "y": 0.134592
+      },
+      {
+        "x": 11.0,
+        "y": 0.132711
+      },
+      {
+        "x": 11.2,
+        "y": 0.135271
+      },
+      {
+        "x": 11.4,
+        "y": 0.135895
+      },
+      {
+        "x": 11.6,
+        "y": 0.136355
+      },
+      {
+        "x": 11.8,
+        "y": 0.13602
+      }
+    ],
+    "radius_of_gyration": [
+      {
+        "x": 0.0,
+        "y": 1.147395
+      },
+      {
+        "x": 0.2,
+        "y": 1.145403
+      },
+      {
+        "x": 0.4,
+        "y": 1.149818
+      },
+      {
+        "x": 0.6,
+        "y": 1.14903
+      },
+      {
+        "x": 0.8,
+        "y": 1.147829
+      },
+      {
+        "x": 1.0,
+        "y": 1.142787
+      },
+      {
+        "x": 1.2,
+        "y": 1.146315
+      },
+      {
+        "x": 1.4,
+        "y": 1.147929
+      },
+      {
+        "x": 1.6,
+        "y": 1.152358
+      },
+      {
+        "x": 1.8,
+        "y": 1.156643
+      },
+      {
+        "x": 2.0,
+        "y": 1.15971
+      },
+      {
+        "x": 2.2,
+        "y": 1.163407
+      },
+      {
+        "x": 2.4,
+        "y": 1.164609
+      },
+      {
+        "x": 2.6,
+        "y": 1.168926
+      },
+      {
+        "x": 2.8,
+        "y": 1.168218
+      },
+      {
+        "x": 3.0,
+        "y": 1.166382
+      },
+      {
+        "x": 3.2,
+        "y": 1.163123
+      },
+      {
+        "x": 3.4,
+        "y": 1.161242
+      },
+      {
+        "x": 3.6,
+        "y": 1.161679
+      },
+      {
+        "x": 3.8,
+        "y": 1.163507
+      },
+      {
+        "x": 4.0,
+        "y": 1.163282
+      },
+      {
+        "x": 4.2,
+        "y": 1.157158
+      },
+      {
+        "x": 4.4,
+        "y": 1.15496
+      },
+      {
+        "x": 4.6,
+        "y": 1.153827
+      },
+      {
+        "x": 4.8,
+        "y": 1.149727
+      },
+      {
+        "x": 5.0,
+        "y": 1.15523
+      },
+      {
+        "x": 5.2,
+        "y": 1.155649
+      },
+      {
+        "x": 5.4,
+        "y": 1.152942
+      },
+      {
+        "x": 5.6,
+        "y": 1.148232
+      },
+      {
+        "x": 5.8,
+        "y": 1.145804
+      },
+      {
+        "x": 6.0,
+        "y": 1.146296
+      },
+      {
+        "x": 6.2,
+        "y": 1.151878
+      },
+      {
+        "x": 6.4,
+        "y": 1.15124
+      },
+      {
+        "x": 6.6,
+        "y": 1.147197
+      },
+      {
+        "x": 6.8,
+        "y": 1.148093
+      },
+      {
+        "x": 7.0,
+        "y": 1.149772
+      },
+      {
+        "x": 7.2,
+        "y": 1.153436
+      },
+      {
+        "x": 7.4,
+        "y": 1.154789
+      },
+      {
+        "x": 7.6,
+        "y": 1.150509
+      },
+      {
+        "x": 7.8,
+        "y": 1.150957
+      },
+      {
+        "x": 8.0,
+        "y": 1.148437
+      },
+      {
+        "x": 8.2,
+        "y": 1.14279
+      },
+      {
+        "x": 8.4,
+        "y": 1.142529
+      },
+      {
+        "x": 8.6,
+        "y": 1.145024
+      },
+      {
+        "x": 8.8,
+        "y": 1.144845
+      },
+      {
+        "x": 9.0,
+        "y": 1.143738
+      },
+      {
+        "x": 9.2,
+        "y": 1.147341
+      },
+      {
+        "x": 9.4,
+        "y": 1.149099
+      },
+      {
+        "x": 9.6,
+        "y": 1.154389
+      },
+      {
+        "x": 9.8,
+        "y": 1.154365
+      },
+      {
+        "x": 10.0,
+        "y": 1.154528
+      },
+      {
+        "x": 10.2,
+        "y": 1.153955
+      },
+      {
+        "x": 10.4,
+        "y": 1.156974
+      },
+      {
+        "x": 10.6,
+        "y": 1.154461
+      },
+      {
+        "x": 10.8,
+        "y": 1.154611
+      },
+      {
+        "x": 11.0,
+        "y": 1.156744
+      },
+      {
+        "x": 11.2,
+        "y": 1.159707
+      },
+      {
+        "x": 11.4,
+        "y": 1.161733
+      },
+      {
+        "x": 11.6,
+        "y": 1.159955
+      },
+      {
+        "x": 11.8,
+        "y": 1.153367
+      }
+    ],
+    "potential_energy": [
+      {
+        "x": 0.2,
+        "y": -12954.586792
+      },
+      {
+        "x": 0.4,
+        "y": -12772.700577
+      },
+      {
+        "x": 0.6,
+        "y": -12436.805984
+      },
+      {
+        "x": 0.8,
+        "y": -12382.393661
+      },
+      {
+        "x": 1.0,
+        "y": -12109.20401
+      },
+      {
+        "x": 1.2,
+        "y": -12226.913467
+      },
+      {
+        "x": 1.4,
+        "y": -11894.313416
+      },
+      {
+        "x": 1.6,
+        "y": -11828.169876
+      },
+      {
+        "x": 1.8,
+        "y": -11688.359711
+      },
+      {
+        "x": 2.0,
+        "y": -11663.280823
+      },
+      {
+        "x": 2.2,
+        "y": -11663.607529
+      },
+      {
+        "x": 2.4,
+        "y": -11546.143021
+      },
+      {
+        "x": 2.6,
+        "y": -11477.525917
+      },
+      {
+        "x": 2.8,
+        "y": -11532.467331
+      },
+      {
+        "x": 3.0,
+        "y": -11402.561066
+      },
+      {
+        "x": 3.2,
+        "y": -11531.158981
+      },
+      {
+        "x": 3.4,
+        "y": -11582.819916
+      },
+      {
+        "x": 3.6,
+        "y": -11614.787506
+      },
+      {
+        "x": 3.8,
+        "y": -11637.964691
+      },
+      {
+        "x": 4.0,
+        "y": -11520.714645
+      },
+      {
+        "x": 4.2,
+        "y": -11455.779282
+      },
+      {
+        "x": 4.4,
+        "y": -11558.891739
+      },
+      {
+        "x": 4.6,
+        "y": -11662.674561
+      },
+      {
+        "x": 4.8,
+        "y": -11708.068588
+      },
+      {
+        "x": 5.0,
+        "y": -11617.955795
+      },
+      {
+        "x": 5.2,
+        "y": -11567.902542
+      },
+      {
+        "x": 5.4,
+        "y": -11562.723633
+      },
+      {
+        "x": 5.6,
+        "y": -11650.950027
+      },
+      {
+        "x": 5.8,
+        "y": -11744.986633
+      },
+      {
+        "x": 6.0,
+        "y": -11623.311264
+      },
+      {
+        "x": 6.2,
+        "y": -11533.905853
+      },
+      {
+        "x": 6.4,
+        "y": -11512.045319
+      },
+      {
+        "x": 6.6,
+        "y": -11565.034607
+      },
+      {
+        "x": 6.8,
+        "y": -11502.792633
+      },
+      {
+        "x": 7.0,
+        "y": -11524.093185
+      },
+      {
+        "x": 7.2,
+        "y": -11386.590149
+      },
+      {
+        "x": 7.4,
+        "y": -11518.048584
+      },
+      {
+        "x": 7.6,
+        "y": -11507.72821
+      },
+      {
+        "x": 7.8,
+        "y": -11617.200546
+      },
+      {
+        "x": 8.0,
+        "y": -11482.23262
+      },
+      {
+        "x": 8.2,
+        "y": -11601.960754
+      },
+      {
+        "x": 8.4,
+        "y": -11435.085556
+      },
+      {
+        "x": 8.6,
+        "y": -11439.54068
+      },
+      {
+        "x": 8.8,
+        "y": -11467.875229
+      },
+      {
+        "x": 9.0,
+        "y": -11456.374268
+      },
+      {
+        "x": 9.2,
+        "y": -11547.776184
+      },
+      {
+        "x": 9.4,
+        "y": -11371.646286
+      },
+      {
+        "x": 9.6,
+        "y": -11436.645584
+      },
+      {
+        "x": 9.8,
+        "y": -11414.910965
+      },
+      {
+        "x": 10.0,
+        "y": -11586.387833
+      },
+      {
+        "x": 10.2,
+        "y": -11480.730942
+      },
+      {
+        "x": 10.4,
+        "y": -11571.92778
+      },
+      {
+        "x": 10.6,
+        "y": -11560.45697
+      },
+      {
+        "x": 10.8,
+        "y": -11518.860092
+      },
+      {
+        "x": 11.0,
+        "y": -11422.568741
+      },
+      {
+        "x": 11.2,
+        "y": -11473.994324
+      },
+      {
+        "x": 11.4,
+        "y": -11343.629166
+      },
+      {
+        "x": 11.6,
+        "y": -11554.380646
+      },
+      {
+        "x": 11.8,
+        "y": -11511.93837
+      },
+      {
+        "x": 12.0,
+        "y": -11663.520905
+      }
+    ],
+    "kinetic_energy": [
+      {
+        "x": 0.2,
+        "y": 2383.875977
+      },
+      {
+        "x": 0.4,
+        "y": 2681.998535
+      },
+      {
+        "x": 0.6,
+        "y": 2757.246582
+      },
+      {
+        "x": 0.8,
+        "y": 3043.48291
+      },
+      {
+        "x": 1.0,
+        "y": 3232.261719
+      },
+      {
+        "x": 1.2,
+        "y": 3405.624023
+      },
+      {
+        "x": 1.4,
+        "y": 3318.268066
+      },
+      {
+        "x": 1.6,
+        "y": 3445.727051
+      },
+      {
+        "x": 1.8,
+        "y": 3464.024414
+      },
+      {
+        "x": 2.0,
+        "y": 3536.552002
+      },
+      {
+        "x": 2.2,
+        "y": 3682.054443
+      },
+      {
+        "x": 2.4,
+        "y": 3599.167969
+      },
+      {
+        "x": 2.6,
+        "y": 3649.459961
+      },
+      {
+        "x": 2.8,
+        "y": 3838.769043
+      },
+      {
+        "x": 3.0,
+        "y": 3799.930176
+      },
+      {
+        "x": 3.2,
+        "y": 3790.745117
+      },
+      {
+        "x": 3.4,
+        "y": 3818.876709
+      },
+      {
+        "x": 3.6,
+        "y": 3783.807129
+      },
+      {
+        "x": 3.8,
+        "y": 3849.931641
+      },
+      {
+        "x": 4.0,
+        "y": 3813.634521
+      },
+      {
+        "x": 4.2,
+        "y": 3776.618164
+      },
+      {
+        "x": 4.4,
+        "y": 3812.203857
+      },
+      {
+        "x": 4.6,
+        "y": 3897.598877
+      },
+      {
+        "x": 4.8,
+        "y": 3862.02832
+      },
+      {
+        "x": 5.0,
+        "y": 3737.19165
+      },
+      {
+        "x": 5.2,
+        "y": 3705.321045
+      },
+      {
+        "x": 5.4,
+        "y": 3695.708984
+      },
+      {
+        "x": 5.6,
+        "y": 3761.34375
+      },
+      {
+        "x": 5.8,
+        "y": 3852.138672
+      },
+      {
+        "x": 6.0,
+        "y": 3757.5979
+      },
+      {
+        "x": 6.2,
+        "y": 3884.885254
+      },
+      {
+        "x": 6.4,
+        "y": 3801.67334
+      },
+      {
+        "x": 6.6,
+        "y": 3787.22168
+      },
+      {
+        "x": 6.8,
+        "y": 3904.745117
+      },
+      {
+        "x": 7.0,
+        "y": 3902.881592
+      },
+      {
+        "x": 7.2,
+        "y": 3825.366211
+      },
+      {
+        "x": 7.4,
+        "y": 3813.432129
+      },
+      {
+        "x": 7.6,
+        "y": 3667.572754
+      },
+      {
+        "x": 7.8,
+        "y": 3853.229736
+      },
+      {
+        "x": 8.0,
+        "y": 3766.802734
+      },
+      {
+        "x": 8.2,
+        "y": 3848.496826
+      },
+      {
+        "x": 8.4,
+        "y": 3745.897705
+      },
+      {
+        "x": 8.6,
+        "y": 3782.808838
+      },
+      {
+        "x": 8.8,
+        "y": 3906.458984
+      },
+      {
+        "x": 9.0,
+        "y": 3872.191895
+      },
+      {
+        "x": 9.2,
+        "y": 3862.128174
+      },
+      {
+        "x": 9.4,
+        "y": 3872.469971
+      },
+      {
+        "x": 9.6,
+        "y": 3888.85791
+      },
+      {
+        "x": 9.8,
+        "y": 3842.037842
+      },
+      {
+        "x": 10.0,
+        "y": 3848.650879
+      },
+      {
+        "x": 10.2,
+        "y": 3823.589844
+      },
+      {
+        "x": 10.4,
+        "y": 3748.991699
+      },
+      {
+        "x": 10.6,
+        "y": 3960.552002
+      },
+      {
+        "x": 10.8,
+        "y": 3854.965332
+      },
+      {
+        "x": 11.0,
+        "y": 3745.525391
+      },
+      {
+        "x": 11.2,
+        "y": 3762.657715
+      },
+      {
+        "x": 11.4,
+        "y": 3667.206055
+      },
+      {
+        "x": 11.6,
+        "y": 3872.662842
+      },
+      {
+        "x": 11.8,
+        "y": 3758.23291
+      },
+      {
+        "x": 12.0,
+        "y": 3880.707764
+      }
+    ],
+    "total_energy": [
+      {
+        "x": 0.2,
+        "y": -10570.710815
+      },
+      {
+        "x": 0.4,
+        "y": -10090.702042
+      },
+      {
+        "x": 0.6,
+        "y": -9679.559402
+      },
+      {
+        "x": 0.8,
+        "y": -9338.910751
+      },
+      {
+        "x": 1.0,
+        "y": -8876.942291
+      },
+      {
+        "x": 1.2,
+        "y": -8821.289444
+      },
+      {
+        "x": 1.4,
+        "y": -8576.045349
+      },
+      {
+        "x": 1.6,
+        "y": -8382.442825
+      },
+      {
+        "x": 1.8,
+        "y": -8224.335297
+      },
+      {
+        "x": 2.0,
+        "y": -8126.728821
+      },
+      {
+        "x": 2.2,
+        "y": -7981.553085
+      },
+      {
+        "x": 2.4,
+        "y": -7946.975052
+      },
+      {
+        "x": 2.6,
+        "y": -7828.065956
+      },
+      {
+        "x": 2.8,
+        "y": -7693.698288
+      },
+      {
+        "x": 3.0,
+        "y": -7602.63089
+      },
+      {
+        "x": 3.2,
+        "y": -7740.413864
+      },
+      {
+        "x": 3.4,
+        "y": -7763.943207
+      },
+      {
+        "x": 3.6,
+        "y": -7830.980377
+      },
+      {
+        "x": 3.8,
+        "y": -7788.033051
+      },
+      {
+        "x": 4.0,
+        "y": -7707.080124
+      },
+      {
+        "x": 4.2,
+        "y": -7679.161118
+      },
+      {
+        "x": 4.4,
+        "y": -7746.687881
+      },
+      {
+        "x": 4.6,
+        "y": -7765.075684
+      },
+      {
+        "x": 4.8,
+        "y": -7846.040268
+      },
+      {
+        "x": 5.0,
+        "y": -7880.764145
+      },
+      {
+        "x": 5.2,
+        "y": -7862.581497
+      },
+      {
+        "x": 5.4,
+        "y": -7867.014648
+      },
+      {
+        "x": 5.6,
+        "y": -7889.606277
+      },
+      {
+        "x": 5.8,
+        "y": -7892.847961
+      },
+      {
+        "x": 6.0,
+        "y": -7865.713364
+      },
+      {
+        "x": 6.2,
+        "y": -7649.020599
+      },
+      {
+        "x": 6.4,
+        "y": -7710.371979
+      },
+      {
+        "x": 6.6,
+        "y": -7777.812927
+      },
+      {
+        "x": 6.8,
+        "y": -7598.047516
+      },
+      {
+        "x": 7.0,
+        "y": -7621.211594
+      },
+      {
+        "x": 7.2,
+        "y": -7561.223938
+      },
+      {
+        "x": 7.4,
+        "y": -7704.616455
+      },
+      {
+        "x": 7.6,
+        "y": -7840.155457
+      },
+      {
+        "x": 7.8,
+        "y": -7763.97081
+      },
+      {
+        "x": 8.0,
+        "y": -7715.429886
+      },
+      {
+        "x": 8.2,
+        "y": -7753.463928
+      },
+      {
+        "x": 8.4,
+        "y": -7689.187851
+      },
+      {
+        "x": 8.6,
+        "y": -7656.731842
+      },
+      {
+        "x": 8.8,
+        "y": -7561.416245
+      },
+      {
+        "x": 9.0,
+        "y": -7584.182373
+      },
+      {
+        "x": 9.2,
+        "y": -7685.64801
+      },
+      {
+        "x": 9.4,
+        "y": -7499.176315
+      },
+      {
+        "x": 9.6,
+        "y": -7547.787674
+      },
+      {
+        "x": 9.8,
+        "y": -7572.873123
+      },
+      {
+        "x": 10.0,
+        "y": -7737.736954
+      },
+      {
+        "x": 10.2,
+        "y": -7657.141098
+      },
+      {
+        "x": 10.4,
+        "y": -7822.936081
+      },
+      {
+        "x": 10.6,
+        "y": -7599.904968
+      },
+      {
+        "x": 10.8,
+        "y": -7663.89476
+      },
+      {
+        "x": 11.0,
+        "y": -7677.04335
+      },
+      {
+        "x": 11.2,
+        "y": -7711.336609
+      },
+      {
+        "x": 11.4,
+        "y": -7676.423111
+      },
+      {
+        "x": 11.6,
+        "y": -7681.717804
+      },
+      {
+        "x": 11.8,
+        "y": -7753.70546
+      },
+      {
+        "x": 12.0,
+        "y": -7782.813141
+      }
+    ],
+    "temperature": [
+      {
+        "x": 0.2,
+        "y": 187.333798
+      },
+      {
+        "x": 0.4,
+        "y": 210.761372
+      },
+      {
+        "x": 0.6,
+        "y": 216.674642
+      },
+      {
+        "x": 0.8,
+        "y": 239.168152
+      },
+      {
+        "x": 1.0,
+        "y": 254.00309
+      },
+      {
+        "x": 1.2,
+        "y": 267.626541
+      },
+      {
+        "x": 1.4,
+        "y": 260.761787
+      },
+      {
+        "x": 1.6,
+        "y": 270.777986
+      },
+      {
+        "x": 1.8,
+        "y": 272.21586
+      },
+      {
+        "x": 2.0,
+        "y": 277.915347
+      },
+      {
+        "x": 2.2,
+        "y": 289.349467
+      },
+      {
+        "x": 2.4,
+        "y": 282.835941
+      },
+      {
+        "x": 2.6,
+        "y": 286.788072
+      },
+      {
+        "x": 2.8,
+        "y": 301.66468
+      },
+      {
+        "x": 3.0,
+        "y": 298.612578
+      },
+      {
+        "x": 3.2,
+        "y": 297.890782
+      },
+      {
+        "x": 3.4,
+        "y": 300.101467
+      },
+      {
+        "x": 3.6,
+        "y": 297.34557
+      },
+      {
+        "x": 3.8,
+        "y": 302.541879
+      },
+      {
+        "x": 4.0,
+        "y": 299.689517
+      },
+      {
+        "x": 4.2,
+        "y": 296.780634
+      },
+      {
+        "x": 4.4,
+        "y": 299.57709
+      },
+      {
+        "x": 4.6,
+        "y": 306.287746
+      },
+      {
+        "x": 4.8,
+        "y": 303.49248
+      },
+      {
+        "x": 5.0,
+        "y": 293.682353
+      },
+      {
+        "x": 5.2,
+        "y": 291.177843
+      },
+      {
+        "x": 5.4,
+        "y": 290.422491
+      },
+      {
+        "x": 5.6,
+        "y": 295.580314
+      },
+      {
+        "x": 5.8,
+        "y": 302.715315
+      },
+      {
+        "x": 6.0,
+        "y": 295.285952
+      },
+      {
+        "x": 6.2,
+        "y": 305.288663
+      },
+      {
+        "x": 6.4,
+        "y": 298.749563
+      },
+      {
+        "x": 6.6,
+        "y": 297.613898
+      },
+      {
+        "x": 6.8,
+        "y": 306.849324
+      },
+      {
+        "x": 7.0,
+        "y": 306.702882
+      },
+      {
+        "x": 7.2,
+        "y": 300.611436
+      },
+      {
+        "x": 7.4,
+        "y": 299.673612
+      },
+      {
+        "x": 7.6,
+        "y": 288.211442
+      },
+      {
+        "x": 7.8,
+        "y": 302.801055
+      },
+      {
+        "x": 8.0,
+        "y": 296.009301
+      },
+      {
+        "x": 8.2,
+        "y": 302.429126
+      },
+      {
+        "x": 8.4,
+        "y": 294.366507
+      },
+      {
+        "x": 8.6,
+        "y": 297.26712
+      },
+      {
+        "x": 8.8,
+        "y": 306.984006
+      },
+      {
+        "x": 9.0,
+        "y": 304.291172
+      },
+      {
+        "x": 9.2,
+        "y": 303.500327
+      },
+      {
+        "x": 9.4,
+        "y": 304.313024
+      },
+      {
+        "x": 9.6,
+        "y": 305.600849
+      },
+      {
+        "x": 9.8,
+        "y": 301.921555
+      },
+      {
+        "x": 10.0,
+        "y": 302.441232
+      },
+      {
+        "x": 10.2,
+        "y": 300.471843
+      },
+      {
+        "x": 10.4,
+        "y": 294.609644
+      },
+      {
+        "x": 10.6,
+        "y": 311.234836
+      },
+      {
+        "x": 10.8,
+        "y": 302.937445
+      },
+      {
+        "x": 11.0,
+        "y": 294.337249
+      },
+      {
+        "x": 11.2,
+        "y": 295.68357
+      },
+      {
+        "x": 11.4,
+        "y": 288.182626
+      },
+      {
+        "x": 11.6,
+        "y": 304.328181
+      },
+      {
+        "x": 11.8,
+        "y": 295.335853
+      },
+      {
+        "x": 12.0,
+        "y": 304.96038
+      }
+    ]
+  },
+  "rmsf": [
+    {
+      "residue_index": 1,
+      "residue_id": "A:1",
+      "residue_type": "MET",
+      "rmsf_nm": 0.049312
+    },
+    {
+      "residue_index": 2,
+      "residue_id": "A:2",
+      "residue_type": "GLN",
+      "rmsf_nm": 0.045344
+    },
+    {
+      "residue_index": 3,
+      "residue_id": "A:3",
+      "residue_type": "ILE",
+      "rmsf_nm": 0.035645
+    },
+    {
+      "residue_index": 4,
+      "residue_id": "A:4",
+      "residue_type": "PHE",
+      "rmsf_nm": 0.029838
+    },
+    {
+      "residue_index": 5,
+      "residue_id": "A:5",
+      "residue_type": "VAL",
+      "rmsf_nm": 0.034752
+    },
+    {
+      "residue_index": 6,
+      "residue_id": "A:6",
+      "residue_type": "LYS",
+      "rmsf_nm": 0.040986
+    },
+    {
+      "residue_index": 7,
+      "residue_id": "A:7",
+      "residue_type": "THR",
+      "rmsf_nm": 0.055234
+    },
+    {
+      "residue_index": 8,
+      "residue_id": "A:8",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.08286
+    },
+    {
+      "residue_index": 9,
+      "residue_id": "A:9",
+      "residue_type": "THR",
+      "rmsf_nm": 0.100286
+    },
+    {
+      "residue_index": 10,
+      "residue_id": "A:10",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.087405
+    },
+    {
+      "residue_index": 11,
+      "residue_id": "A:11",
+      "residue_type": "LYS",
+      "rmsf_nm": 0.077027
+    },
+    {
+      "residue_index": 12,
+      "residue_id": "A:12",
+      "residue_type": "THR",
+      "rmsf_nm": 0.055812
+    },
+    {
+      "residue_index": 13,
+      "residue_id": "A:13",
+      "residue_type": "ILE",
+      "rmsf_nm": 0.048963
+    },
+    {
+      "residue_index": 14,
+      "residue_id": "A:14",
+      "residue_type": "THR",
+      "rmsf_nm": 0.041502
+    },
+    {
+      "residue_index": 15,
+      "residue_id": "A:15",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.03881
+    },
+    {
+      "residue_index": 16,
+      "residue_id": "A:16",
+      "residue_type": "GLU",
+      "rmsf_nm": 0.039925
+    },
+    {
+      "residue_index": 17,
+      "residue_id": "A:17",
+      "residue_type": "VAL",
+      "rmsf_nm": 0.048958
+    },
+    {
+      "residue_index": 18,
+      "residue_id": "A:18",
+      "residue_type": "GLU",
+      "rmsf_nm": 0.052858
+    },
+    {
+      "residue_index": 19,
+      "residue_id": "A:19",
+      "residue_type": "PRO",
+      "rmsf_nm": 0.058994
+    },
+    {
+      "residue_index": 20,
+      "residue_id": "A:20",
+      "residue_type": "SER",
+      "rmsf_nm": 0.05319
+    },
+    {
+      "residue_index": 21,
+      "residue_id": "A:21",
+      "residue_type": "ASP",
+      "rmsf_nm": 0.043414
+    },
+    {
+      "residue_index": 22,
+      "residue_id": "A:22",
+      "residue_type": "THR",
+      "rmsf_nm": 0.044937
+    },
+    {
+      "residue_index": 23,
+      "residue_id": "A:23",
+      "residue_type": "ILE",
+      "rmsf_nm": 0.040814
+    },
+    {
+      "residue_index": 24,
+      "residue_id": "A:24",
+      "residue_type": "GLU",
+      "rmsf_nm": 0.047145
+    },
+    {
+      "residue_index": 25,
+      "residue_id": "A:25",
+      "residue_type": "ASN",
+      "rmsf_nm": 0.045406
+    },
+    {
+      "residue_index": 26,
+      "residue_id": "A:26",
+      "residue_type": "VAL",
+      "rmsf_nm": 0.03637
+    },
+    {
+      "residue_index": 27,
+      "residue_id": "A:27",
+      "residue_type": "LYS",
+      "rmsf_nm": 0.029645
+    },
+    {
+      "residue_index": 28,
+      "residue_id": "A:28",
+      "residue_type": "ALA",
+      "rmsf_nm": 0.03974
+    },
+    {
+      "residue_index": 29,
+      "residue_id": "A:29",
+      "residue_type": "LYS",
+      "rmsf_nm": 0.039197
+    },
+    {
+      "residue_index": 30,
+      "residue_id": "A:30",
+      "residue_type": "ILE",
+      "rmsf_nm": 0.042846
+    },
+    {
+      "residue_index": 31,
+      "residue_id": "A:31",
+      "residue_type": "GLN",
+      "rmsf_nm": 0.052074
+    },
+    {
+      "residue_index": 32,
+      "residue_id": "A:32",
+      "residue_type": "ASP",
+      "rmsf_nm": 0.075363
+    },
+    {
+      "residue_index": 33,
+      "residue_id": "A:33",
+      "residue_type": "LYS",
+      "rmsf_nm": 0.075513
+    },
+    {
+      "residue_index": 34,
+      "residue_id": "A:34",
+      "residue_type": "GLU",
+      "rmsf_nm": 0.074202
+    },
+    {
+      "residue_index": 35,
+      "residue_id": "A:35",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.077373
+    },
+    {
+      "residue_index": 36,
+      "residue_id": "A:36",
+      "residue_type": "ILE",
+      "rmsf_nm": 0.056556
+    },
+    {
+      "residue_index": 37,
+      "residue_id": "A:37",
+      "residue_type": "PRO",
+      "rmsf_nm": 0.050465
+    },
+    {
+      "residue_index": 38,
+      "residue_id": "A:38",
+      "residue_type": "PRO",
+      "rmsf_nm": 0.045561
+    },
+    {
+      "residue_index": 39,
+      "residue_id": "A:39",
+      "residue_type": "ASP",
+      "rmsf_nm": 0.051408
+    },
+    {
+      "residue_index": 40,
+      "residue_id": "A:40",
+      "residue_type": "GLN",
+      "rmsf_nm": 0.034428
+    },
+    {
+      "residue_index": 41,
+      "residue_id": "A:41",
+      "residue_type": "GLN",
+      "rmsf_nm": 0.033378
+    },
+    {
+      "residue_index": 42,
+      "residue_id": "A:42",
+      "residue_type": "ARG",
+      "rmsf_nm": 0.043139
+    },
+    {
+      "residue_index": 43,
+      "residue_id": "A:43",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.035992
+    },
+    {
+      "residue_index": 44,
+      "residue_id": "A:44",
+      "residue_type": "ILE",
+      "rmsf_nm": 0.042684
+    },
+    {
+      "residue_index": 45,
+      "residue_id": "A:45",
+      "residue_type": "PHE",
+      "rmsf_nm": 0.053568
+    },
+    {
+      "residue_index": 46,
+      "residue_id": "A:46",
+      "residue_type": "ALA",
+      "rmsf_nm": 0.101382
+    },
+    {
+      "residue_index": 47,
+      "residue_id": "A:47",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.087284
+    },
+    {
+      "residue_index": 48,
+      "residue_id": "A:48",
+      "residue_type": "LYS",
+      "rmsf_nm": 0.075195
+    },
+    {
+      "residue_index": 49,
+      "residue_id": "A:49",
+      "residue_type": "GLN",
+      "rmsf_nm": 0.05572
+    },
+    {
+      "residue_index": 50,
+      "residue_id": "A:50",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.046438
+    },
+    {
+      "residue_index": 51,
+      "residue_id": "A:51",
+      "residue_type": "GLU",
+      "rmsf_nm": 0.053433
+    },
+    {
+      "residue_index": 52,
+      "residue_id": "A:52",
+      "residue_type": "ASP",
+      "rmsf_nm": 0.048936
+    },
+    {
+      "residue_index": 53,
+      "residue_id": "A:53",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.06537
+    },
+    {
+      "residue_index": 54,
+      "residue_id": "A:54",
+      "residue_type": "ARG",
+      "rmsf_nm": 0.042366
+    },
+    {
+      "residue_index": 55,
+      "residue_id": "A:55",
+      "residue_type": "THR",
+      "rmsf_nm": 0.044905
+    },
+    {
+      "residue_index": 56,
+      "residue_id": "A:56",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.046359
+    },
+    {
+      "residue_index": 57,
+      "residue_id": "A:57",
+      "residue_type": "SER",
+      "rmsf_nm": 0.058212
+    },
+    {
+      "residue_index": 58,
+      "residue_id": "A:58",
+      "residue_type": "ASP",
+      "rmsf_nm": 0.059184
+    },
+    {
+      "residue_index": 59,
+      "residue_id": "A:59",
+      "residue_type": "TYR",
+      "rmsf_nm": 0.057584
+    },
+    {
+      "residue_index": 60,
+      "residue_id": "A:60",
+      "residue_type": "ASN",
+      "rmsf_nm": 0.067664
+    },
+    {
+      "residue_index": 61,
+      "residue_id": "A:61",
+      "residue_type": "ILE",
+      "rmsf_nm": 0.046832
+    },
+    {
+      "residue_index": 62,
+      "residue_id": "A:62",
+      "residue_type": "GLN",
+      "rmsf_nm": 0.063297
+    },
+    {
+      "residue_index": 63,
+      "residue_id": "A:63",
+      "residue_type": "LYS",
+      "rmsf_nm": 0.046828
+    },
+    {
+      "residue_index": 64,
+      "residue_id": "A:64",
+      "residue_type": "GLU",
+      "rmsf_nm": 0.052874
+    },
+    {
+      "residue_index": 65,
+      "residue_id": "A:65",
+      "residue_type": "SER",
+      "rmsf_nm": 0.050676
+    },
+    {
+      "residue_index": 66,
+      "residue_id": "A:66",
+      "residue_type": "THR",
+      "rmsf_nm": 0.036257
+    },
+    {
+      "residue_index": 67,
+      "residue_id": "A:67",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.039667
+    },
+    {
+      "residue_index": 68,
+      "residue_id": "A:68",
+      "residue_type": "HIS",
+      "rmsf_nm": 0.036628
+    },
+    {
+      "residue_index": 69,
+      "residue_id": "A:69",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.036876
+    },
+    {
+      "residue_index": 70,
+      "residue_id": "A:70",
+      "residue_type": "VAL",
+      "rmsf_nm": 0.049983
+    },
+    {
+      "residue_index": 71,
+      "residue_id": "A:71",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.066294
+    },
+    {
+      "residue_index": 72,
+      "residue_id": "A:72",
+      "residue_type": "ARG",
+      "rmsf_nm": 0.065346
+    },
+    {
+      "residue_index": 73,
+      "residue_id": "A:73",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.114594
+    },
+    {
+      "residue_index": 74,
+      "residue_id": "A:74",
+      "residue_type": "ARG",
+      "rmsf_nm": 0.155591
+    },
+    {
+      "residue_index": 75,
+      "residue_id": "A:75",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.247062
+    },
+    {
+      "residue_index": 76,
+      "residue_id": "A:76",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.290112
+    }
+  ],
+  "highest_mobility_residues": [
+    {
+      "rank": 1,
+      "residue_id": "A:76",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.290112
+    },
+    {
+      "rank": 2,
+      "residue_id": "A:75",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.247062
+    },
+    {
+      "rank": 3,
+      "residue_id": "A:74",
+      "residue_type": "ARG",
+      "rmsf_nm": 0.155591
+    },
+    {
+      "rank": 4,
+      "residue_id": "A:73",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.114594
+    },
+    {
+      "rank": 5,
+      "residue_id": "A:46",
+      "residue_type": "ALA",
+      "rmsf_nm": 0.101382
+    },
+    {
+      "rank": 6,
+      "residue_id": "A:9",
+      "residue_type": "THR",
+      "rmsf_nm": 0.100286
+    },
+    {
+      "rank": 7,
+      "residue_id": "A:10",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.087405
+    },
+    {
+      "rank": 8,
+      "residue_id": "A:47",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.087284
+    },
+    {
+      "rank": 9,
+      "residue_id": "A:8",
+      "residue_type": "LEU",
+      "rmsf_nm": 0.08286
+    },
+    {
+      "rank": 10,
+      "residue_id": "A:35",
+      "residue_type": "GLY",
+      "rmsf_nm": 0.077373
+    }
+  ],
+  "stability_summary": {
+    "verdict": "stable",
+    "explanation": "Final backbone RMSD of 0.136 nm is within the range expected from thermal motion for a folded domain over a short run. No evidence of unfolding in this trajectory.",
+    "threshold_note": "Verdict bands (0.15 / 0.30 / 0.60 nm final C\u03b1 RMSD) are presentational heuristics for this MVP, not published stability criteria.",
+    "rmsd_nm": {
+      "min": 0.0,
+      "max": 0.156341,
+      "mean": 0.110621,
+      "final": 0.13602,
+      "std": 0.03129
+    },
+    "radius_of_gyration_nm": {
+      "min": 1.142529,
+      "max": 1.168926,
+      "mean": 1.153431,
+      "final": 1.153367,
+      "std": 0.006699
+    },
+    "rmsf_nm": {
+      "min": 0.029645,
+      "max": 0.290112,
+      "mean": 0.060498,
+      "final": 0.290112,
+      "std": 0.040081
+    },
+    "temperature_kelvin": {
+      "mean": 290.113,
+      "std": 23.83,
+      "n_samples": 60
+    }
+  },
+  "comparison": {
+    "ml_degradation_percent": 49.5216,
+    "ml_label": "ML Prediction",
+    "simulation_degradation_proxy_percent": 16.937,
+    "simulation_label": "Simulation-derived degradation proxy",
+    "difference_percentage_points": -32.5846,
+    "agreement": "divergent",
+    "interpretation": "These two numbers are different quantities. The ML value is a mock-model estimate of per-residue side-chain-loss degradation, aggregated over ranked candidate residues. The simulation value is a structural-drift score computed from the trajectory. Their difference measures disagreement between two proxies; it does NOT indicate which is closer to physical reality, and neither has been validated against experiment.",
+    "caveats": [
+      "This is a structural-drift score computed by BioNano-Sim from the trajectory. It is NOT experimentally measured degradation and NOT a radiation-damage yield.",
+      "The reference scales (RMSD 0.60 nm, \u0394Rg 25 %, RMSF 0.35 nm) are engineering constants chosen for this MVP, not physical constants. Changing them changes the number without changing the underlying physics.",
+      "A short run at 300 K produces non-zero drift from thermal motion alone. Use the BASELINE_NO_RADIATION preset as a control to see that floor.",
+      "The ML estimate and this proxy are different quantities on different scales. Their difference measures disagreement between two proxies, and does not tell you which is closer to reality."
+    ],
+    "agreement_note": "The proxies differ by 32.6 percentage points (ML higher). Bands (10 / 25 pp) are presentational only."
+  },
+  "metadata": {
+    "pdb_id": "1UBQ",
+    "upload_id": null,
+    "chain_id": "A",
+    "scenario": {
+      "scenario_id": "GCR_DEEP_SPACE_REFERENCE",
+      "label": "Deep-space GCR reference",
+      "summary": "Galactic cosmic ray background in free space, outside any planetary magnetosphere.",
+      "radiation_class": "GCR",
+      "environment": "free_space",
+      "particle_group": "high_z_high_energy_ions",
+      "ml_supported": true,
+      "defaults": {
+        "dose": 0.5,
+        "dose_unit": "Gy",
+        "exposure_duration_days": 180.0,
+        "temperature_kelvin": 300.0,
+        "mechanical_force_pn": 0.0
+      },
+      "notes": "This is the reference scenario the mock model was trained on for free-space GCR exposure."
+    },
+    "preset": {
+      "preset_id": "rapid_demo",
+      "label": "Rapid Demo",
+      "summary": "Minimal real OpenMM run sized to finish in a live demonstration. Implicit solvent, 1.2 nm nonbonded cutoff, fastest available platform, deterministic seed.",
+      "platform": "auto",
+      "solvent": "implicit_gbn2",
+      "nonbonded_cutoff_nm": 1.2,
+      "forcefield": [
+        "amber14-all.xml",
+        "implicit/gbn2.xml"
+      ],
+      "production_steps": 5000,
+      "equilibration_steps": 1000,
+      "minimisation_steps": 500,
+      "timestep_fs": 2.0,
+      "report_interval": 100,
+      "friction_per_ps": 1.0,
+      "constraints": "HBonds",
+      "estimated_runtime_note": "About 15-25 s on a GPU platform (OpenCL/CUDA) or 80-120 s on a multi-core CPU, for a 56-107 residue domain.",
+      "scientific_label": "Rapid OpenMM Simulation",
+      "is_default": true,
+      "limitations": [
+        "12 ps total simulated time. This is a smoke-scale run: long enough to show real dynamics and produce genuine metrics, far too short for equilibrium sampling or any statistical claim.",
+        "A 1.2 nm nonbonded cutoff is applied. Implicit-solvent GBn2 with no cutoff is roughly 8x slower and infeasible for a live demo; the cutoff is standard practice for implicit solvent but does neglect long-range electrostatics.",
+        "Implicit solvent (GBn2). There are no explicit water molecules, so hydration shell effects and solvent viscosity are approximated.",
+        "Standard OpenMM does not model ionising-radiation events. No particle track, energy deposition, radical chemistry or bond scission is simulated.",
+        "Simulated time is picoseconds to nanoseconds. Real degradation processes occur over seconds to years, so this cannot be extrapolated to mission timescales."
+      ],
+      "simulated_time_ps": 12.0
+    },
+    "created_at": "2026-08-26T20:33:20+00:00",
+    "started_at": "2026-08-26T20:33:21+00:00",
+    "finished_at": "2026-08-26T20:33:44+00:00",
+    "duration_seconds": 23.375,
+    "prediction_id": "887d3ea5-21ba-43f9-a784-55c079b26d61",
+    "topology": {
+      "n_atoms": 1231,
+      "n_residues": 76,
+      "n_constraints": 629,
+      "platform": "OpenCL",
+      "platform_properties": {},
+      "nonbonded_cutoff_nm": 1.2,
+      "topology_file": "topology.pdb",
+      "forcefield": [
+        "amber14-all.xml",
+        "implicit/gbn2.xml"
+      ],
+      "residue_ids": [
+        "A:1",
+        "A:2",
+        "A:3",
+        "A:4",
+        "A:5",
+        "A:6",
+        "A:7",
+        "A:8",
+        "A:9",
+        "A:10",
+        "A:11",
+        "A:12",
+        "A:13",
+        "A:14",
+        "A:15",
+        "A:16",
+        "A:17",
+        "A:18",
+        "A:19",
+        "A:20",
+        "A:21",
+        "A:22",
+        "A:23",
+        "A:24",
+        "A:25",
+        "A:26",
+        "A:27",
+        "A:28",
+        "A:29",
+        "A:30",
+        "A:31",
+        "A:32",
+        "A:33",
+        "A:34",
+        "A:35",
+        "A:36",
+        "A:37",
+        "A:38",
+        "A:39",
+        "A:40",
+        "A:41",
+        "A:42",
+        "A:43",
+        "A:44",
+        "A:45",
+        "A:46",
+        "A:47",
+        "A:48",
+        "A:49",
+        "A:50",
+        "A:51",
+        "A:52",
+        "A:53",
+        "A:54",
+        "A:55",
+        "A:56",
+        "A:57",
+        "A:58",
+        "A:59",
+        "A:60",
+        "A:61",
+        "A:62",
+        "A:63",
+        "A:64",
+        "A:65",
+        "A:66",
+        "A:67",
+        "A:68",
+        "A:69",
+        "A:70",
+        "A:71",
+        "A:72",
+        "A:73",
+        "A:74",
+        "A:75",
+        "A:76"
+      ],
+      "residue_types": [
+        "MET",
+        "GLN",
+        "ILE",
+        "PHE",
+        "VAL",
+        "LYS",
+        "THR",
+        "LEU",
+        "THR",
+        "GLY",
+        "LYS",
+        "THR",
+        "ILE",
+        "THR",
+        "LEU",
+        "GLU",
+        "VAL",
+        "GLU",
+        "PRO",
+        "SER",
+        "ASP",
+        "THR",
+        "ILE",
+        "GLU",
+        "ASN",
+        "VAL",
+        "LYS",
+        "ALA",
+        "LYS",
+        "ILE",
+        "GLN",
+        "ASP",
+        "LYS",
+        "GLU",
+        "GLY",
+        "ILE",
+        "PRO",
+        "PRO",
+        "ASP",
+        "GLN",
+        "GLN",
+        "ARG",
+        "LEU",
+        "ILE",
+        "PHE",
+        "ALA",
+        "GLY",
+        "LYS",
+        "GLN",
+        "LEU",
+        "GLU",
+        "ASP",
+        "GLY",
+        "ARG",
+        "THR",
+        "LEU",
+        "SER",
+        "ASP",
+        "TYR",
+        "ASN",
+        "ILE",
+        "GLN",
+        "LYS",
+        "GLU",
+        "SER",
+        "THR",
+        "LEU",
+        "HIS",
+        "LEU",
+        "VAL",
+        "LEU",
+        "ARG",
+        "LEU",
+        "ARG",
+        "GLY",
+        "GLY"
+      ]
+    },
+    "engine_notes": [
+      "Added 76 hydrogen atoms using the force field.",
+      "Auto-selected platform 'OpenCL' from available: CPU, OpenCL, Reference. GPU platforms are faster but not bit-reproducible; use platform 'CPU' if you need an exactly repeatable trajectory.",
+      "Trajectory read with mdtraj 1.11.1.post2."
+    ]
+  },
+  "reproducibility": {
+    "structure_kind": "approved",
+    "structure_identifier": "1UBQ",
+    "chain_id": "A",
+    "n_residues_simulated": 76,
+    "scenario_id": "GCR_DEEP_SPACE_REFERENCE",
+    "preset_id": "rapid_demo",
+    "forcefield": [
+      "amber14-all.xml",
+      "implicit/gbn2.xml"
+    ],
+    "solvent_model": "implicit_gbn2",
+    "constraints": "HBonds",
+    "platform_requested": "auto",
+    "integrator": "LangevinMiddleIntegrator",
+    "friction_per_ps": 1.0,
+    "timestep_fs": 2.0,
+    "minimisation_steps": 500,
+    "equilibration_steps": 1000,
+    "production_steps": 5000,
+    "temperature_kelvin": 300.0,
+    "random_seed": 42,
+    "seed_note": "The integrator random seed and initial-velocity seed are both set from random_seed, so re-running with the same preset, structure, seed and OpenMM build reproduces the trajectory.",
+    "dose_recorded": "0.5 Gy",
+    "dose_note": "Recorded for provenance only. No radiation physics is simulated: standard OpenMM models no particle tracks, energy deposition or bond scission.",
+    "software": {
+      "python": "3.11.14",
+      "platform": "Windows-10-10.0.26200-SP0",
+      "openmm": "8.6",
+      "mdtraj": "1.11.1.post2",
+      "numpy": "2.1.3",
+      "biopython": "1.84"
+    },
+    "platform_resolved": "OpenCL",
+    "platform_properties": {},
+    "nonbonded_cutoff_nm": 1.2,
+    "bitwise_reproducible": false
+  },
+  "warnings": [
+    "A dose of 0.5 Gy was recorded for provenance. Standard OpenMM does not model ionising radiation: no particle track, energy deposition or bond scission is simulated. The trajectory reflects thermal dynamics at the requested temperature only.",
+    "Results from this run must be labelled 'Rapid OpenMM Simulation'.",
+    "12 ps total simulated time. This is a smoke-scale run: long enough to show real dynamics and produce genuine metrics, far too short for equilibrium sampling or any statistical claim.",
+    "A 1.2 nm nonbonded cutoff is applied. Implicit-solvent GBn2 with no cutoff is roughly 8x slower and infeasible for a live demo; the cutoff is standard practice for implicit solvent but does neglect long-range electrostatics.",
+    "Implicit solvent (GBn2). There are no explicit water molecules, so hydration shell effects and solvent viscosity are approximated.",
+    "Standard OpenMM does not model ionising-radiation events. No particle track, energy deposition, radical chemistry or bond scission is simulated.",
+    "Simulated time is picoseconds to nanoseconds. Real degradation processes occur over seconds to years, so this cannot be extrapolated to mission timescales.",
+    "Added 76 hydrogen atoms using the force field.",
+    "Auto-selected platform 'OpenCL' from available: CPU, OpenCL, Reference. GPU platforms are faster but not bit-reproducible; use platform 'CPU' if you need an exactly repeatable trajectory.",
+    "Trajectory read with mdtraj 1.11.1.post2."
+  ],
+  "limitations": [
+    "12 ps total simulated time. This is a smoke-scale run: long enough to show real dynamics and produce genuine metrics, far too short for equilibrium sampling or any statistical claim.",
+    "A 1.2 nm nonbonded cutoff is applied. Implicit-solvent GBn2 with no cutoff is roughly 8x slower and infeasible for a live demo; the cutoff is standard practice for implicit solvent but does neglect long-range electrostatics.",
+    "Implicit solvent (GBn2). There are no explicit water molecules, so hydration shell effects and solvent viscosity are approximated.",
+    "Standard OpenMM does not model ionising-radiation events. No particle track, energy deposition, radical chemistry or bond scission is simulated.",
+    "Simulated time is picoseconds to nanoseconds. Real degradation processes occur over seconds to years, so this cannot be extrapolated to mission timescales.",
+    "Standard OpenMM does not model ionising-radiation events. The requested dose and particle class are recorded as provenance only; no radiation physics was simulated in this trajectory."
+  ],
+  "provenance": {
+    "origin": "scripts/run_demo_simulation.py --write-precomputed",
+    "original_job_id": "7ab510ef7ba14aa586533f4558b89188",
+    "generated_on": "Windows-10-10.0.26200-SP0",
+    "statement": "This is a real OpenMM run, executed once and committed to the repository so the results interface stays demonstrable when a live run cannot complete on the viewer's machine. It is labelled 'Precomputed OpenMM Result' everywhere it appears and is never presented as a live simulation."
+  }
+}

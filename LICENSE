@@ -1,0 +1,37 @@
+MIT License
+
+Copyright (c) 2026 BioNano-Sim contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+THIRD-PARTY DATA AND MODELS
+
+Protein structure coordinates in data/proteins/pdb/ are distributed by RCSB PDB
+(https://www.rcsb.org/) under the CC0 1.0 Universal Public Domain Dedication.
+
+The machine-learning bundle in models/ and the datasets in data/ml/ are
+DEMONSTRATION ARTIFACTS. Their training labels are a synthetic public-data
+proxy, not experimental measurements. Their declared approved use is
+"DASHBOARD_AND_API_INTEGRATION_TESTING_ONLY". They must not be used for
+scientific inference or cited as evidence about protein radiation tolerance.
+
+3Dmol.js (fetched into frontend/public/vendor/ by scripts/fetch_viewer.py) is
+distributed under the BSD 3-Clause License by its authors.

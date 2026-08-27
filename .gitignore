@@ -1,0 +1,78 @@
+# ---------------------------------------------------------------------------
+# Generated simulation output. These are reproducible from a job request, can
+# reach hundreds of MB, and are specific to one machine.
+# ---------------------------------------------------------------------------
+runtime/jobs/*
+runtime/uploads/*
+runtime/reports/*
+runtime/logs/*
+!runtime/*/.gitkeep
+
+# Trajectories, checkpoints and structures produced by a run, wherever they land
+*.dcd
+*.xtc
+*.trr
+*.chk
+*.h5
+final.pdb
+prepared.pdb
+topology.pdb
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+backend/.venv/
+.venv/
+venv/
+env/
+
+# ---------------------------------------------------------------------------
+# Node / frontend
+# ---------------------------------------------------------------------------
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+frontend/tsconfig.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+
+# The 3Dmol bundle is fetched by scripts/setup_local.py rather than committed.
+frontend/public/vendor/
+
+# ---------------------------------------------------------------------------
+# Secrets and local config
+# ---------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ---------------------------------------------------------------------------
+# Editors and OS
+# ---------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------------------
+# Large raw datasets. The small provenance CSVs under data/ml/ ARE committed
+# deliberately: they are what makes the model's predictions reproducible.
+# ---------------------------------------------------------------------------
+data/raw/
+data/external/
+*.parquet
+*.feather
+notebooks/**/*.ipynb_checkpoints/

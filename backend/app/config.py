@@ -1,0 +1,146 @@
+"""Application configuration.
+
+Every path is derived from the repository root so the backend runs identically
+whether it is started from ``backend/`` or from the repo root, on Windows or
+POSIX. Nothing here reads a database; the MVP persists job state on disk.
+"""
+
+from __future__ import annotations
+
+from functools import lru_cache
+from pathlib import Path
+
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# backend/app/config.py -> backend/app -> backend -> <repo root>
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+
+class Settings(BaseSettings):
+    """Runtime settings, overridable via environment or ``backend/.env``."""
+
+    model_config = SettingsConfigDict(
+        env_file=(REPO_ROOT / "backend" / ".env"),
+        env_prefix="BIONANO_",
+        extra="ignore",
+        # `model_` is a Pydantic-reserved prefix; we use model_* field names
+        # deliberately (they describe the ML model, not the pydantic model).
+        protected_namespaces=(),
+    )
+
+    # --- Identity -----------------------------------------------------------
+    app_name: str = "BioNano-Sim"
+    api_prefix: str = "/api/v1"
+    version: str = "0.1.0"
+
+    # --- Paths --------------------------------------------------------------
+    repo_root: Path = REPO_ROOT
+    data_dir: Path = REPO_ROOT / "data"
+    models_dir: Path = REPO_ROOT / "models"
+    runtime_dir: Path = REPO_ROOT / "runtime"
+
+    # --- CORS ---------------------------------------------------------------
+    # Local frontend dev origins only. Deliberately not "*": the API serves
+    # file downloads and accepts uploads.
+    cors_origins: list[str] = Field(
+        default_factory=lambda: [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:4173",  # vite preview
+            "http://127.0.0.1:4173",
+        ]
+    )
+
+    # --- Upload limits ------------------------------------------------------
+    max_upload_bytes: int = 8 * 1024 * 1024  # 8 MiB
+    max_upload_atoms: int = 100_000
+    max_upload_residues: int = 2_000
+
+    # --- Simulation safety limits ------------------------------------------
+    # One job at a time for the MVP (spec 8). Raising this needs a real queue.
+    max_concurrent_jobs: int = 1
+    max_production_steps: int = 50_000
+    max_minimisation_steps: int = 5_000
+    job_wall_clock_limit_s: int = 900
+
+    # --- Logging ------------------------------------------------------------
+    log_level: str = "INFO"
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def _split_origins(cls, v: object) -> object:
+        """Allow a comma-separated string from the environment."""
+        if isinstance(v, str):
+            return [item.strip() for item in v.split(",") if item.strip()]
+        return v
+
+    # --- Derived paths ------------------------------------------------------
+    @property
+    def pdb_dir(self) -> Path:
+        return self.data_dir / "proteins" / "pdb"
+
+    @property
+    def protein_metadata_dir(self) -> Path:
+        return self.data_dir / "proteins" / "metadata"
+
+    @property
+    def scenarios_file(self) -> Path:
+        return self.data_dir / "scenarios" / "radiation_scenarios.json"
+
+    @property
+    def precomputed_dir(self) -> Path:
+        return self.data_dir / "precomputed"
+
+    @property
+    def ml_data_dir(self) -> Path:
+        return self.data_dir / "ml" / "data"
+
+    @property
+    def residue_features_csv(self) -> Path:
+        return self.ml_data_dir / "public_residue_features.csv"
+
+    @property
+    def ranked_candidates_csv(self) -> Path:
+        return self.ml_data_dir / "ranked_candidate_residues.csv"
+
+    @property
+    def model_bundle_path(self) -> Path:
+        return self.models_dir / "bionano_mock_model_bundle.pkl"
+
+    @property
+    def model_metadata_path(self) -> Path:
+        return self.models_dir / "model_metadata.json"
+
+    @property
+    def feature_schema_path(self) -> Path:
+        return self.models_dir / "feature_schema.json"
+
+    @property
+    def jobs_dir(self) -> Path:
+        return self.runtime_dir / "jobs"
+
+    @property
+    def uploads_dir(self) -> Path:
+        return self.runtime_dir / "uploads"
+
+    @property
+    def reports_dir(self) -> Path:
+        return self.runtime_dir / "reports"
+
+    @property
+    def logs_dir(self) -> Path:
+        return self.runtime_dir / "logs"
+
+    def ensure_runtime_dirs(self) -> None:
+        for path in (self.jobs_dir, self.uploads_dir, self.reports_dir, self.logs_dir):
+            path.mkdir(parents=True, exist_ok=True)
+
+
+@lru_cache
+def get_settings() -> Settings:
+    """Cached settings singleton."""
+    return Settings()
+
+
+settings = get_settings()

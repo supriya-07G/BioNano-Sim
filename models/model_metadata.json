@@ -1,0 +1,86 @@
+{
+  "model_name": "BioNano-Sim Public Bootstrap Model",
+  "model_version": "0.2.0-mock",
+  "created_at_utc": "2026-08-26T18:59:01.392176+00:00",
+  "scientific_status": "MOCK_PUBLIC_DATA_BOOTSTRAP",
+  "label_source": "SYNTHETIC_PUBLIC_DATA_PROXY",
+  "scientifically_validated": false,
+  "approved_use": "DASHBOARD_AND_API_INTEGRATION_TESTING_ONLY",
+  "feature_columns": [
+    "protein_length",
+    "molecular_weight",
+    "hydrophobic_fraction",
+    "charged_fraction",
+    "residue_index_norm",
+    "residue_sasa_norm",
+    "residue_contact_count",
+    "proxy_rank",
+    "residue_type",
+    "qualitative_susceptibility",
+    "scenario_id",
+    "radiation_class",
+    "environment",
+    "proxy_type"
+  ],
+  "numeric_features": [
+    "protein_length",
+    "molecular_weight",
+    "hydrophobic_fraction",
+    "charged_fraction",
+    "residue_index_norm",
+    "residue_sasa_norm",
+    "residue_contact_count",
+    "proxy_rank"
+  ],
+  "categorical_features": [
+    "residue_type",
+    "qualitative_susceptibility",
+    "scenario_id",
+    "radiation_class",
+    "environment",
+    "proxy_type"
+  ],
+  "target_column": "mechanical_degradation_pct",
+  "train_proteins": [
+    "1PGA",
+    "1TIT",
+    "2SPC"
+  ],
+  "validation_proteins": [
+    "1UBQ"
+  ],
+  "test_proteins": [
+    "1TEN"
+  ],
+  "best_parameters": {
+    "model__subsample": 1.0,
+    "model__reg_lambda": 0.5,
+    "model__reg_alpha": 0.01,
+    "model__n_estimators": 350,
+    "model__min_child_weight": 1,
+    "model__max_depth": 3,
+    "model__learning_rate": 0.03,
+    "model__colsample_bytree": 0.7
+  },
+  "validation_metrics": {
+    "split": "validation_unseen_protein",
+    "rows": 90,
+    "proteins": [
+      "1UBQ"
+    ],
+    "mae": 4.107995231743421,
+    "rmse": 4.853537178418681,
+    "r2": 0.7016028128183565
+  },
+  "test_metrics": {
+    "split": "test_unseen_protein",
+    "rows": 90,
+    "proteins": [
+      "1TEN"
+    ],
+    "mae": 2.2559697165885138,
+    "rmse": 2.858351689066664,
+    "r2": 0.8435673195978214
+  },
+  "replacement_requirement": "Retrain using real paired baseline and damaged simulation stiffness results."
+}

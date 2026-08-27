@@ -1,0 +1,28 @@
+[project]
+name = "bionano-sim-backend"
+version = "0.1.0"
+description = "BioNano-Sim backend: ML degradation estimation and rapid OpenMM simulation"
+requires-python = ">=3.11,<3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# pytest-asyncio warns when this is unset; the suite has no async fixtures, so
+# function scope is both correct and the future default.
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["."]
+markers = [
+    "slow: runs a real OpenMM simulation (tens of seconds)",
+]
+filterwarnings = [
+    # XGBoost warns on any cross-version pickle; numerical fidelity is verified
+    # separately by scripts/validate_model.py.
+    "ignore::UserWarning:xgboost.*",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "N"]
+ignore = ["E501", "B008"]

@@ -1,0 +1,64 @@
+name: frontend-ci
+
+on:
+  push:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type check
+        working-directory: frontend
+        run: npm run typecheck
+
+      # --max-warnings 0: a warning that is allowed to accumulate stops being a
+      # warning.
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Production build
+        working-directory: frontend
+        run: npm run build
+
+      # The viewer bundle is fetched rather than committed, so the build must not
+      # depend on it. This asserts the app builds without it present.
+      - name: Confirm the build does not require the vendored viewer
+        working-directory: frontend
+        run: |
+          # The bundle is gitignored and fetched by scripts/fetch_viewer.py (and by
+          # the production build). If it ever appears in a checkout, it was committed
+          # by mistake.
+          test ! -f public/vendor/3Dmol-min.js             || (echo "::error::frontend/public/vendor/3Dmol-min.js is committed; it should be fetched instead" && exit 1)
+          test -f dist/index.html
+          echo "Build output:"
+          ls -la dist/assets/
+
+      - name: Upload build output
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 5
