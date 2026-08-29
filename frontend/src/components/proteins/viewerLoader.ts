@@ -64,6 +64,7 @@ declare global {
 
 const SCRIPT_ID = 'bionano-3dmol'
 const SCRIPT_SRC = '/vendor/3Dmol-min.js'
+const FALLBACK_SCRIPT_SRC = 'https://3dmol.org/build/3Dmol-min.js'
 
 let loadPromise: Promise<Mol3DGlobal> | null = null
 
@@ -85,35 +86,67 @@ export function load3Dmol(): Promise<Mol3DGlobal> {
         )
     }
 
+    const tryScript = (src: string, fallbackSrc?: string) => {
+      const script = document.createElement('script')
+      script.id = SCRIPT_ID
+      script.src = src
+      script.async = true
+      script.crossOrigin = 'anonymous'
+      script.addEventListener('load', settle, { once: true })
+      script.addEventListener(
+        'error',
+        () => {
+          if (fallbackSrc) {
+            const next = document.createElement('script')
+            next.id = SCRIPT_ID
+            next.src = fallbackSrc
+            next.async = true
+            next.crossOrigin = 'anonymous'
+            next.addEventListener('load', settle, { once: true })
+            next.addEventListener(
+              'error',
+              () => {
+                loadPromise = null
+                reject(
+                  new Error(
+                    'Could not load the molecular viewer from the local vendor bundle or the CDN. ' +
+                      'The rest of the application still works.',
+                  ),
+                )
+              },
+              { once: true },
+            )
+            document.head.appendChild(next)
+            return
+          }
+
+          loadPromise = null
+          reject(
+            new Error(
+              'Could not load the molecular viewer (public/vendor/3Dmol-min.js is ' +
+                'missing). The rest of the application still works.',
+            ),
+          )
+        },
+        { once: true },
+      )
+      document.head.appendChild(script)
+    }
+
     if (existing) {
       existing.addEventListener('load', settle, { once: true })
       existing.addEventListener(
         'error',
-        () => reject(new Error('Failed to load the 3Dmol viewer script.')),
+        () => {
+          existing.remove()
+          tryScript(FALLBACK_SCRIPT_SRC)
+        },
         { once: true },
       )
       return
     }
 
-    const script = document.createElement('script')
-    script.id = SCRIPT_ID
-    script.src = SCRIPT_SRC
-    script.async = true
-    script.addEventListener('load', settle, { once: true })
-    script.addEventListener(
-      'error',
-      () => {
-        loadPromise = null
-        reject(
-          new Error(
-            'Could not load the molecular viewer (public/vendor/3Dmol-min.js is ' +
-              'missing). The rest of the application still works.',
-          ),
-        )
-      },
-      { once: true },
-    )
-    document.head.appendChild(script)
+    tryScript(SCRIPT_SRC, FALLBACK_SCRIPT_SRC)
   })
 
   return loadPromise

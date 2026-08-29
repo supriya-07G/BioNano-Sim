@@ -1,0 +1,3 @@
+structure_state,damage_label,dose_label,damage_probability,residue_count,severed_residues,fraction_removed,num_nodes,num_edges,avg_degree,density,node_retention,edge_retention
+before,0,DEEP_SPACE,0.15,76,11,0.14473684210526316,76.0,38.0,1.0,0.013333333333333334,1.0,1.0
+after,1,DEEP_SPACE,0.15,76,11,0.14473684210526316,65.0,32.0,0.9846153846153847,0.015384615384615385,0.8552631578947368,0.8421052631578947
