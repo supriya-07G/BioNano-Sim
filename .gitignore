@@ -31,6 +31,7 @@ __pycache__/
 htmlcov/
 backend/.venv/
 .venv/
+.venv311/
 venv/
 env/
 
