@@ -362,3 +362,54 @@ def test_multithreaded_runs_are_not_claimed_to_be_reproducible(tmp_path, openmm_
     if config["platform"] == "CPU" and threads == "1":
         pytest.skip("single-core machine: the default path is deterministic here")
     assert config["bit_reproducible"] is False
+
+
+def test_a_pulling_preset_does_not_claim_it_applies_no_force(openmm_available):
+    """Adding steered MD made the old provenance warning false. It must not fire.
+
+    Before the pulling preset existed, every run warned that no external pulling
+    force was applied. That sentence is now wrong for this preset, and a warning
+    that contradicts what the engine did is worse than no warning at all.
+    """
+    if not openmm_available:
+        pytest.skip("OpenMM is required to validate a request.")
+
+    from app.schemas.simulation import SimulationRequest
+    from app.services.protein_service import structure_path
+    from app.simulation.validators import validate_simulation_request
+
+    request = SimulationRequest(
+        pdb_id="1UBQ",
+        scenario_id="GCR_DEEP_SPACE_REFERENCE",
+        preset_id="mechanical_pull",
+        mechanical_force_pn=150.0,
+    )
+    _, warnings = validate_simulation_request(request, structure_path("1UBQ"))
+    joined = " ".join(warnings)
+
+    assert "applies no external pulling force" not in joined
+    assert "applies a real pulling force by steered MD" in joined
+    # The field still does not set the load, and that must be said.
+    assert "does not set the load" in joined
+    # The rate caveat must travel with the number.
+    assert "faster than an AFM experiment" in joined
+
+
+def test_a_free_dynamics_preset_still_warns_that_no_force_is_applied(openmm_available):
+    if not openmm_available:
+        pytest.skip("OpenMM is required to validate a request.")
+
+    from app.schemas.simulation import SimulationRequest
+    from app.services.protein_service import structure_path
+    from app.simulation.validators import validate_simulation_request
+
+    request = SimulationRequest(
+        pdb_id="1UBQ",
+        scenario_id="GCR_DEEP_SPACE_REFERENCE",
+        preset_id="rapid_demo",
+        mechanical_force_pn=150.0,
+    )
+    _, warnings = validate_simulation_request(request, structure_path("1UBQ"))
+    joined = " ".join(warnings)
+    assert "applies no external pulling force" in joined
+    assert "Mechanical Pull preset" in joined

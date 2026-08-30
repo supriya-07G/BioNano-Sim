@@ -171,11 +171,32 @@ def validate_simulation_request(
             "compare against. The simulation itself is unaffected."
         )
 
-    if request.mechanical_force_pn > 0:
+    pulling = getattr(preset, "pulling", None)
+    if pulling is not None:
+        # This preset really does apply a force, so the provenance-only warning
+        # below would be false here. What is still true is that the field does
+        # not control it: the protocol does.
+        warnings.append(
+            f"Preset '{preset.label}' applies a real pulling force by steered MD: a "
+            f"moving harmonic restraint on the terminal Ca distance, spring constant "
+            f"{pulling.spring_constant_kj_mol_nm2} kJ/mol/nm^2 at "
+            f"{pulling.pull_velocity_nm_per_ps} nm/ps. The pulling velocity is orders "
+            "of magnitude faster than an AFM experiment, so the forces reported are "
+            "far above experimental values and are comparable only to other runs of "
+            "this same protocol."
+        )
+        if request.mechanical_force_pn > 0:
+            warnings.append(
+                f"The mechanical force field ({request.mechanical_force_pn} pN) is "
+                "recorded for provenance but does not set the load. The load comes "
+                "from the preset's spring constant and pulling velocity, and the "
+                "force the molecule actually carried is in the force-extension curve."
+            )
+    elif request.mechanical_force_pn > 0:
         warnings.append(
             f"A mechanical force of {request.mechanical_force_pn} pN was recorded for "
             "provenance, but the Rapid Demo engine applies no external pulling force. "
-            "Steered MD is future scope."
+            "Select the Mechanical Pull preset for a run that applies a real force."
         )
 
     if request.dose > 0:
