@@ -132,7 +132,7 @@ def _request_id(request: Request) -> str:
     return getattr(request.state, "request_id", "unknown")
 
 
-async def COSMORA_exception_handler(request: Request, exc: COSMORAError) -> JSONResponse:
+async def cosmora_exception_handler(request: Request, exc: COSMORAError) -> JSONResponse:
     return JSONResponse(
         status_code=exc.http_status,
         content=error_body(exc.code, exc.message, _request_id(request), exc.details),

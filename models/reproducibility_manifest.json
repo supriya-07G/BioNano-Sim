@@ -1,9 +1,9 @@
 {
-  "generated_at_utc": "2026-08-30T06:55:51.770479+00:00",
+  "generated_at_utc": "2026-08-30T17:44:55.064825+00:00",
   "git": {
-    "commit": "3f4d779caae383ea2326472f821374b0adb610d7",
+    "commit": "7af2c4a57670ecffac26f7be0c5423369d37ad2b",
     "branch": "main",
-    "describe": "3f4d779",
+    "describe": "7af2c4a",
     "dirty": true
   },
   "code": {
@@ -39,7 +39,7 @@
   "dataset": {
     "file": "stiffness_results_REAL_v1.csv",
     "dataset_sha256": "53380a8a4c1407400a676e0efa3ece5e22d9101e05cfc68915799863c5926a7b",
-    "manifest_sha256": "fe544f7c161e276a4478334214089c65d864467620d76f90b283312738790495",
+    "manifest_sha256": "fdc01ab9f3a9be0e858093973e0d2d58483bdd53d6cd46cf889754583c62fa38",
     "rows_total": 520,
     "rows_accepted": 130,
     "proteins": [
@@ -103,7 +103,14 @@
     "1UBQ.pdb": "d4a6812d8951cf6594e6a0763f089e35f5a80b62acb3c117b2c5565228a7b161",
     "2SPC.pdb": "6ba6661e3b86e6807a9b0e2e0e9344f059b744bc12ca7e236a4843dc20fbf24b"
   },
-  "release_tag": "v0.2.0",
+  "protocol_matches_dataset": {
+    "matches": false,
+    "local_sim_config_hash": "e5a910df6a5194a761b876ff019e6c114c816203b8283bae5f2706e8773d1c1d",
+    "dataset_sim_config_hashes": [
+      "779b297ee54d560c11b07397c92fa69e593a32de7fc748657547006a26ac50d5"
+    ],
+    "note": "Does not match. The committed dataset was produced by the Kaggle notebook, which hashes its own protocol dict, so this checkout's sim_config_hash is not evidence of how those rows were generated. Reproduce them from the dataset's own hash, not this one."
+  },
   "provenance_complete": true,
   "provenance_missing": []
 }

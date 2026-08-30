@@ -24,7 +24,7 @@ from app.api.router import api_router
 from app.config import settings
 from app.core.exceptions import (
     COSMORAError,
-    COSMORA_exception_handler,
+    cosmora_exception_handler,
     http_exception_handler,
     unhandled_exception_handler,
     validation_exception_handler,
@@ -124,7 +124,7 @@ async def attach_request_id(request: Request, call_next):  # type: ignore[no-unt
     return response
 
 
-app.add_exception_handler(COSMORAError, COSMORA_exception_handler)
+app.add_exception_handler(COSMORAError, cosmora_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)
