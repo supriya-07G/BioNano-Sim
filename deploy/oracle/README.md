@@ -32,78 +32,7 @@ Oracle Cloud → Compute → Instances → Create.
 > different availability domains, or take the x86 micro shape. Do not plan a
 > deadline around getting an A1.
 
-## 2. Docker on the VM
-
-```bash
-ssh -i your-key.pem ubuntu@<vm-public-ip>
-```
-
-```bash
-curl -fsSL https://get.docker.com | sudo sh && sudo usermod -aG docker $USER
-```
-
-Log out and back in so the group membership applies.
-
-## 3. Bring it up
-
-```bash
-git clone https://github.com/supriya-07G/BioNano-Sim.git && cd BioNano-Sim
-```
-
-```bash
-docker compose -f deploy/oracle/docker-compose.yml up -d --build
-```
-
-The first build takes 5–10 minutes, most of it installing OpenMM. Then read
-the tunnel's URL out of its log:
-
-```bash
-docker compose -f deploy/oracle/docker-compose.yml logs tunnel | grep trycloudflare
-```
-
-You get `https://<random-words>.trycloudflare.com`. Check it:
-
-```bash
-curl https://<random-words>.trycloudflare.com/api/v1/system/readiness
-```
-
-All seven components should report ready.
-
-## 4. Point Vercel at it
-
-Import the repo at [vercel.com/new](https://vercel.com/new). `vercel.json` at
-the repo root already sets the build command, output directory and the SPA
-rewrite, so leave the framework preset alone.
-
-Add one environment variable:
-
-| Name | Value |
-|---|---|
-| `VITE_API_BASE_URL` | `https://<random-words>.trycloudflare.com` |
-
-**The origin only — no `/api/v1`.** `services/api.ts` appends `/api/v1`
-itself, so including it produces `/api/v1/api/v1/...` and every request 404s.
-
-Redeploy after setting it: Vite bakes environment variables in at build time,
-so a variable added after a build has no effect until the next one.
-
-## 5. Let the backend accept the Vercel origin
-
-Back on the VM, with your real Vercel URL:
-
-```bash
-VERCEL_ORIGINS=https://your-app.vercel.app docker compose -f deploy/oracle/docker-compose.yml up -d
-```
-
-Without this the browser blocks every call as a CORS failure. The default in
-the compose file is a placeholder, not your URL.
-
----
-
-## Without Docker
-
-Docker is not required. Nothing about the tunnel needs it -- `cloudflared` is a
-single binary and runs fine under systemd.
+## 2. Install the backend
 
 The one real constraint is the interpreter: `scripts/validate_model.py` asserts
 Python **3.11** exactly, because the model bundle was fitted under 3.11 with
@@ -177,19 +106,18 @@ sudo systemctl enable --now bionano-api bionano-tunnel
 sudo journalctl -u bionano-tunnel | grep trycloudflare   # your HTTPS URL
 ```
 
-### Which to pick
+### Why not Docker
 
-| | Docker compose | systemd + uv |
-|---|---|---|
-| Python 3.11 | pinned by the image | pinned by `uv` |
-| Steps to run | one command | two unit files |
-| Memory overhead | ~100 MB for the daemon | none |
-| Matches what CI tested | yes, same image | close, not identical |
-| Debugging a failure | `docker logs` | `journalctl` |
+There is no Dockerfile in this repository, deliberately.
 
-On a 1 GB `E2.1.Micro` the systemd route is the better trade -- the Docker
-daemon's overhead is a real fraction of that box. On a 24 GB Ampere it makes
-no practical difference, and compose is fewer moving parts to get wrong.
+Docker's one real advantage here would have been pinning Python 3.11, and `uv`
+does that without a daemon. Against it: on a 1 GB `E2.1.Micro` the Docker
+daemon's memory is a real fraction of the box, and it puts a container
+boundary between you and `journalctl` when something fails at 2 a.m. before a
+deadline.
+
+Nothing else needed it. `cloudflared` and `caddy` are single binaries, and
+systemd already does restart-on-failure and start-on-boot.
 
 ## Without Cloudflare: Caddy + nip.io
 
@@ -311,26 +239,40 @@ permanent hostname:
 2. Copy the token
 3. Replace the `tunnel` service's command with:
 
-```yaml
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+```ini
+ExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate run --token <TOKEN>
 ```
 
-4. Route the hostname to `http://backend:8000` in the Cloudflare dashboard.
+in `bionano-tunnel.service`, then `sudo systemctl daemon-reload && sudo systemctl restart bionano-tunnel`.
+
+4. Route the hostname to `http://127.0.0.1:8000` in the Cloudflare dashboard.
 
 ## Operating it
 
 ```bash
-docker compose -f deploy/oracle/docker-compose.yml logs -f backend
+sudo journalctl -u bionano-api -f
 ```
 
 ```bash
-docker compose -f deploy/oracle/docker-compose.yml exec backend python scripts/cleanup_runtime.py
+sudo systemctl restart bionano-api
 ```
 
-Job results live on the `bionano-runtime` volume and survive restarts. `data/`
-and `models/` are baked into the image and deliberately not mounted: they are
-the evidence a scientific claim rests on, and a volume would let them drift
-from the commit that produced them.
+```bash
+cd ~/BioNano-Sim && .venv311/bin/python scripts/cleanup_runtime.py
+```
+
+Add `--apply` to that last one to actually delete; it previews by default.
+
+Job results live under `runtime/`, which is a plain directory on the VM and
+survives restarts. `data/` and `models/` are tracked in git and change only
+with a deploy, which is the point: they are the evidence a scientific claim
+rests on, and they should move only when the commit that produced them does.
+
+Diagnostics, redacted and safe to paste into an issue:
+
+```bash
+curl -s https://<your-host>/api/v1/system/diagnostics | python3 -m json.tool
+```
 
 ## Deliberate limits
 
@@ -340,7 +282,7 @@ from the commit that produced them.
 | `BIONANO_MAX_PRODUCTION_STEPS` | 20,000 | bounds a single request's cost |
 | `BIONANO_JOB_WALL_CLOCK_LIMIT_S` | 600 | fail visibly rather than hang |
 | `OPENMM_CPU_THREADS` | 2 | leaves headroom for the API to stay responsive |
-| memory limit | 6 GB | one runaway job must not take the tunnel down with it |
+| `BIONANO_RUNTIME_QUOTA_BYTES` | 8 GiB | jobs are refused before the disk fills |
 
 ## What was verified before writing this
 

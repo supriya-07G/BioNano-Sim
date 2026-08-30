@@ -1,15 +1,3 @@
----
-title: BioNano-Sim
-emoji: 🧬
-colorFrom: indigo
-colorTo: blue
-sdk: docker
-app_port: 7860
-pinned: false
-license: mit
-short_description: Steered-MD stiffness triage for protein nanomachines
----
-
 # BioNano-Sim
 
 **AI-Assisted Stress Testing for Protein Nanomachines in Deep Space**

@@ -133,10 +133,13 @@ app.include_router(api_router, prefix=settings.api_prefix)
 
 
 # --- Static frontend ---------------------------------------------------------
-# The Dockerfile copies the Vite build here. It is absent in a dev checkout, in
-# which case the API behaves exactly as before and Vite serves the frontend on
-# :5173. When it is present, the built app and the API share an origin, so the
-# frontend's relative /api/v1 base works with no CORS entry at all.
+# Serves a Vite build if one has been copied to backend/app/static. Absent in
+# a normal checkout, in which case the API behaves exactly as before and Vite
+# serves the frontend on :5173, or Vercel serves it in production.
+#
+# Kept because it is the escape hatch when CORS is inconvenient: build the
+# frontend into that directory and the app and API share an origin, so the
+# relative /api/v1 base works with no cross-origin configuration at all.
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 STATIC_INDEX = STATIC_DIR / "index.html"
 SERVING_FRONTEND = STATIC_INDEX.is_file()
