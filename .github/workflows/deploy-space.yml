@@ -25,20 +25,27 @@ jobs:
           fetch-depth: 0
           lfs: true
 
-      - name: Check the deployment secrets are configured
+      # Deployment is opt-in. Until the Space exists and the three settings are
+      # filled in, this skips with a notice rather than failing, so an
+      # unconfigured repo does not show a permanent red X on every push.
+      - name: Check whether deployment is configured
+        id: check
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          if [ -z "$HF_TOKEN" ]; then
-            echo "::error::HF_TOKEN is not set. Add it under Settings -> Secrets and variables -> Actions."
-            exit 1
-          fi
-          if [ -z "${{ vars.HF_USERNAME }}" ] || [ -z "${{ vars.HF_SPACE }}" ]; then
-            echo "::error::HF_USERNAME and HF_SPACE must be set as repository variables."
-            exit 1
+          missing=""
+          [ -z "$HF_TOKEN" ] && missing="$missing HF_TOKEN(secret)"
+          [ -z "${{ vars.HF_USERNAME }}" ] && missing="$missing HF_USERNAME(variable)"
+          [ -z "${{ vars.HF_SPACE }}" ] && missing="$missing HF_SPACE(variable)"
+          if [ -n "$missing" ]; then
+            echo "::notice::Hugging Face deployment skipped. Not configured:$missing. See docs/DEPLOYMENT.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Push to the Space
+        if: steps.check.outputs.ready == 'true'
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |

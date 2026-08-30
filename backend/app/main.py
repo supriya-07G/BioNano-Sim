@@ -146,7 +146,10 @@ if SERVING_FRONTEND:
     app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
 
 
-@app.get("/", include_in_schema=False)
+# response_model=None is required: FastAPI otherwise tries to build a response
+# model from the union return annotation, and FileResponse is not a valid
+# Pydantic field type, so the app fails to import at all.
+@app.get("/", include_in_schema=False, response_model=None)
 def root() -> FileResponse | dict[str, str]:
     if SERVING_FRONTEND:
         return FileResponse(STATIC_INDEX)
