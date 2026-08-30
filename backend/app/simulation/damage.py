@@ -53,7 +53,7 @@ from typing import Any
 from app.core.exceptions import InvalidSimulationInputError
 from app.core.logging import get_logger
 
-logger = get_logger("bionano.simulation.damage")
+logger = get_logger("COSMORA.simulation.damage")
 
 PROXY_TYPE = "SIDE_CHAIN_LOSS"
 PROXY_VERSION = "2.0"

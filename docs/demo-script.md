@@ -32,7 +32,7 @@ engine fails. It is labelled *Precomputed OpenMM Result*.
 
 Open <http://localhost:5173>.
 
-> "BioNano-Sim asks a narrow, answerable question: could specific protein
+> "COSMORA asks a narrow, answerable question: could specific protein
 > domains work as nanoscale *mechanical* components — springs, switches,
 > structural members — in the radiation environment of deep space.
 >

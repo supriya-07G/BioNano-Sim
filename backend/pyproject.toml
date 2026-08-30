@@ -1,7 +1,7 @@
 [project]
-name = "bionano-sim-backend"
+name = "COSMORA-backend"
 version = "0.1.0"
-description = "BioNano-Sim backend: ML degradation estimation and rapid OpenMM simulation"
+description = "COSMORA backend: ML degradation estimation and rapid OpenMM simulation"
 requires-python = ">=3.11,<3.12"
 
 [tool.pytest.ini_options]

@@ -216,7 +216,7 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    print("BioNano-Sim local setup")
+    print("COSMORA local setup")
     print("=" * 70)
 
     print("\n[1] Runtime directories")

@@ -28,8 +28,8 @@
     "steps": 10,
     "potential_energy_kj_mol": -7067.305698566356,
     "temperature_kelvin_proxy": 160.7751031965261,
-    "final_pdb": "C:\\Users\\shree\\BioNano-Sim\\runtime\\blueprint\\damaged_openmm_final.pdb",
-    "state_csv": "C:\\Users\\shree\\BioNano-Sim\\runtime\\blueprint\\openmm_state.csv",
+    "final_pdb": "C:\\Users\\shree\\COSMORA\\runtime\\blueprint\\damaged_openmm_final.pdb",
+    "state_csv": "C:\\Users\\shree\\COSMORA\\runtime\\blueprint\\openmm_state.csv",
     "note": "Short OpenMM run on a damaged structure with a light harmonic pulling restraint."
   },
   "dataset_rows": 2,

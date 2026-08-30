@@ -12,7 +12,7 @@ import { persist } from 'zustand/middleware'
 import type { DoseUnit } from '@/types/prediction'
 import type { StructureRef } from '@/types/protein'
 
-const STORAGE_KEY = 'bionano-sim.experiment-draft.v1'
+const STORAGE_KEY = 'COSMORA.experiment-draft.v1'
 
 export interface ExperimentDraft {
   pdbId: string | null

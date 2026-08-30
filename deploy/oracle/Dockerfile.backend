@@ -43,15 +43,15 @@ COPY scripts/ scripts/
 
 # Written on every job. Kept on a volume in compose so results survive a
 # container restart.
-ENV BIONANO_RUNTIME_DIR=/srv/runtime
+ENV COSMORA_RUNTIME_DIR=/srv/runtime
 RUN mkdir -p /srv/runtime && chown -R app:app /srv
 
 # One OCPU is not four. A single concurrent job with a bounded step count
 # keeps a demo responsive instead of letting one request monopolise the box.
 ENV OPENMM_CPU_THREADS=2 \
-    BIONANO_MAX_CONCURRENT_JOBS=1 \
-    BIONANO_MAX_PRODUCTION_STEPS=20000 \
-    BIONANO_JOB_WALL_CLOCK_LIMIT_S=600
+    COSMORA_MAX_CONCURRENT_JOBS=1 \
+    COSMORA_MAX_PRODUCTION_STEPS=20000 \
+    COSMORA_JOB_WALL_CLOCK_LIMIT_S=600
 
 USER app
 EXPOSE 8000

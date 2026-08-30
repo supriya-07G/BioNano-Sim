@@ -69,7 +69,7 @@ export class ApiError extends Error {
 export class NetworkError extends Error {
   constructor(cause: unknown) {
     super(
-      'Could not reach the BioNano-Sim API. Confirm the backend is running: ' +
+      'Could not reach the COSMORA API. Confirm the backend is running: ' +
         'uvicorn app.main:app --reload --port 8000',
     )
     this.name = 'NetworkError'

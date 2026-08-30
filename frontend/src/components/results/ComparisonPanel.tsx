@@ -68,7 +68,7 @@ export function ComparisonPanel({
           label={comparison.simulation_label}
           kind="proxy"
           value={comparison.simulation_degradation_proxy_percent}
-          caption="Structural-drift score computed by BioNano-Sim from the trajectory."
+          caption="Structural-drift score computed by COSMORA from the trajectory."
         />
       </div>
 

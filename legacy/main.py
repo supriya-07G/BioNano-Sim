@@ -12,7 +12,7 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
-    title="BioNano-Sim ML Engine",
+    title="COSMORA ML Engine",
     description="Fast surrogate prediction API for space radiation protein damage.",
     version="1.0.0",
 )
@@ -92,7 +92,7 @@ def extract_graph_features(pdb_path, distance_threshold=8.0):
 def health_check():
     return {
         "status": "online",
-        "service": "BioNano-Sim Fast Surrogate API",
+        "service": "COSMORA Fast Surrogate API",
         "version": "1.0.0",
     }
 

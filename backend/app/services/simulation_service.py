@@ -21,7 +21,7 @@ from app.simulation.validators import (
 )
 from app.utils.files import read_json
 
-logger = get_logger("bionano.services.simulation")
+logger = get_logger("COSMORA.services.simulation")
 
 RESULT_LABELS = {
     "openmm": "Rapid OpenMM Simulation",
@@ -47,7 +47,7 @@ def engine_health() -> dict[str, Any]:
         "active_jobs": manager.active_job_ids(),
         "trajectory_analysis": (
             f"MDTraj {mdtraj['version']}" if mdtraj["available"]
-            else "BioNano-Sim built-in DCD reader"
+            else "COSMORA built-in DCD reader"
         ),
     }
 

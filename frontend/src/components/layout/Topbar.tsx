@@ -29,7 +29,7 @@ export function Topbar({ className }: { className?: string }) {
         </span>
         <span className="leading-tight">
           <span className="block text-sm font-semibold tracking-tight text-ink">
-            BioNano-Sim
+            COSMORA
           </span>
           <span className="block text-2xs text-ink-faint">
             Protein nanomachine stress testing

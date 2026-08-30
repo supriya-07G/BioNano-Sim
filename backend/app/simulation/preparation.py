@@ -18,7 +18,7 @@ import numpy as np
 from app.core.exceptions import InvalidSimulationInputError
 from app.core.logging import get_logger
 
-logger = get_logger("bionano.simulation.preparation")
+logger = get_logger("COSMORA.simulation.preparation")
 
 # Residues OpenMM's amber14 templates will not match, dropped before system build.
 _DROP_RESIDUES = {"HOH", "WAT", "SO4", "PO4", "GOL", "EDO", "DOD", "MOH", "PEG"}

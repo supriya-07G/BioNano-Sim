@@ -28,7 +28,7 @@ from app.core.logging import get_logger
 from app.ml.feature_schema import FeatureSchema
 from app.ml.loader import ModelState
 
-logger = get_logger("bionano.ml.inference")
+logger = get_logger("COSMORA.ml.inference")
 
 MVP_DISCLAIMER = (
     "MVP estimate; not experimentally validated. Labels are a synthetic "
@@ -327,7 +327,7 @@ def aggregate_prediction(
             "The model's target is per-residue degradation of a single candidate "
             "residue. This protein-level figure is the arithmetic mean over the "
             f"{len(values)} highest-susceptibility candidate residues (proxy_rank "
-            "1..N), computed by BioNano-Sim rather than emitted by the model. "
+            "1..N), computed by COSMORA rather than emitted by the model. "
             "Because those residues are the most susceptible in the chain, the "
             "mean is an upper-leaning indicator, not a whole-chain average."
         ),

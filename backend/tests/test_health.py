@@ -8,7 +8,7 @@ def test_health_returns_ok(client, api):
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "ok"
-    assert body["app"] == "BioNano-Sim"
+    assert body["app"] == "COSMORA"
     assert body["time_utc"]
 
 
@@ -75,7 +75,7 @@ def test_cors_origins_accept_a_comma_separated_env_value(monkeypatch):
     from app.config import Settings
 
     monkeypatch.setenv(
-        "BIONANO_CORS_ORIGINS", "https://a.example.com, https://b.example.com"
+        "COSMORA_CORS_ORIGINS", "https://a.example.com, https://b.example.com"
     )
     assert Settings().cors_origins == [
         "https://a.example.com",
@@ -86,5 +86,5 @@ def test_cors_origins_accept_a_comma_separated_env_value(monkeypatch):
 def test_cors_origins_default_to_local_dev(monkeypatch):
     from app.config import Settings
 
-    monkeypatch.delenv("BIONANO_CORS_ORIGINS", raising=False)
+    monkeypatch.delenv("COSMORA_CORS_ORIGINS", raising=False)
     assert "http://localhost:5173" in Settings().cors_origins

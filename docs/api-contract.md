@@ -63,7 +63,7 @@ Simulation sub-codes: `UNKNOWN_PRESET`, `PRESET_EXCEEDS_LIMIT`,
 Liveness. Always cheap.
 
 ```json
-{"status": "ok", "app": "BioNano-Sim", "version": "0.1.0", "time_utc": "…"}
+{"status": "ok", "app": "COSMORA", "version": "0.1.0", "time_utc": "…"}
 ```
 
 ### `GET /system/readiness`
@@ -82,7 +82,7 @@ failing wholesale.
       "ready": true,
       "status": "ready",
       "version": "0.2.0-mock",
-      "detail": "BioNano-Sim Public Bootstrap Model 0.2.0-mock (MOCK_PUBLIC_DATA_BOOTSTRAP); integrity verified.",
+      "detail": "COSMORA Public Bootstrap Model 0.2.0-mock (MOCK_PUBLIC_DATA_BOOTSTRAP); integrity verified.",
       "remediation": null
     }
   ],
@@ -431,7 +431,7 @@ correctly; pandas, R and text editors ignore it.
 ## CORS
 
 Restricted to the local frontend dev origins (5173 and 4173 on `localhost` and
-`127.0.0.1`), configurable via `BIONANO_CORS_ORIGINS`. Deliberately not `*`: the
+`127.0.0.1`), configurable via `COSMORA_CORS_ORIGINS`. Deliberately not `*`: the
 API accepts uploads and serves file downloads. Methods `GET, POST, DELETE,
 OPTIONS`; `Content-Disposition` is exposed so a browser download gets its
 filename.

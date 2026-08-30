@@ -11,16 +11,16 @@ from app.core.logging import get_logger
 from app.services import prediction_service, simulation_service
 from app.utils.serialization import to_jsonable, utc_now_iso
 
-logger = get_logger("bionano.services.report")
+logger = get_logger("COSMORA.services.report")
 
 SCIENTIFIC_NOTICE = {
     "status": "MVP_DEMONSTRATION",
-    "headline": "BioNano-Sim MVP — not experimentally validated",
+    "headline": "COSMORA MVP — not experimentally validated",
     "what_this_is": [
         "An ML degradation estimate from a mock public-data bootstrap model whose "
         "labels are a synthetic proxy, not measured degradation.",
         "A real but very short OpenMM molecular-dynamics run in implicit solvent.",
-        "A structural-drift score ('degradation proxy') computed by BioNano-Sim "
+        "A structural-drift score ('degradation proxy') computed by COSMORA "
         "from that trajectory.",
     ],
     "what_this_is_not": [
@@ -28,7 +28,7 @@ SCIENTIFIC_NOTICE = {
         "Not a simulation of ionising radiation. Standard OpenMM models no particle "
         "tracks, energy deposition, radical chemistry or bond scission.",
         "Not production-timescale molecular dynamics. Simulated time is picoseconds.",
-        "Not a claim that proteins replace silicon electronics. BioNano-Sim examines "
+        "Not a claim that proteins replace silicon electronics. COSMORA examines "
         "proteins as candidate nanoscale mechanical components only.",
     ],
     "reproducibility": (
@@ -77,7 +77,7 @@ def build_json_report(job_id: str) -> dict[str, Any]:
             },
             "aggregation_note": (
                 "The model's target is per-residue. This protein-level figure is the "
-                "mean over ranked candidate residues, computed by BioNano-Sim."
+                "mean over ranked candidate residues, computed by COSMORA."
             ),
         }
 
@@ -206,7 +206,7 @@ def build_csv_report(job_id: str) -> str:
 
     proxy = metrics.get("degradation_proxy") or {}
     emit("degradation_proxy", "percent", proxy.get("percent"), "%",
-         "Structural-drift score computed by BioNano-Sim, NOT measured degradation.")
+         "Structural-drift score computed by COSMORA, NOT measured degradation.")
     emit("degradation_proxy", "formula", proxy.get("formula"))
     for name, comp in (proxy.get("components") or {}).items():
         for stat, value in comp.items():

@@ -84,7 +84,7 @@
         "note": "Engineering constants for this MVP, not physical constants."
       },
       "caveats": [
-        "This is a structural-drift score computed by BioNano-Sim from the trajectory. It is NOT experimentally measured degradation and NOT a radiation-damage yield.",
+        "This is a structural-drift score computed by COSMORA from the trajectory. It is NOT experimentally measured degradation and NOT a radiation-damage yield.",
         "The reference scales (RMSD 0.60 nm, \u0394Rg 25 %, RMSF 0.35 nm) are engineering constants chosen for this MVP, not physical constants. Changing them changes the number without changing the underlying physics.",
         "A short run at 300 K produces non-zero drift from thermal motion alone. Use the BASELINE_NO_RADIATION preset as a control to see that floor.",
         "The ML estimate and this proxy are different quantities on different scales. Their difference measures disagreement between two proxies, and does not tell you which is closer to reality."
@@ -2105,7 +2105,7 @@
     "agreement": "divergent",
     "interpretation": "These two numbers are different quantities. The ML value is a mock-model estimate of per-residue side-chain-loss degradation, aggregated over ranked candidate residues. The simulation value is a structural-drift score computed from the trajectory. Their difference measures disagreement between two proxies; it does NOT indicate which is closer to physical reality, and neither has been validated against experiment.",
     "caveats": [
-      "This is a structural-drift score computed by BioNano-Sim from the trajectory. It is NOT experimentally measured degradation and NOT a radiation-damage yield.",
+      "This is a structural-drift score computed by COSMORA from the trajectory. It is NOT experimentally measured degradation and NOT a radiation-damage yield.",
       "The reference scales (RMSD 0.60 nm, \u0394Rg 25 %, RMSF 0.35 nm) are engineering constants chosen for this MVP, not physical constants. Changing them changes the number without changing the underlying physics.",
       "A short run at 300 K produces non-zero drift from thermal motion alone. Use the BASELINE_NO_RADIATION preset as a control to see that floor.",
       "The ML estimate and this proxy are different quantities on different scales. Their difference measures disagreement between two proxies, and does not tell you which is closer to reality."

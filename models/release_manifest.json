@@ -1,5 +1,5 @@
 {
-  "model_file": "bionano_mock_model_bundle.pkl",
+  "model_file": "COSMORA_mock_model_bundle.pkl",
   "model_sha256": "00828fda47e2550c834b2c2d9e6b6a4786ee62721cbda759b15462e39353b6ba",
   "metadata_file": "model_metadata.json",
   "scientific_status": "MOCK_PUBLIC_DATA_BOOTSTRAP",

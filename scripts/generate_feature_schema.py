@@ -85,7 +85,7 @@ def main() -> int:
     import joblib
     import pandas as pd
 
-    bundle_path = REPO / "models" / "bionano_mock_model_bundle.pkl"
+    bundle_path = REPO / "models" / "COSMORA_mock_model_bundle.pkl"
     if not bundle_path.exists():
         print(f"ERROR: model bundle not found at {bundle_path}", file=sys.stderr)
         return 1
@@ -99,7 +99,7 @@ def main() -> int:
     imputer = pre.transformers_[0][1].named_steps["imputer"]
 
     train = pd.read_csv(REPO / "data" / "ml" / "splits" / "train.csv")
-    full = pd.read_csv(REPO / "data" / "ml" / "data" / "bionano_mock_experiments_v1.csv")
+    full = pd.read_csv(REPO / "data" / "ml" / "data" / "COSMORA_mock_experiments_v1.csv")
     target = bundle["target_column"]
 
     schema = {

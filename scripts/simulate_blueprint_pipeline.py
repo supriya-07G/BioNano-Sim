@@ -236,7 +236,7 @@ def main() -> int:
     if not PDB_PATH.exists():
         raise FileNotFoundError(f"Missing input PDB: {PDB_PATH}")
 
-    print("BioNano-Sim blueprint simulation")
+    print("COSMORA blueprint simulation")
     print("=" * 72)
     print("Stage 1: radiation-inspired damage proxy")
     damaged_pdb, proxy = build_damage_proxy(PDB_PATH, dose_label="DEEP_SPACE")

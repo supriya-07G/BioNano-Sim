@@ -25,7 +25,7 @@ from app.ml.loader import get_model
 from app.ml.preprocessing import build_feature_frame, featurise_structure
 from app.services import protein_service
 
-logger = get_logger("bionano.services.prediction")
+logger = get_logger("COSMORA.services.prediction")
 
 # The only proxy_type in the training data. Sent as a constant because the
 # encoder has exactly one category for it.
@@ -227,7 +227,7 @@ def model_info() -> dict[str, Any]:
             "Labels are a synthetic public-data proxy (SYNTHETIC_PUBLIC_DATA_PROXY), "
             "not experimentally measured degradation.",
             "The target is per-residue side-chain-loss degradation for a ranked "
-            "candidate residue. Protein-level figures are aggregated by BioNano-Sim.",
+            "candidate residue. Protein-level figures are aggregated by COSMORA.",
             "The model has no dose, exposure-duration, temperature or mechanical-force "
             "input; radiation enters only as a categorical scenario.",
             "Only three scenario configurations were trained. There is no "

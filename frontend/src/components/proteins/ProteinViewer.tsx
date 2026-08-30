@@ -76,7 +76,7 @@ export function ProteinViewer({
   highlights = [],
   onResidueClick,
   className,
-  screenshotName = 'bionano-structure',
+  screenshotName = 'COSMORA-structure',
   showControls = true,
   autoSpin = false,
   onRetry,

@@ -1,8 +1,8 @@
-# BioNano-Sim
+# COSMORA
 
 **AI-Assisted Stress Testing for Protein Nanomachines in Deep Space**
 
-BioNano-Sim is a locally runnable platform for computationally triaging
+COSMORA is a locally runnable platform for computationally triaging
 protein domains as candidate *nanoscale mechanical components* — molecular
 springs, switches, sensors, structural members — by measuring how their
 mechanical stiffness changes when residues lose their side chains.
@@ -29,7 +29,7 @@ It combines four capabilities and keeps them rigorously separated:
 Read this before reading any number the application produces.
 
 - **It does not claim proteins replace silicon electronics.** Proteins and
-  silicon are separate technologies. BioNano-Sim examines proteins as candidate
+  silicon are separate technologies. COSMORA examines proteins as candidate
   nanoscale *mechanical* components only.
 - **The ML estimate is not validated.** The shipped bundle is a mock
   public-data bootstrap model (`MOCK_PUBLIC_DATA_BOOTSTRAP`) whose training
@@ -228,7 +228,7 @@ them as *held-out* so this is visible at the point of selection.
 
 Custom PDB upload is supported, validated (type, size, parseability, atom and
 residue counts, chain availability) and clearly flagged: uploaded structures are
-featurised by BioNano-Sim's own extractor rather than read from the training
+featurised by COSMORA's own extractor rather than read from the training
 reference table.
 
 ---
@@ -236,7 +236,7 @@ reference table.
 ## Repository layout
 
 ```
-BioNano-Sim/
+COSMORA/
 ├── backend/            FastAPI service
 │   ├── app/
 │   │   ├── ml/         bundle loading, featurisation, inference guards
@@ -343,7 +343,7 @@ Every error uses one envelope:
 
 Beyond the scientific limits above:
 
-- **One simulation at a time.** Raising `BIONANO_MAX_CONCURRENT_JOBS` needs a
+- **One simulation at a time.** Raising `COSMORA_MAX_CONCURRENT_JOBS` needs a
   real queue, not a larger thread pool: OpenMM runs are device-bound and two
   concurrent jobs on one device are slower than two in sequence.
 - **No database.** Job state lives in `runtime/jobs/<job_id>/` with atomic

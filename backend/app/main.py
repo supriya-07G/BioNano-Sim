@@ -23,18 +23,18 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from app.api.router import api_router
 from app.config import settings
 from app.core.exceptions import (
-    BioNanoError,
-    bionano_exception_handler,
+    COSMORAError,
+    COSMORA_exception_handler,
     http_exception_handler,
     unhandled_exception_handler,
     validation_exception_handler,
 )
 from app.core.logging import configure_logging, get_logger
 
-logger = get_logger("bionano.main")
+logger = get_logger("COSMORA.main")
 
 DESCRIPTION = """
-**BioNano-Sim** — AI-assisted stress testing for protein nanomachines in deep space.
+**COSMORA** — AI-assisted stress testing for protein nanomachines in deep space.
 
 This API combines three clearly separated capabilities:
 
@@ -47,9 +47,9 @@ This API combines three clearly separated capabilities:
   particle tracks, energy deposition or bond scission are simulated.
 * **Structural analysis** — RMSD, RMSF, radius of gyration and energies computed
   from the real trajectory, plus a clearly-labelled *degradation proxy* that
-  BioNano-Sim derives from structural drift.
+  COSMORA derives from structural drift.
 
-BioNano-Sim does not claim that proteins replace silicon electronics. It examines
+COSMORA does not claim that proteins replace silicon electronics. It examines
 whether selected proteins could serve as nanoscale mechanical components.
 """
 
@@ -124,7 +124,7 @@ async def attach_request_id(request: Request, call_next):  # type: ignore[no-unt
     return response
 
 
-app.add_exception_handler(BioNanoError, bionano_exception_handler)
+app.add_exception_handler(COSMORAError, COSMORA_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)

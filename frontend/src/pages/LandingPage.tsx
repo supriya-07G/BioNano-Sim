@@ -73,7 +73,7 @@ export function LandingPage() {
             <Boxes className="h-4.5 w-4.5 text-accent" aria-hidden />
           </span>
           <span className="text-sm font-semibold tracking-tight text-ink">
-            BioNano-Sim
+            COSMORA
           </span>
         </div>
         <nav className="flex items-center gap-2">
@@ -110,7 +110,7 @@ export function LandingPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink-muted">
-              BioNano-Sim combines three clearly separated capabilities: a{' '}
+              COSMORA combines three clearly separated capabilities: a{' '}
               <strong className="text-ink">machine-learning degradation estimate</strong>{' '}
               from a mock public-data bootstrap model, a{' '}
               <strong className="text-ink">real but short OpenMM simulation</strong> in
@@ -240,7 +240,7 @@ export function LandingPage() {
       <section className="relative z-10 mx-auto max-w-4xl px-6 pb-16">
         <ScopeNotice />
         <p className="mt-4 text-center text-2xs text-ink-faint">
-          BioNano-Sim MVP · ML estimates are not experimentally validated ·{' '}
+          COSMORA MVP · ML estimates are not experimentally validated ·{' '}
           <Link to="/methodology" className="text-accent hover:underline">
             read what this MVP does not claim
           </Link>

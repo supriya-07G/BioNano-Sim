@@ -35,7 +35,7 @@ carries this warning:
 > simulated. The trajectory reflects thermal dynamics at the requested
 > temperature only.
 
-Radiation reaches BioNano-Sim's output **only** through the ML model's
+Radiation reaches COSMORA's output **only** through the ML model's
 categorical scenario feature — and that model was fitted on synthetic proxy
 labels. Nothing in the physics path is radiation-aware.
 

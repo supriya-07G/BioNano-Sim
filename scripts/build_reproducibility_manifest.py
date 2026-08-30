@@ -162,9 +162,9 @@ def build() -> dict[str, Any]:
         },
         "models": {
             "mock_bundle_sha256": sha256_file(
-                REPO / "models" / "bionano_mock_model_bundle.pkl"),
+                REPO / "models" / "COSMORA_mock_model_bundle.pkl"),
             "real_bundle_sha256": sha256_file(
-                REPO / "models" / "bionano_real_model_bundle.pkl"),
+                REPO / "models" / "COSMORA_real_model_bundle.pkl"),
             "feature_schema_sha256": sha256_file(
                 REPO / "models" / "feature_schema.json"),
         },

@@ -93,7 +93,7 @@ if ($existing) {
 }
 
 # --- Tunnel ---------------------------------------------------------------
-$logFile = Join-Path ([System.IO.Path]::GetTempPath()) "bionano-tunnel-$PID.log"
+$logFile = Join-Path ([System.IO.Path]::GetTempPath()) "COSMORA-tunnel-$PID.log"
 
 if ($Provider -eq 'ngrok') {
     # The reserved domain is fixed, so the URL is known before the tunnel is

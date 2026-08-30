@@ -15,7 +15,7 @@ export function ArchitectureDiagram({ className }: { className?: string }) {
         viewBox="0 0 880 380"
         className="h-auto w-full min-w-[680px]"
         role="img"
-        aria-label="BioNano-Sim architecture: React frontend calls a FastAPI backend, which splits into an ML inference path and an OpenMM simulation path that meet at the comparison and report step."
+        aria-label="COSMORA architecture: React frontend calls a FastAPI backend, which splits into an ML inference path and an OpenMM simulation path that meet at the comparison and report step."
       >
         <defs>
           <marker

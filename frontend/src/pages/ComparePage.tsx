@@ -84,7 +84,7 @@ export function ComparePage() {
             <div className="flex items-center gap-2">
               <a
                 href={downloadUrl(`/reports/${selectedA}.json`)}
-                download={`bionano-${shortId(selectedA)}.json`}
+                download={`COSMORA-${shortId(selectedA)}.json`}
                 className="btn-ghost !text-xs"
               >
                 <Download className="h-3.5 w-3.5" aria-hidden />
@@ -92,7 +92,7 @@ export function ComparePage() {
               </a>
               <a
                 href={downloadUrl(`/reports/${selectedB}.json`)}
-                download={`bionano-${shortId(selectedB)}.json`}
+                download={`COSMORA-${shortId(selectedB)}.json`}
                 className="btn-ghost !text-xs"
               >
                 <Download className="h-3.5 w-3.5" aria-hidden />

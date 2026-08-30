@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Generate the self-contained Kaggle notebook for the BioNano-Sim data run.
+"""Generate the self-contained Kaggle notebook for the COSMORA data run.
 
 The notebook does not import this repository. Everything it needs -- structure
 preparation, the steered-MD pull, the damage proxy, the stiffness fit, the label
@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-OUT = Path(__file__).resolve().parent / "bionano_kaggle_pipeline.ipynb"
+OUT = Path(__file__).resolve().parent / "COSMORA_kaggle_pipeline.ipynb"
 
 
 def md(*lines: str) -> dict:
@@ -33,7 +33,7 @@ def code(*lines: str) -> dict:
 
 CELLS = [
     md(
-        "# BioNano-Sim - paired mechanical experiments and the ML model\n",
+        "# COSMORA - paired mechanical experiments and the ML model\n",
         "\n",
         "Runs the whole pipeline on one Kaggle GPU session:\n",
         "\n",
@@ -729,7 +729,7 @@ CELLS = [
     md(
         "## 10. Export a real model bundle\n",
         "\n",
-        "This replaces `bionano_mock_model_bundle.pkl`. The bundle format matches what\n",
+        "This replaces `COSMORA_mock_model_bundle.pkl`. The bundle format matches what\n",
         "`app/ml/loader.py` expects, so it drops into the running app.\n",
         "\n",
         "The point of the replacement is **not a higher score**. The mock reports\n",
@@ -798,10 +798,10 @@ CELLS = [
         "    validated = not failed\n",
         "\n",
         "    metadata = {\n",
-        "        'model_name': 'BioNano-Sim Real Simulation Model',\n",
+        "        'model_name': 'COSMORA Real Simulation Model',\n",
         "        'model_version': '1.0.0-real',\n",
         "        'scientific_status': 'REAL_PAIRED_SIMULATION_LABELS',\n",
-        "        'label_source': 'BIONANO_PAIRED_STEERED_MD',\n",
+        "        'label_source': 'COSMORA_PAIRED_STEERED_MD',\n",
         "        'scientifically_validated': validated,\n",
         "        'validation_criteria': VALIDATION_CRITERIA,\n",
         "        'validation_failures': failed,\n",
@@ -854,7 +854,7 @@ CELLS = [
         "        'scientific_status': metadata['scientific_status'],\n",
         "    }\n",
         "\n",
-        "    bundle_path = WORK / 'bionano_real_model_bundle.pkl'\n",
+        "    bundle_path = WORK / 'COSMORA_real_model_bundle.pkl'\n",
         "    joblib.dump(bundle, bundle_path, compress=3)\n",
         "    digest = hashlib.sha256(bundle_path.read_bytes()).hexdigest()\n",
         "\n",
