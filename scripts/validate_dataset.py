@@ -48,6 +48,7 @@ from app.contracts.paired_experiment import (  # noqa: E402
     STIFFNESS_CSV_COLUMNS,
     validate_stiffness_row,
 )
+from app.simulation.quality_gates import check_fit, check_units  # noqa: E402
 from pydantic import ValidationError  # noqa: E402
 
 DEFAULT_DATASET = REPO / "data" / "ml" / "stiffness_results_REAL_v1.csv"
@@ -70,6 +71,11 @@ STIFFNESS_MAX_PN_NM = 20_000.0
 #: docs/experiment-contract.md. Filled with a placeholder so the scientific
 #: fields are still validated rather than the whole row being skipped.
 KNOWN_PRODUCER_GAP = {"job_id": None, "git_commit": "unrecorded"}
+
+#: The CSV carries fit_quality but no point count, so the fit gate is
+#: applied on r^2 alone with the point count assumed to meet the minimum.
+#: Gating on a number the file does not contain would be theatre.
+MIN_FIT_POINTS = 5
 
 
 class Report:
@@ -194,6 +200,8 @@ def main() -> int:
     # --- Per-row contract and range validation ------------------------------
     accepted: list[dict[str, Any]] = []
     rejected_fits = 0
+    gate_rejected = 0
+    gate_warnings: list[str] = []
     for index, row in enumerate(rows, start=2):  # header is line 1
         try:
             payload = coerce(row)
@@ -215,6 +223,26 @@ def main() -> int:
         if payload["status"] != "COMPLETED":
             rejected_fits += 1
             continue
+
+        # Quality gates (issue #13). The status column is the producer's own
+        # verdict; these re-derive it here so a row cannot enter training
+        # merely because the producer said COMPLETED.
+        gate = [check_units("pN", "nm") if payload["stiffness_unit"] == "pN/nm"
+                else check_units(payload["stiffness_unit"], "nm"),
+                check_fit(payload["fit_quality"], MIN_FIT_POINTS)]
+        blocked = [f for f in gate if f.status == "rejected"]
+        if blocked:
+            gate_rejected += 1
+            report.error(
+                f"row {index} ({payload['experiment_id']}): barred from training "
+                f"by a quality gate -- "
+                + "; ".join(f"{f.check}: {f.detail}" for f in blocked)
+            )
+            continue
+        gate_warnings.extend(
+            f"row {index} ({payload['experiment_id']}): {f.check}: {f.detail}"
+            for f in gate if f.status == "warning"
+        )
         accepted.append(payload)
 
     # --- Duplicates ---------------------------------------------------------
@@ -258,6 +286,7 @@ def main() -> int:
         "rows_total": len(rows),
         "rows_accepted": len(accepted),
         "rows_rejected_by_status": rejected_fits,
+        "rows_barred_by_quality_gate": gate_rejected,
         "duplicate_experiment_ids": duplicates,
         "proteins": proteins,
         "n_proteins": len(proteins),
@@ -277,8 +306,19 @@ def main() -> int:
     # --- Report -------------------------------------------------------------
     print(f"accepted     {len(accepted)}")
     print(f"rejected     {rejected_fits} (status != COMPLETED)")
+    print(f"gate-barred  {gate_rejected} (quality gate)")
     print(f"proteins     {len(proteins)}  {', '.join(proteins)}")
     print(f"manifest     {show(destination)}")
+
+    if gate_warnings:
+        print(
+            f"\n{len(gate_warnings)} row(s) flagged by a quality gate "
+            "but still admissible:"
+        )
+        for message in gate_warnings[:10]:
+            print(f"  [warn] {message}")
+        if len(gate_warnings) > 10:
+            print(f"  ... and {len(gate_warnings) - 10} more")
 
     if report.warnings:
         print(f"\n{len(report.warnings)} warning(s):")

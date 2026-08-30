@@ -193,3 +193,44 @@ def test_the_skip_is_announced_when_no_experiments_dir_is_given(tmp_path):
     """Silence would read as 'checked and fine'. It must say it skipped."""
     result = run(REAL_CSV, tmp_path / "m.json")
     assert "paired-artifact and hash checks skipped" in result.stdout
+
+
+# --------------------------------------------------------------------------- #
+# Quality gates barring rows from training (issue #13)
+# --------------------------------------------------------------------------- #
+def test_a_hopeless_fit_is_barred_from_training(tmp_path, rows):
+    """Detection is not enough: the row must not reach the accepted set."""
+    def mutate(r):
+        r[0]["fit_quality"] = "0.05"
+
+    result = run(corrupt(tmp_path, rows, mutate), tmp_path / "m.json")
+    assert result.returncode == 1
+    assert "barred from training" in result.stderr
+    assert "not a measurement" in result.stderr
+
+
+def test_the_gate_barred_count_is_reported(tmp_path, rows):
+    def mutate(r):
+        for row in r[:3]:
+            row["fit_quality"] = "0.05"
+
+    result = run(corrupt(tmp_path, rows, mutate), tmp_path / "m.json")
+    assert "gate-barred  3" in result.stdout
+
+
+def test_the_manifest_records_gate_barred_rows(tmp_path):
+    manifest_path = tmp_path / "m.json"
+    run(REAL_CSV, manifest_path)
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["rows_barred_by_quality_gate"] == 0
+
+
+def test_a_marginal_fit_is_flagged_but_admitted(tmp_path, rows):
+    """Warning, not rejection: usable in aggregate, worth a human's eye."""
+    def mutate(r):
+        r[0]["fit_quality"] = "0.35"
+
+    result = run(corrupt(tmp_path, rows, mutate), tmp_path / "m.json")
+    assert result.returncode == 0
+    assert "flagged by a quality gate" in result.stdout
+    assert "still admissible" in result.stdout

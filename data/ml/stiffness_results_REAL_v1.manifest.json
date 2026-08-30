@@ -2,10 +2,11 @@
   "dataset_file": "stiffness_results_REAL_v1.csv",
   "dataset_sha256": "53380a8a4c1407400a676e0efa3ece5e22d9101e05cfc68915799863c5926a7b",
   "contract_version": "1.0",
-  "generated_at_utc": "2026-08-30T06:31:05.869148+00:00",
+  "generated_at_utc": "2026-08-30T07:04:13.711819+00:00",
   "rows_total": 520,
   "rows_accepted": 130,
   "rows_rejected_by_status": 390,
+  "rows_barred_by_quality_gate": 0,
   "duplicate_experiment_ids": [],
   "proteins": [
     "1AKI",
