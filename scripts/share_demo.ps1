@@ -28,6 +28,9 @@
 #>
 [CmdletBinding()]
 param(
+    [ValidateSet('ngrok', 'cloudflare')]
+    [string]$Provider = 'ngrok',
+    [string]$NgrokDomain = 'richness-feminine-auction.ngrok-free.dev',
     [int]$Port = 5173,
     [int]$BackendPort = 8000,
     [int]$TimeoutSeconds = 45
@@ -40,9 +43,16 @@ function Write-Step($message) { Write-Host "==> $message" -ForegroundColor Cyan 
 function Write-Warn($message) { Write-Host "!!  $message" -ForegroundColor Yellow }
 
 # --- Preconditions --------------------------------------------------------
-if (-not (Get-Command cloudflared -ErrorAction SilentlyContinue)) {
-    Write-Warn "cloudflared is not installed. Install it with:"
-    Write-Host "    winget install --id Cloudflare.cloudflared"
+$binary = if ($Provider -eq 'ngrok') { 'ngrok' } else { 'cloudflared' }
+if (-not (Get-Command $binary -ErrorAction SilentlyContinue)) {
+    Write-Warn "$binary is not installed, or your shell has not picked it up yet."
+    if ($Provider -eq 'ngrok') {
+        Write-Host "    winget install --id Ngrok.Ngrok"
+    } else {
+        Write-Host "    winget install --id Cloudflare.cloudflared"
+    }
+    Write-Host ""
+    Write-Host "    The installer edits PATH, so open a NEW terminal afterwards."
     exit 1
 }
 
@@ -84,34 +94,59 @@ if ($existing) {
 
 # --- Tunnel ---------------------------------------------------------------
 $logFile = Join-Path ([System.IO.Path]::GetTempPath()) "bionano-tunnel-$PID.log"
-Write-Step "Starting the Cloudflare tunnel..."
 
-$tunnel = Start-Process -FilePath 'cloudflared' `
-    -ArgumentList @('tunnel', '--no-autoupdate', '--url', "http://localhost:$Port") `
-    -RedirectStandardError $logFile -RedirectStandardOutput "$logFile.out" `
-    -NoNewWindow -PassThru
+if ($Provider -eq 'ngrok') {
+    # The reserved domain is fixed, so the URL is known before the tunnel is
+    # even up -- no log parsing, and nothing to reconfigure between runs.
+    Write-Step "Starting ngrok on $NgrokDomain..."
+    $tunnel = Start-Process -FilePath 'ngrok' `
+        -ArgumentList @('http', "$Port", "--url=$NgrokDomain", '--log', 'stdout') `
+        -RedirectStandardOutput $logFile -RedirectStandardError "$logFile.err" `
+        -NoNewWindow -PassThru
+    $publicUrl = "https://$NgrokDomain"
+    $hostname = $NgrokDomain
 
-# cloudflared prints the assigned hostname to stderr a second or two after it
-# starts, so poll rather than assuming it is ready.
-$publicUrl = $null
-$deadline = (Get-Date).AddSeconds($TimeoutSeconds)
-while ((Get-Date) -lt $deadline -and -not $publicUrl) {
-    Start-Sleep -Milliseconds 500
-    if (Test-Path $logFile) {
-        $match = Select-String -Path $logFile -Pattern 'https://[a-z0-9-]+\.trycloudflare\.com' `
-            -ErrorAction SilentlyContinue | Select-Object -First 1
-        if ($match) { $publicUrl = $match.Matches[0].Value }
+    # Give it a moment to fail loudly on a bad authtoken or a domain that is
+    # not on this account, rather than handing over a URL that will not answer.
+    Start-Sleep -Seconds 4
+    if ($tunnel.HasExited) {
+        Write-Warn "ngrok exited immediately. Its output:"
+        foreach ($f in @($logFile, "$logFile.err")) {
+            if (Test-Path $f) { Get-Content $f -Tail 15 }
+        }
+        Write-Host ""
+        Write-Host "    Common causes: no authtoken set (ngrok config add-authtoken ...),"
+        Write-Host "    or the domain is not reserved on this account."
+        exit 1
     }
-}
+} else {
+    Write-Step "Starting the Cloudflare tunnel..."
+    $tunnel = Start-Process -FilePath 'cloudflared' `
+        -ArgumentList @('tunnel', '--no-autoupdate', '--url', "http://localhost:$Port") `
+        -RedirectStandardError $logFile -RedirectStandardOutput "$logFile.out" `
+        -NoNewWindow -PassThru
 
-if (-not $publicUrl) {
-    Write-Warn "The tunnel did not report a URL within $TimeoutSeconds seconds. Its log:"
-    if (Test-Path $logFile) { Get-Content $logFile -Tail 20 }
-    if (-not $tunnel.HasExited) { Stop-Process -Id $tunnel.Id -Force }
-    exit 1
-}
+    # cloudflared assigns a random hostname and prints it to stderr a second or
+    # two after starting, so poll rather than assuming it is ready.
+    $publicUrl = $null
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    while ((Get-Date) -lt $deadline -and -not $publicUrl) {
+        Start-Sleep -Milliseconds 500
+        if (Test-Path $logFile) {
+            $match = Select-String -Path $logFile -Pattern 'https://[a-z0-9-]+\.trycloudflare\.com' `
+                -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($match) { $publicUrl = $match.Matches[0].Value }
+        }
+    }
 
-$hostname = ([System.Uri]$publicUrl).Host
+    if (-not $publicUrl) {
+        Write-Warn "The tunnel did not report a URL within $TimeoutSeconds seconds. Its log:"
+        if (Test-Path $logFile) { Get-Content $logFile -Tail 20 }
+        if (-not $tunnel.HasExited) { Stop-Process -Id $tunnel.Id -Force }
+        exit 1
+    }
+    $hostname = ([System.Uri]$publicUrl).Host
+}
 
 Write-Host ""
 Write-Host "  Public URL:  $publicUrl" -ForegroundColor Green
@@ -119,6 +154,11 @@ Write-Host ""
 Write-Host "  This is your laptop, reachable from anywhere. It stops when you"
 Write-Host "  close this window. The URL is unguessable but NOT authenticated:"
 Write-Host "  anyone holding it can start simulations on this machine."
+if ($Provider -eq 'ngrok') {
+    Write-Host ""
+    Write-Host "  First-time visitors see an ngrok interstitial before the app."
+    Write-Host "  One click through it; that is the free plan, not a fault."
+}
 Write-Host ""
 
 # --- Frontend -------------------------------------------------------------
@@ -137,5 +177,5 @@ try {
     if ($tunnel -and -not $tunnel.HasExited) {
         Stop-Process -Id $tunnel.Id -Force -ErrorAction SilentlyContinue
     }
-    Remove-Item $logFile, "$logFile.out" -ErrorAction SilentlyContinue
+    Remove-Item $logFile, "$logFile.out", "$logFile.err" -ErrorAction SilentlyContinue
 }

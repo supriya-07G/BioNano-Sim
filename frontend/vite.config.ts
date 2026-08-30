@@ -23,6 +23,11 @@ export default defineConfig({
     // and the /api proxy below means reaching it also reaches the backend.
     allowedHosts: [
       '.app.github.dev',
+      // This project's reserved ngrok domain. It is permanent and specific to
+      // this account, so listing it here removes the one step people forget:
+      // without it the tunnel serves a bare "Blocked request" page and the
+      // cause is not obvious from anything the browser shows.
+      'richness-feminine-auction.ngrok-free.dev',
       ...(process.env.VITE_ALLOWED_HOSTS ?? '')
         .split(',')
         .map((host) => host.trim())
