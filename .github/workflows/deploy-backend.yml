@@ -12,6 +12,7 @@ name: deploy-backend
 #   Variables -> VM_HOST       the VM's public IP or hostname
 #   Variables -> VM_USER       usually 'ubuntu'
 #   Variables -> VM_APP_DIR    e.g. /home/ubuntu/BioNano-Sim
+#   Variables -> VM_DEPLOY_MODE  'docker' or 'systemd' (default: systemd)
 
 on:
   push:
@@ -77,25 +78,44 @@ jobs:
 
           # Reinstalling the scientific stack takes minutes. Only do it when the
           # pins actually moved, so a code-only change redeploys in seconds.
-          if [ "$before" != "$after" ]; then
-            echo "requirements changed -- reinstalling"
-            uv pip install --python .venv311 -r backend/requirements.txt
-          else
-            echo "requirements unchanged -- skipping install"
+          if [ "${{ vars.VM_DEPLOY_MODE }}" != "docker" ]; then
+            if [ "$before" != "$after" ]; then
+              echo "requirements changed -- reinstalling"
+              uv pip install --python .venv311 -r backend/requirements.txt
+            else
+              echo "requirements unchanged -- skipping install"
+            fi
           fi
 
-          # Regenerate derived data, then refuse to restart onto a bundle that
-          # no longer reproduces its published metrics.
-          .venv311/bin/python scripts/setup_local.py
-          .venv311/bin/python scripts/validate_model.py
+          MODE="${{ vars.VM_DEPLOY_MODE }}"
+          MODE="${MODE:-systemd}"
 
-          sudo systemctl restart bionano-api
-          sleep 5
-          systemctl is-active --quiet bionano-api || {
-            echo "::error::bionano-api failed to come back up"
-            sudo journalctl -u bionano-api -n 40 --no-pager
+          if [ "$MODE" = "docker" ]; then
+            # The image build reinstalls dependencies itself, and validate_model
+            # runs inside the container where the pinned interpreter lives.
+            docker compose -f deploy/oracle/docker-compose.yml up -d --build
+            sleep 10
+            docker compose -f deploy/oracle/docker-compose.yml               exec -T backend python scripts/validate_model.py
+          else
+            # Regenerate derived data, then refuse to restart onto a bundle that
+            # no longer reproduces its published metrics.
+            .venv311/bin/python scripts/setup_local.py
+            .venv311/bin/python scripts/validate_model.py
+
+            sudo systemctl restart bionano-api
+            sleep 5
+            systemctl is-active --quiet bionano-api || {
+              echo "::error::bionano-api failed to come back up"
+              sudo journalctl -u bionano-api -n 40 --no-pager
+              exit 1
+            }
+          fi
+
+          # Same health gate either way: a deploy that silently leaves the API
+          # down is worse than one that fails loudly.
+          curl -fsS http://127.0.0.1:8000/api/v1/health > /dev/null || {
+            echo "::error::the API is not answering after deploy (mode: $MODE)"
             exit 1
           }
-          curl -fsS http://127.0.0.1:8000/api/v1/health > /dev/null
-          echo "backend healthy at $(git rev-parse --short HEAD)"
+          echo "backend healthy at $(git rev-parse --short HEAD) (mode: $MODE)"
           REMOTE

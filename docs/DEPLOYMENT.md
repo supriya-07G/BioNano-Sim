@@ -10,8 +10,10 @@ one that meets the need.
 | **GitHub Codespace** | ~4 min | yes, while running | no (idle timeout) | a free HTTPS URL with no VM and no card |
 | **Vercel + Oracle VM** | a few hours | yes, permanent | yes | a link that outlives the demo |
 
-No Docker is required for any of them. The permanent setup runs the API
-directly under systemd; see [deploy/oracle/README.md](../deploy/oracle/README.md).
+No Docker is required for any of them, and the permanent setup offers it as a
+choice rather than a requirement: the API runs either under Docker Compose or
+directly under systemd. See
+[deploy/oracle/README.md](../deploy/oracle/README.md).
 
 > **Hugging Face Spaces is not an option.** Docker and Gradio Spaces require a
 > paid PRO plan — *"Static Spaces stay free for everyone"* — and a Static Space

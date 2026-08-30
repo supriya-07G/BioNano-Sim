@@ -32,7 +32,43 @@ Oracle Cloud → Compute → Instances → Create.
 > different availability domains, or take the x86 micro shape. Do not plan a
 > deadline around getting an A1.
 
-## 2. Install the backend
+## 2. Run the backend
+
+Two ways. Both work; pick one and stay with it, because the auto-deploy
+workflow needs to know which.
+
+### Option A — Docker Compose
+
+Fewer steps, and the image pins Python 3.11 for you.
+
+```bash
+curl -fsSL https://get.docker.com | sudo sh && sudo usermod -aG docker $USER
+```
+
+Log out and back in, then:
+
+```bash
+git clone https://github.com/supriya-07G/BioNano-Sim.git && cd BioNano-Sim
+docker compose -f deploy/oracle/docker-compose.yml up -d --build
+```
+
+The first build takes 5–10 minutes, most of it installing OpenMM. The compose
+file runs both the API and `cloudflared`, so the tunnel URL is in its log:
+
+```bash
+docker compose -f deploy/oracle/docker-compose.yml logs tunnel | grep trycloudflare
+```
+
+The API is not published to the host — only the tunnel reaches it, over the
+compose network.
+
+Set `VM_DEPLOY_MODE=docker` as a repository variable if you use auto-deploy.
+
+### Option B — uv + systemd
+
+No daemon, and `journalctl` rather than a container boundary between you and a
+failure. Better on a 1 GB `E2.1.Micro`, where Docker's memory is a real
+fraction of the box.
 
 The one real constraint is the interpreter: `scripts/validate_model.py` asserts
 Python **3.11** exactly, because the model bundle was fitted under 3.11 with
@@ -106,18 +142,22 @@ sudo systemctl enable --now bionano-api bionano-tunnel
 sudo journalctl -u bionano-tunnel | grep trycloudflare   # your HTTPS URL
 ```
 
-### Why not Docker
+### Which one
 
-There is no Dockerfile in this repository, deliberately.
+| | Docker Compose | uv + systemd |
+|---|---|---|
+| Python 3.11 | pinned by the image | pinned by `uv` |
+| Steps | one command | two unit files |
+| Memory overhead | ~100 MB daemon | none |
+| Reading a failure | `docker compose logs` | `journalctl` |
+| Tunnel | runs as a compose service | runs as a systemd unit |
 
-Docker's one real advantage here would have been pinning Python 3.11, and `uv`
-does that without a daemon. Against it: on a 1 GB `E2.1.Micro` the Docker
-daemon's memory is a real fraction of the box, and it puts a container
-boundary between you and `journalctl` when something fails at 2 a.m. before a
-deadline.
+On a 24 GB Ampere it makes little practical difference and Compose is fewer
+things to get wrong. On a 1 GB `E2.1.Micro`, systemd is the better trade.
 
-Nothing else needed it. `cloudflared` and `caddy` are single binaries, and
-systemd already does restart-on-failure and start-on-boot.
+Whichever you pick, set `VM_DEPLOY_MODE` to match (`docker` or `systemd`) if
+you enable auto-deploy — the workflow restarts the service differently for
+each.
 
 ## Without Cloudflare: Caddy + nip.io
 
@@ -203,6 +243,7 @@ Add under **Settings -> Secrets and variables -> Actions**:
 | Variable | `VM_HOST` | the VM's public IP |
 | Variable | `VM_USER` | `ubuntu` |
 | Variable | `VM_APP_DIR` | `/home/ubuntu/BioNano-Sim` |
+| Variable | `VM_DEPLOY_MODE` | `docker` or `systemd` (defaults to `systemd`) |
 
 The VM user needs to restart the service without a password prompt:
 
@@ -249,19 +290,24 @@ in `bionano-tunnel.service`, then `sudo systemctl daemon-reload && sudo systemct
 
 ## Operating it
 
+**Docker Compose:**
+
+```bash
+docker compose -f deploy/oracle/docker-compose.yml logs -f backend
+docker compose -f deploy/oracle/docker-compose.yml restart backend
+docker compose -f deploy/oracle/docker-compose.yml exec backend python scripts/cleanup_runtime.py
+```
+
+**systemd:**
+
 ```bash
 sudo journalctl -u bionano-api -f
-```
-
-```bash
 sudo systemctl restart bionano-api
-```
-
-```bash
 cd ~/BioNano-Sim && .venv311/bin/python scripts/cleanup_runtime.py
 ```
 
-Add `--apply` to that last one to actually delete; it previews by default.
+Add `--apply` to the cleanup command to actually delete; it previews by
+default.
 
 Job results live under `runtime/`, which is a plain directory on the VM and
 survives restarts. `data/` and `models/` are tracked in git and change only
