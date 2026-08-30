@@ -116,6 +116,13 @@ docker run --rm -p 7860:7860 bionano-sim
 Then open <http://localhost:7860>. The frontend should load at `/`, the API
 docs at `/docs`, and `/api/v1/system/readiness` should report OpenMM available.
 
+## Permanent deployment: Vercel + Oracle over a Cloudflare tunnel
+
+The production setup — React on a CDN, the API on a VM with real memory, HTTPS
+between them with no domain purchased and no inbound port opened.
+
+Full runbook: [deploy/oracle/README.md](../deploy/oracle/README.md).
+
 ## Paid alternatives
 
 If sleeping is unacceptable, Railway (~$5 credit) and Fly.io both run this
