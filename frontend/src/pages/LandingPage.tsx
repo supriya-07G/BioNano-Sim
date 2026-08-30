@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 
 import { ScopeNotice } from '@/components/common/ScientificNotice'
+import { HeroStructure } from '@/components/landing/HeroStructure'
 import { OrbitLines, Starfield } from '@/components/layout/Starfield'
 import { cn } from '@/components/ui/cn'
 import { useReadiness } from '@/hooks/useSimulation'
@@ -95,8 +96,10 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
-            className="relative max-w-3xl"
+            className="relative"
           >
+            <div className="grid items-center gap-8 lg:grid-cols-[1.15fr_1fr]">
+              <div className="max-w-2xl">
             <span className="badge border-accent/35 bg-accent/[0.08] text-accent">
               MVP · scientific integrity first
             </span>
@@ -110,15 +113,22 @@ export function LandingPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink-muted">
-              COSMORA combines three clearly separated capabilities: a{' '}
-              <strong className="text-ink">machine-learning degradation estimate</strong>{' '}
-              from a mock public-data bootstrap model, a{' '}
-              <strong className="text-ink">real but short OpenMM simulation</strong> in
-              implicit solvent, and{' '}
-              <strong className="text-ink">structural stability analysis</strong>{' '}
-              computed from the resulting trajectory. Each result carries its own
-              provenance label, so a prediction is never mistaken for physics and
-              physics is never mistaken for measurement.
+              Deep-space radiation degrades protein-based components, and on a
+              long mission there is no repair, replacement or resupply. COSMORA
+              answers the question that follows:{' '}
+              <strong className="text-ink">
+                which domains still carry load once damage has occurred
+              </strong>{' '}
+              — measured before launch, not discovered in transit.
+            </p>
+
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-muted">
+              A residue is removed, the domain is pulled apart by{' '}
+              <strong className="text-ink">steered molecular dynamics</strong>,
+              and the change in stiffness is measured in pN/nm. Run blind across
+              13 domains, it ranked{' '}
+              <strong className="text-ink">titin I27</strong> first — the
+              standard experimental benchmark for mechanical stability.
             </p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
@@ -165,6 +175,10 @@ export function LandingPage() {
                 </li>
               )}
             </ul>
+              </div>
+
+              <HeroStructure />
+            </div>
           </motion.div>
         </div>
       </section>
