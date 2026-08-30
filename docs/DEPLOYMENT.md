@@ -7,11 +7,16 @@ cheapest one that meets the need.
 |---|---|---|---|---|
 | **localhost** | already done | no | no | presenting in person |
 | **Cloudflare tunnel** | ~2 min | yes, temporary | no | someone remote needs to look now |
-| **Hugging Face Space** | ~15 min build | yes, permanent | yes | a link that outlives the demo |
+| **Hugging Face Space** | ~15 min build | yes, permanent | yes | **requires HF PRO** -- see the note below |
 
-Hugging Face's Docker SDK is **free** on CPU basic (2 vCPU, 16 GB RAM, no
-payment method). Paid plans buy upgraded hardware, persistent storage and Dev
-Mode -- none of which this app needs.
+> **Hugging Face Docker Spaces now require a PRO subscription.** The Space
+> creation page states it plainly: *"Gradio and Docker Spaces require a paid
+> plan. Static Spaces stay free for everyone."* Only Static Spaces are free,
+> and a Static Space cannot run OpenMM -- it serves files, not compute. The
+> Dockerfile and the deploy workflow in this repo still work, but only on a
+> PRO account.
+>
+> For a free public URL, use the Cloudflare tunnel below.
 
 The whole app ships as one Docker image: FastAPI serves the API *and* the built
 Vite frontend from the same origin. That is why `VITE_API_BASE_URL` is left
