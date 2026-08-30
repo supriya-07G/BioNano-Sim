@@ -142,6 +142,28 @@ from the commit that produced them.
 | `OPENMM_CPU_THREADS` | 2 | leaves headroom for the API to stay responsive |
 | memory limit | 6 GB | one runaway job must not take the tunnel down with it |
 
+## What was verified before writing this
+
+The decoupled setup was exercised locally, not assumed: the production bundle
+was built with `VITE_API_BASE_URL` pointing at a different origin, served from
+`:4173`, and driven against the API on `:8000`.
+
+| Check | Result |
+|---|---|
+| Runtime dependencies cover every backend import | fastapi, openmm, mdtraj, numpy, pandas, joblib, pydantic — all pinned in `requirements.txt` |
+| `VITE_API_BASE_URL` is baked into the bundle at build time | confirmed present in `dist/assets/index-*.js` |
+| No request bypasses `API_PREFIX` | no hardcoded `/api` fetches in the built output |
+| CORS preflight from another origin | `200`, correct `allow-methods` and `allow-origin` |
+| Dashboard cross-origin | 5 proteins, all components ready |
+| Results page cross-origin | 5 charts, both 3D viewers rendering, structure fetches `200` |
+| Report download | `200`, `Content-Disposition` readable by JavaScript |
+| Multipart upload | `200`, returned an `upload_id` |
+
+`uvicorn app.main:app --app-dir backend` was also checked against the
+alternative `backend.app.main:app`, which fails with `ModuleNotFoundError: No
+module named 'app'` — there is no `backend/__init__.py` and every internal
+import is `from app.…`.
+
 ## Known caveats
 
 - **The tunnel URL is public and unauthenticated.** Unguessable, but anyone
