@@ -39,7 +39,7 @@ export function HeroStructure({ className }: { className?: string }) {
   const structure = useStructure({ kind: 'approved', pdbId: selected.pdbId })
 
   return (
-    <div className={cn('rounded-xl border border-hairline bg-elevated/70 p-3 backdrop-blur', className)}>
+    <div className={cn('relative', className)}>
       <div className="mb-2 flex flex-wrap items-center gap-1.5">
         {FEATURED.map((protein) => {
           const active = protein.pdbId === selected.pdbId
@@ -63,7 +63,21 @@ export function HeroStructure({ className }: { className?: string }) {
         <span className="ml-auto text-2xs text-ink-faint">drag to rotate</span>
       </div>
 
-      <div className="h-64 overflow-hidden rounded-lg border border-hairline bg-void sm:h-72">
+      {/*
+        No border and no background: the transparent canvas lets the starfield
+        and orbit lines behind the hero show through, so the structure sits in
+        the page rather than on top of it. The radial mask fades the canvas
+        edges out instead of ending them on a hard rectangle.
+      */}
+      <div
+        className="h-64 sm:h-80"
+        style={{
+          maskImage:
+            'radial-gradient(ellipse 72% 72% at 50% 50%, #000 55%, transparent 100%)',
+          WebkitMaskImage:
+            'radial-gradient(ellipse 72% 72% at 50% 50%, #000 55%, transparent 100%)',
+        }}
+      >
         <ProteinViewer
           data={structure.data}
           isLoading={structure.isLoading}
@@ -71,6 +85,7 @@ export function HeroStructure({ className }: { className?: string }) {
           mode="cartoon"
           colourMode="chain"
           autoSpin
+          transparent
           showControls={false}
           screenshotName={`COSMORA-${selected.pdbId}`}
           onRetry={() => void structure.refetch()}

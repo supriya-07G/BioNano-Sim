@@ -49,6 +49,12 @@ interface ProteinViewerProps {
   showControls?: boolean
   /** Slow autorotation, off by default so the structure stays readable. */
   autoSpin?: boolean
+  /**
+   * Draw on a transparent canvas so whatever is behind the viewer shows
+   * through. Off by default: every embedded use wants an opaque viewport that
+   * isolates the structure from the page.
+   */
+  transparent?: boolean
   onRetry?: () => void
 }
 
@@ -79,6 +85,7 @@ export function ProteinViewer({
   screenshotName = 'COSMORA-structure',
   showControls = true,
   autoSpin = false,
+  transparent = false,
   onRetry,
 }: ProteinViewerProps) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -100,8 +107,11 @@ export function ProteinViewer({
         if (cancelled || !hostRef.current) return
         viewerRef.current = mol.createViewer(hostRef.current, {
           backgroundColor: viewerBackground(),
+          // 0 leaves the WebGL canvas transparent, so the page's own
+          // background shows through instead of a flat panel behind the model.
+          backgroundAlpha: transparent ? 0 : 1,
           antialias: true,
-brightness: 0.9,
+          brightness: 0.9,
         })
         setEngineReady(true)
       })
@@ -118,15 +128,21 @@ brightness: 0.9,
       }
       viewerRef.current = null
     }
-  }, [])
+    // `transparent` is read when the viewer is constructed, so a change to it
+    // has to rebuild the viewer. In practice callers pass a literal, so this
+    // never re-runs -- but declaring it keeps the effect honest about what it
+    // depends on.
+  }, [transparent])
 
   // Keep the WebGL viewport background in sync with the semantic theme.
   useEffect(() => {
     const viewer = viewerRef.current
     if (!engineReady || !viewer) return
-    viewer.setBackgroundColor(viewerBackground())
+    // The alpha has to be repeated here: setBackgroundColor resets it, which
+    // would quietly make a transparent viewer opaque on a theme change.
+    viewer.setBackgroundColor(viewerBackground(), transparent ? 0 : 1)
     viewer.render()
-  }, [engineReady, resolvedTheme])
+  }, [engineReady, resolvedTheme, transparent])
 
   // --- apply styles -----------------------------------------------------
   const applyStyles = useCallback(
