@@ -7,6 +7,7 @@ cheapest one that meets the need.
 |---|---|---|---|---|
 | **localhost** | already done | no | no | presenting in person |
 | **Cloudflare tunnel** | ~2 min | yes, temporary | no | someone remote needs to look now |
+| **GitHub Codespace** | ~4 min | yes, while running | no (idle timeout) | a free HTTPS URL with no VM and no card |
 | **Hugging Face Space** | ~15 min build | yes, permanent | yes | **requires HF PRO** -- see the note below |
 
 > **Hugging Face Docker Spaces now require a PRO subscription.** The Space
@@ -128,6 +129,52 @@ Full runbook: [deploy/oracle/README.md](../deploy/oracle/README.md).
 If sleeping is unacceptable, Railway (~$5 credit) and Fly.io both run this
 image without changes. Render works from its $7/month instance; the free tier
 does not have the memory.
+
+## GitHub Codespaces
+
+A free HTTPS URL with no VM, no card and no capacity lottery. This repo ships
+a devcontainer, so a Codespace boots with dependencies installed, structures
+fetched and the 3Dmol bundle in place.
+
+1. On the repo: **Code -> Codespaces -> Create codespace on main**
+2. Wait for setup (~4 minutes; it prints a banner when done)
+3. Two terminals:
+
+```bash
+cd backend && ../.venv311/bin/python -m uvicorn app.main:app --port 8000
+```
+
+```bash
+cd frontend && npm run dev
+```
+
+4. **PORTS** tab -> right-click **5173** -> **Port Visibility -> Public**
+5. Copy the `https://<name>-5173.app.github.dev` URL
+
+Forwarding 5173 alone is enough: Vite proxies `/api` to the backend inside the
+Codespace, so one URL serves the whole app with no CORS configuration. Vite's
+host check already allows `.app.github.dev`, so there is no "Blocked request"
+step.
+
+### What it costs and where it stops
+
+- **Free allowance:** 120 core-hours and 15 GB storage per month on a GitHub
+  Free account. A 2-core Codespace therefore runs ~60 hours a month.
+- **It stops on idle**, 30 minutes by default. Raise it in
+  Settings -> Codespaces -> Default idle timeout (up to 4 hours). A stopped
+  Codespace's URL returns an error until it is restarted.
+- **Public port visibility is required** for anyone else to open the link.
+  Without it they hit a GitHub login wall.
+
+### What will *not* work: GitHub Actions
+
+Running the server inside a workflow and tunnelling out of it is technically
+possible and is a **violation of the GitHub Acceptable Use Policies**, which
+prohibit using Actions for activity unrelated to producing, testing, deploying
+or publishing the project. Accounts are suspended for it. Do not do this on an
+account you need.
+
+GitHub Pages is static-only: it can host the frontend build, but not OpenMM.
 
 ## Sharing localhost through a Cloudflare tunnel
 

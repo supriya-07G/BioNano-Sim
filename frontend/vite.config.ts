@@ -12,13 +12,22 @@ export default defineConfig({
     strictPort: true,
     // Vite 6 rejects requests whose Host header it does not recognise, which
     // blocks every tunnel URL (Cloudflare, ngrok) with "Blocked request".
-    // Opt in explicitly rather than disabling the check: this is a dev server,
-    // and the /api proxy below means anything reaching it also reaches the
-    // backend. Set VITE_ALLOWED_HOSTS to the tunnel hostname when sharing.
-    allowedHosts: (process.env.VITE_ALLOWED_HOSTS ?? '')
-      .split(',')
-      .map((host) => host.trim())
-      .filter(Boolean),
+    //
+    // '.app.github.dev' is allowed by default so a Codespace works with no
+    // manual step: that domain is GitHub's, the port is only reachable once
+    // explicitly forwarded, and the alternative is every Codespace user
+    // hitting an unexplained blank page.
+    //
+    // Ad-hoc tunnels stay opt-in via VITE_ALLOWED_HOSTS. Blanket-allowing
+    // '.trycloudflare.com' would let any tunnel host reach this dev server,
+    // and the /api proxy below means reaching it also reaches the backend.
+    allowedHosts: [
+      '.app.github.dev',
+      ...(process.env.VITE_ALLOWED_HOSTS ?? '')
+        .split(',')
+        .map((host) => host.trim())
+        .filter(Boolean),
+    ],
     // Proxy /api to the backend so the browser sees one origin in dev. This
     // keeps CORS out of the picture entirely for the common case; the backend
     // still allows the Vite origin explicitly for direct calls.
