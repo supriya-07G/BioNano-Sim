@@ -67,10 +67,13 @@ frontend: ## Run the dashboard at http://localhost:5173
 # --------------------------------------------------------------------------- #
 # Validate
 # --------------------------------------------------------------------------- #
-validate: validate-env validate-model ## Run every environment and model check
+validate: validate-env validate-model validate-dataset ## Run every environment, model and dataset check
 
 validate-env: ## Check interpreter, packages, OpenMM platforms and data files
 	@$(PY) scripts/validate_environment.py
+
+validate-dataset: ## Validate the real stiffness dataset and write its manifest
+	@$(PY) scripts/validate_dataset.py
 
 validate-model: ## Verify the ML bundle reproduces its published metrics
 	@$(PY) scripts/validate_model.py

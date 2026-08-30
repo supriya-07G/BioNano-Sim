@@ -143,3 +143,55 @@ Regenerate the invalid fixtures after changing a rule:
 ```bash
 python backend/tests/fixtures/contract/make_invalid.py
 ```
+
+## Validating the dataset
+
+One command, run by CI on every push and by `make validate`:
+
+```bash
+python scripts/validate_dataset.py
+```
+
+It exits **0** only if every row satisfies the contract. On failure it exits
+**1** and prints every problem, not just the first — a row number, the
+experiment id, and what is wrong. A missing dataset exits **2**.
+
+What it rejects:
+
+| Check | Why it matters |
+|---|---|
+| Contract violation on any row | the row would enter training malformed |
+| Duplicate `experiment_id` | the same experiment counted twice doubles its training weight |
+| Stiffness outside −5,000 … 20,000 pN/nm | a kJ/mol/nm² value lands near 1e5 and would otherwise look valid |
+| Degradation arithmetic disagreeing | a changed definition, or two stiffnesses from different runs |
+| More than one `sim_config_hash` | rows from different protocols are not comparable and must not be pooled |
+| `is_synthetic` true | the mock dataset must not leak into the real one |
+
+It writes a manifest beside the dataset — sha256, row counts, accepted versus
+rejected, proteins, severities, seeds, protocol hashes and the column set — so
+a model can record exactly which dataset version it was trained on.
+
+Paired-artifact checks are **off by default**, because the flat CSV alone
+cannot prove both runs exist on disk. Turn them on with an experiments root:
+
+```bash
+python scripts/validate_dataset.py --experiments-dir runtime/experiments
+```
+
+The report says when it skipped them; silence would read as "checked and fine".
+
+## Adding a new experiment safely
+
+1. Run the experiment with `scripts/run_paired_experiment.py`. It writes the
+   directory layout above and appends one row to the dataset.
+2. Run `python scripts/validate_dataset.py`. If it exits non-zero, fix the
+   producer — do not edit the CSV by hand.
+3. Commit the dataset **and** the regenerated manifest together, so the sha256
+   in the manifest always matches the file beside it.
+4. If you changed a contract rule, bump `CONTRACT_VERSION`, regenerate the
+   fixtures with `backend/tests/fixtures/contract/make_invalid.py`, and update
+   this document. A version bump is a breaking change and fails a test until
+   it is deliberate.
+
+Never append rows produced under a different `sim_config_hash` to an existing
+dataset. Start a new versioned file instead.

@@ -48,6 +48,11 @@ jobs:
       - name: Verify the ML bundle reproduces its published metrics
         run: python scripts/validate_model.py
 
+      # The dataset is the gate into training. A corrupt row must fail the
+      # build, not be discovered weeks later in a model that will not fit.
+      - name: Validate the real stiffness dataset
+        run: python scripts/validate_dataset.py
+
       - name: Check the generated feature schema is up to date
         run: |
           cp models/feature_schema.json /tmp/feature_schema.before.json

@@ -69,6 +69,34 @@ Sha256 = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
 ResidueId = Annotated[str, Field(pattern=r"^[A-Za-z0-9]:-?\d+$")]
 
 
+def check_degradation_arithmetic(
+    baseline: float | None, damaged: float | None, stated: float | None
+) -> None:
+    """Re-derive degradation and refuse a value whose arithmetic disagrees.
+
+    A mismatch means the producer changed the definition, mixed units, or wrote
+    the two stiffnesses from different runs. All three silently corrupt a
+    training set, so the contract recomputes rather than trusts.
+
+    Shared by the result model and the CSV row: the CSV is what actually feeds
+    training, so it must not be the weaker check of the two.
+    """
+    if stated is None or baseline is None or damaged is None:
+        return
+    if not all(math.isfinite(v) for v in (baseline, damaged, stated)):
+        return
+    if baseline == 0:
+        return
+    expected = (baseline - damaged) / baseline * 100.0
+    if abs(expected - stated) > DEGRADATION_TOLERANCE_PP:
+        raise ValueError(
+            f"mechanical_degradation_pct is {stated:.4f} but "
+            f"(baseline - damaged) / baseline * 100 is {expected:.4f} "
+            f"(baseline={baseline}, damaged={damaged}); the contract defines "
+            "degradation by that formula"
+        )
+
+
 class StiffnessFit(BaseModel):
     """Diagnostics for one linear fit of force against extension.
 
@@ -187,26 +215,10 @@ class PairedExperimentResult(BaseModel):
         return self
 
     def _check_degradation(self) -> None:
-        """Re-derive degradation and refuse a row whose arithmetic disagrees.
-
-        A mismatch means the producer changed the definition, mixed units, or
-        wrote the two stiffnesses from different runs. All three silently
-        corrupt a training set, so the contract recomputes rather than trusts.
-        """
-        base, dmg = self.baseline_stiffness, self.damaged_stiffness
-        stated = self.mechanical_degradation_pct
-        if stated is None or base is None or dmg is None:
-            return
-        if not all(math.isfinite(v) for v in (base, dmg, stated)) or base == 0:
-            return
-        expected = (base - dmg) / base * 100.0
-        if abs(expected - stated) > DEGRADATION_TOLERANCE_PP:
-            raise ValueError(
-                f"mechanical_degradation_pct is {stated:.4f} but "
-                f"(baseline - damaged) / baseline * 100 is {expected:.4f} "
-                f"(baseline={base}, damaged={dmg}); the contract defines "
-                "degradation by that formula"
-            )
+        check_degradation_arithmetic(
+            self.baseline_stiffness, self.damaged_stiffness,
+            self.mechanical_degradation_pct,
+        )
 
 
 class StiffnessResultRow(BaseModel):
@@ -251,6 +263,10 @@ class StiffnessResultRow(BaseModel):
                 "is_synthetic must be false in stiffness_results_REAL_v1.csv; "
                 "synthetic rows belong in a separate file"
             )
+        check_degradation_arithmetic(
+            self.baseline_stiffness, self.damaged_stiffness,
+            self.mechanical_degradation_pct,
+        )
         return self
 
 
