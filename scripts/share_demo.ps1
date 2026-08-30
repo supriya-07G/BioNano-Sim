@@ -98,9 +98,20 @@ $logFile = Join-Path ([System.IO.Path]::GetTempPath()) "bionano-tunnel-$PID.log"
 if ($Provider -eq 'ngrok') {
     # The reserved domain is fixed, so the URL is known before the tunnel is
     # even up -- no log parsing, and nothing to reconfigure between runs.
-    Write-Step "Starting ngrok on $NgrokDomain..."
+    # The reserved-domain flag was renamed: --domain on ngrok 3.x up to ~3.18,
+    # --url on newer builds. winget currently ships 3.3.1, so pick by version
+    # rather than assuming -- the wrong one fails with 'unknown flag'.
+    $ngrokVersion = (& ngrok version) -replace '[^0-9.]', ''
+    $useUrlFlag = $false
+    try {
+        $parsed = [version]($ngrokVersion -split '\s+' | Select-Object -First 1)
+        $useUrlFlag = $parsed -ge [version]'3.19.0'
+    } catch { $useUrlFlag = $false }
+    $domainFlag = if ($useUrlFlag) { "--url=$NgrokDomain" } else { "--domain=$NgrokDomain" }
+
+    Write-Step "Starting ngrok $ngrokVersion on $NgrokDomain ($domainFlag)..."
     $tunnel = Start-Process -FilePath 'ngrok' `
-        -ArgumentList @('http', "$Port", "--url=$NgrokDomain", '--log', 'stdout') `
+        -ArgumentList @('http', "$Port", $domainFlag, '--log', 'stdout') `
         -RedirectStandardOutput $logFile -RedirectStandardError "$logFile.err" `
         -NoNewWindow -PassThru
     $publicUrl = "https://$NgrokDomain"
