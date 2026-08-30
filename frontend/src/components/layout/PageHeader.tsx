@@ -16,10 +16,12 @@ export function PageHeader({
   className?: string
 }) {
   return (
-    <div className={cn('flex flex-wrap items-start justify-between gap-4', className)}>
-      <div className="min-w-0">
+    <div className={cn('mb-5 flex flex-wrap items-start justify-between gap-4', className)}>
+      <div className="page-header-shell min-w-0">
         <div className="flex flex-wrap items-center gap-2.5">
-          <h1 className="text-lg font-semibold tracking-tight text-ink">{title}</h1>
+          <h1 className="page-header-title text-lg font-semibold tracking-tight text-ink">
+            {title}
+          </h1>
           {badges}
         </div>
         {description && (

@@ -6,7 +6,6 @@ import {
   Atom,
   BookOpen,
   Boxes,
-  CheckCircle2,
   Cpu,
   Microscope,
   Radiation,
@@ -18,7 +17,6 @@ import { ScopeNotice } from '@/components/common/ScientificNotice'
 import { HeroStructure } from '@/components/landing/HeroStructure'
 import { OrbitLines, Starfield } from '@/components/layout/Starfield'
 import { cn } from '@/components/ui/cn'
-import { useReadiness } from '@/hooks/useSimulation'
 
 const CHIPS = [
   { icon: Boxes, label: '5 approved proteins' },
@@ -56,10 +54,8 @@ const WORKFLOW = [
 ] as const
 
 export function LandingPage() {
-  const { data: readiness } = useReadiness()
-
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-void">
+    <div data-theme="light" className="relative min-h-screen overflow-x-hidden bg-void">
       <Starfield className="opacity-70" />
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-orbit-glow" />
       <div
@@ -168,27 +164,6 @@ export function LandingPage() {
                   <span className="text-2xs text-ink-muted">{chip.label}</span>
                 </li>
               ))}
-              {readiness && (
-                <li
-                  className={cn(
-                    'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 backdrop-blur',
-                    readiness.ready
-                      ? 'border-ok/35 bg-ok/[0.08]'
-                      : 'border-warn/35 bg-warn/[0.08]',
-                  )}
-                >
-                  <CheckCircle2
-                    className={cn(
-                      'h-3 w-3',
-                      readiness.ready ? 'text-ok' : 'text-warn',
-                    )}
-                    aria-hidden
-                  />
-                  <span className="text-2xs text-ink-muted">
-                    Backend {readiness.status.replace('_', ' ')}
-                  </span>
-                </li>
-              )}
             </ul>
               </div>
 

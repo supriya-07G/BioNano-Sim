@@ -59,6 +59,62 @@
     --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 0.04);
   }
 
+  .internal-app-theme {
+    --color-void: 3 6 14;
+    --color-surface: 10 14 22;
+    --color-elevated: 15 19 30;
+    --color-raised: 20 27 39;
+    --color-hairline: 45 55 72;
+
+    --color-accent: 199 189 255;
+    --color-accent-soft: 221 214 255;
+    --color-accent-deep: 171 156 255;
+    --color-electric: 202 192 255;
+    --color-violet: 182 167 255;
+
+    --color-ok: 74 222 128;
+    --color-warn: 250 204 21;
+    --color-danger: 252 113 113;
+
+    --color-ink: 241 245 255;
+    --color-ink-muted: 185 191 207;
+    --color-ink-faint: 122 132 153;
+
+    --color-grid: 151 168 216;
+    --color-orbit: 197 186 255;
+    --theme-viewer-bg: #070d18;
+    --shadow-panel: 0 1px 1px rgb(15 23 42 / 0.4), 0 20px 40px -30px rgb(2 6 23 / 0.85);
+    --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 0.02);
+  }
+
+  .internal-app-theme[data-theme='light'] {
+    --color-void: 244 247 251;
+    --color-surface: 255 255 255;
+    --color-elevated: 248 250 252;
+    --color-raised: 238 243 248;
+    --color-hairline: 203 213 225;
+
+    --color-accent: 2 132 199;
+    --color-accent-soft: 14 116 144;
+    --color-accent-deep: 3 105 161;
+    --color-electric: 79 70 229;
+    --color-violet: 124 58 237;
+
+    --color-ok: 22 163 74;
+    --color-warn: 217 119 6;
+    --color-danger: 220 38 38;
+
+    --color-ink: 15 23 42;
+    --color-ink-muted: 71 85 105;
+    --color-ink-faint: 100 116 139;
+
+    --color-grid: 14 116 144;
+    --color-orbit: 124 58 237;
+    --theme-viewer-bg: #f8fafc;
+    --shadow-panel: 0 1px 2px rgb(15 23 42 / 0.08), 0 8px 24px -12px rgb(15 23 42 / 0.16);
+    --shadow-inset: inset 0 1px 0 rgb(255 255 255 / 0.8);
+  }
+
   :root {
   color-scheme: light;
 }
@@ -85,6 +141,32 @@
 
   body {
     @apply bg-void text-ink font-sans antialiased;
+    background-image: radial-gradient(circle at top, rgba(196, 185, 255, 0.08), transparent 27%);
+  }
+
+  .internal-app-theme {
+    background-image: radial-gradient(circle at 10% 0%, rgba(196, 185, 255, 0.14), transparent 24%),
+      radial-gradient(circle at 90% 15%, rgba(167, 154, 255, 0.08), transparent 22%);
+  }
+
+  .page-header-shell {
+    position: relative;
+    padding: 0.5rem 0.875rem 0.5rem 0.25rem;
+  }
+
+  .page-header-shell::before {
+    content: '';
+    position: absolute;
+    inset: -0.7rem -0.8rem -0.9rem -0.8rem;
+    border-radius: 1rem;
+    background: radial-gradient(circle, rgba(196, 185, 255, 0.18), transparent 58%);
+    filter: blur(22px);
+    opacity: 0.9;
+    z-index: -1;
+  }
+
+  .page-header-title {
+    text-shadow: 0 0 18px rgba(196, 185, 255, 0.2);
   }
 
   /* Visible focus for keyboard users on every interactive element. */
@@ -124,11 +206,11 @@
 @layer components {
   /* --- Surfaces ------------------------------------------------------- */
   .panel {
-    @apply rounded-xl border border-hairline bg-surface shadow-panel;
+    @apply rounded-lg border border-hairline bg-surface shadow-panel;
   }
 
   .card {
-    @apply rounded-xl border border-hairline bg-elevated shadow-panel;
+    @apply rounded-lg border border-hairline bg-elevated shadow-panel;
   }
 
   .card-hover {
@@ -154,6 +236,7 @@
   .btn-primary {
     @apply btn bg-accent text-void hover:bg-accent-soft
            disabled:hover:bg-accent shadow-[0_1px_0_rgba(255,255,255,0.14)_inset];
+    box-shadow: 0 0 0 1px rgba(198, 188, 255, 0.18), 0 16px 24px -20px rgba(196, 185, 255, 0.55);
   }
 
   .btn-secondary {
