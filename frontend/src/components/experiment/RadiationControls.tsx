@@ -66,7 +66,14 @@ export function RadiationControls({
 
       {/* Scenario */}
       <label className="block">
-        <span className="mb-1 block text-2xs text-ink-faint">Scenario</span>
+        <span className="mb-1 flex items-center gap-1.5 text-2xs text-ink-faint">
+          Scenario
+          {selected?.ml_supported ? (
+            <span className="badge border-ok/40 bg-ok/10 text-ok">affects ML</span>
+          ) : (
+            <span className="badge border-warn/40 bg-warn/10 text-warn">ML unavailable</span>
+          )}
+        </span>
         <select
           className="select"
           onWheel={blurOnWheel}
@@ -167,6 +174,11 @@ export function RadiationControls({
             </select>
           </label>
         </div>
+
+        <p id="dose-coupling-note" className="mt-2 text-2xs leading-relaxed text-ink-faint">
+          Dose and exposure duration are retained in the run record for provenance.
+          They do not change the ML estimate and are not simulated as radiation physics.
+        </p>
 
         <label className="mt-2 block">
           <span className="mb-1 block text-2xs text-ink-faint">

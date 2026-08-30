@@ -4,11 +4,13 @@ import { Tooltip } from '@/components/ui/Tooltip'
 import type { ExperimentDraft } from '@/stores/experimentStore'
 import type { Scenario } from '@/types/prediction'
 import type { SimulationPreset } from '@/types/simulation'
+import type { ModelInfo } from '@/types/prediction'
 
 interface ExperimentSummaryProps {
   draft: ExperimentDraft
   scenario: Scenario | undefined
   preset: SimulationPreset | undefined
+  model: ModelInfo | undefined
 }
 
 /**
@@ -18,7 +20,7 @@ interface ExperimentSummaryProps {
  * that boundary is the most consequential thing a viewer can misunderstand
  * about this application.
  */
-export function ExperimentSummary({ draft, scenario, preset }: ExperimentSummaryProps) {
+export function ExperimentSummary({ draft, scenario, preset, model }: ExperimentSummaryProps) {
   const structure = draft.uploadId
     ? `upload · ${draft.uploadFilename ?? draft.uploadId}`
     : (draft.pdbId ?? '—')
@@ -36,7 +38,7 @@ export function ExperimentSummary({ draft, scenario, preset }: ExperimentSummary
     ['Dose', `${draft.dose} ${draft.doseUnit}`],
     ['Duration', `${draft.exposureDurationDays} days`],
     ['Temperature', `${draft.temperatureKelvin} K`],
-    ['Mechanical force', `${draft.mechanicalForcePn} pN`],
+    ['Mechanical force', '0 pN · inactive until pulling MD'],
     ['Seed', `${draft.randomSeed}`],
     ['Preset', preset?.label ?? draft.presetId],
   ]
@@ -47,6 +49,13 @@ export function ExperimentSummary({ draft, scenario, preset }: ExperimentSummary
         <ClipboardList className="h-3 w-3" aria-hidden />
         Experiment summary
       </span>
+
+      <CalculationMode
+        draft={draft}
+        scenario={scenario}
+        preset={preset}
+        model={model}
+      />
 
       <Section
         title="Consumed by the ML model"
@@ -61,6 +70,79 @@ export function ExperimentSummary({ draft, scenario, preset }: ExperimentSummary
         rows={nonMlInputs}
         help="Recorded in the job record and used by OpenMM (temperature) or kept purely for provenance (dose, duration, force). None of these is an ML model input."
       />
+    </div>
+  )
+}
+
+function CalculationMode({
+  draft,
+  scenario,
+  preset,
+  model,
+}: {
+  draft: ExperimentDraft
+  scenario: Scenario | undefined
+  preset: SimulationPreset | undefined
+  model: ModelInfo | undefined
+}) {
+  const features = model?.feature_order ?? []
+
+  return (
+    <div className="rounded-lg border border-accent/25 bg-accent/[0.05] p-2.5">
+      <div className="mb-2">
+        <span className="text-2xs font-medium text-accent">Calculation mode</span>
+        <p className="mt-0.5 text-2xs leading-relaxed text-ink-muted">
+          The ML estimate uses model features only. OpenMM receives the thermal and
+          preset parameters below. Radiation dose and mechanical force are provenance
+          fields, not active physics inputs.
+        </p>
+      </div>
+
+      <dl className="grid grid-cols-2 gap-x-3 gap-y-1 font-mono text-2xs">
+        <div>
+          <dt className="text-ink-faint">ML scenario</dt>
+          <dd className="truncate text-ink">{scenario?.scenario_id ?? draft.scenarioId}</dd>
+        </div>
+        <div>
+          <dt className="text-ink-faint">ML support</dt>
+          <dd className={scenario?.ml_supported ? 'text-ok' : 'text-warn'}>
+            {scenario?.ml_supported ? 'enabled' : 'unavailable'}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-ink-faint">OpenMM temperature</dt>
+          <dd className="text-ink">{draft.temperatureKelvin} K</dd>
+        </div>
+        <div>
+          <dt className="text-ink-faint">Preset</dt>
+          <dd className="truncate text-ink">{preset?.label ?? draft.presetId}</dd>
+        </div>
+        <div>
+          <dt className="text-ink-faint">Timestep</dt>
+          <dd className="text-ink">{preset?.timestep_fs ?? '—'} fs</dd>
+        </div>
+        <div>
+          <dt className="text-ink-faint">Production</dt>
+          <dd className="text-ink">{preset?.production_steps ?? '—'} steps</dd>
+        </div>
+        <div>
+          <dt className="text-ink-faint">Pulling force</dt>
+          <dd className="text-danger">inactive (0 pN)</dd>
+        </div>
+        <div>
+          <dt className="text-ink-faint">Radiation physics</dt>
+          <dd className="text-ink-muted">not simulated</dd>
+        </div>
+      </dl>
+
+      <div className="mt-2 border-t border-hairline pt-2">
+        <span className="text-2xs font-medium text-ink-muted">Exact ML feature columns</span>
+        <p className="mt-1 text-2xs leading-relaxed text-ink-faint">
+          {features.length
+            ? features.join(' · ')
+            : 'Model schema unavailable; feature columns will be reported by the backend.'}
+        </p>
+      </div>
     </div>
   )
 }
