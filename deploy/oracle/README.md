@@ -100,6 +100,97 @@ the compose file is a placeholder, not your URL.
 
 ---
 
+## Without Docker
+
+Docker is not required. Nothing about the tunnel needs it -- `cloudflared` is a
+single binary and runs fine under systemd.
+
+The one real constraint is the interpreter: `scripts/validate_model.py` asserts
+Python **3.11** exactly, because the model bundle was fitted under 3.11 with
+scikit-learn 1.7.1. Ubuntu 22.04 ships 3.10 and 24.04 ships 3.12, so neither
+default works. `uv` installs 3.11 without touching the system Python.
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh && exec $SHELL
+git clone https://github.com/supriya-07G/BioNano-Sim.git && cd BioNano-Sim
+uv venv .venv311 --python 3.11
+uv pip install --python .venv311 -r backend/requirements.txt
+.venv311/bin/python scripts/setup_local.py
+.venv311/bin/python scripts/validate_model.py    # must print 25/25
+```
+
+Install `cloudflared`:
+
+```bash
+curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-$(dpkg --print-architecture) -o cloudflared
+sudo install -m755 cloudflared /usr/local/bin/cloudflared
+```
+
+Two systemd units. `/etc/systemd/system/bionano-api.service`:
+
+```ini
+[Unit]
+Description=BioNano-Sim API
+After=network-online.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/BioNano-Sim
+# --app-dir backend is required: every internal import is `from app.…` and
+# there is no backend/__init__.py, so `backend.app.main:app` fails with
+# ModuleNotFoundError.
+ExecStart=/home/ubuntu/BioNano-Sim/.venv311/bin/uvicorn app.main:app     --host 127.0.0.1 --port 8000 --app-dir backend
+Environment=BIONANO_CORS_ORIGINS=https://your-app.vercel.app
+Environment=OPENMM_CPU_THREADS=2
+Environment=BIONANO_MAX_CONCURRENT_JOBS=1
+Environment=BIONANO_MAX_PRODUCTION_STEPS=20000
+Environment=BIONANO_JOB_WALL_CLOCK_LIMIT_S=600
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Binding to `127.0.0.1` rather than `0.0.0.0` is deliberate: only the tunnel
+needs to reach it, so the API is never on the VM's public interface.
+
+`/etc/systemd/system/bionano-tunnel.service`:
+
+```ini
+[Unit]
+Description=Cloudflare tunnel for BioNano-Sim
+After=bionano-api.service
+Requires=bionano-api.service
+
+[Service]
+User=ubuntu
+ExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate --url http://127.0.0.1:8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now bionano-api bionano-tunnel
+sudo journalctl -u bionano-tunnel | grep trycloudflare   # your HTTPS URL
+```
+
+### Which to pick
+
+| | Docker compose | systemd + uv |
+|---|---|---|
+| Python 3.11 | pinned by the image | pinned by `uv` |
+| Steps to run | one command | two unit files |
+| Memory overhead | ~100 MB for the daemon | none |
+| Matches what CI tested | yes, same image | close, not identical |
+| Debugging a failure | `docker logs` | `journalctl` |
+
+On a 1 GB `E2.1.Micro` the systemd route is the better trade -- the Docker
+daemon's overhead is a real fraction of that box. On a 24 GB Ampere it makes
+no practical difference, and compose is fewer moving parts to get wrong.
+
 ## A fixed hostname instead of a random one
 
 The quick tunnel's URL changes whenever the `tunnel` container restarts, and
