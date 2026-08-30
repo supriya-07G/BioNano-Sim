@@ -60,6 +60,28 @@ try {
     if ($reply -ne 'y') { exit 1 }
 }
 
+# Vite reads VITE_ALLOWED_HOSTS once, at startup, so an already-running dev
+# server cannot be told about the tunnel hostname -- it has to be restarted.
+# Left alone, npm would fail with "Port 5173 is already in use", which does not
+# explain what to do about it.
+$existing = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+if ($existing) {
+    $owner = Get-Process -Id $existing.OwningProcess -ErrorAction SilentlyContinue
+    Write-Warn "Something is already listening on :$Port (PID $($existing.OwningProcess)$(if ($owner) { ", $($owner.ProcessName)" }))."
+    Write-Host "    Vite reads VITE_ALLOWED_HOSTS only at startup, so it has to be"
+    Write-Host "    restarted for the tunnel hostname to be accepted."
+    Write-Host ""
+    $reply = Read-Host "Stop it and continue? [y/N]"
+    if ($reply -ne 'y') {
+        Write-Host "Left it running. Stop it yourself, then re-run this script."
+        exit 1
+    }
+    Stop-Process -Id $existing.OwningProcess -Force
+    Start-Sleep -Seconds 2
+    Write-Step "Stopped the process on :$Port"
+}
+
 # --- Tunnel ---------------------------------------------------------------
 $logFile = Join-Path ([System.IO.Path]::GetTempPath()) "bionano-tunnel-$PID.log"
 Write-Step "Starting the Cloudflare tunnel..."
