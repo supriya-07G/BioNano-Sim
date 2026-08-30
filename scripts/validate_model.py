@@ -15,9 +15,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import warnings
 from pathlib import Path
-import sys
 
 # scripts/ is not a package, so the shared console helper is imported by
 # path. init_console() must run before any output is written.
@@ -130,7 +130,7 @@ def main() -> int:
     encoder = pre.transformers_[1][1].named_steps["encoder"]
     live_vocab = {
         c: [str(v) for v in cats]
-        for c, cats in zip(pre.transformers_[1][2], encoder.categories_)
+        for c, cats in zip(pre.transformers_[1][2], encoder.categories_, strict=False)
     }
     check(
         schema.feature_order == list(bundle["feature_columns"]),
@@ -159,7 +159,7 @@ def main() -> int:
         if not (split_path.exists() and report_path.exists()):
             all_ok &= check(False, f"{split} split and report present")
             continue
-        X = pd.read_csv(split_path)
+        X = pd.read_csv(split_path)  # noqa: N806 - sklearn convention
         shipped = pd.read_csv(report_path)
         predicted = np.asarray(pipeline.predict(X[features]), dtype=float)
         reference = shipped["predicted_mechanical_degradation_pct"].to_numpy(dtype=float)

@@ -11,9 +11,9 @@ committed. Once fetched, the application runs entirely offline.
 from __future__ import annotations
 
 import argparse
+import sys
 import urllib.request
 from pathlib import Path
-import sys
 
 # scripts/ is not a package, so the shared console helper is imported by
 # path. init_console() must run before any output is written.

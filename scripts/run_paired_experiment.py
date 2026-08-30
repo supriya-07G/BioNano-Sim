@@ -35,7 +35,6 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "backend"))
 
 import numpy as np  # noqa: E402
-
 from app.simulation.damage import (  # noqa: E402
     PROXY_TYPE,
     SEVERITY_LEVELS,
