@@ -1,0 +1,109 @@
+{
+  "generated_at_utc": "2026-08-30T06:55:51.770479+00:00",
+  "git": {
+    "commit": "3f4d779caae383ea2326472f821374b0adb610d7",
+    "branch": "main",
+    "describe": "3f4d779",
+    "dirty": true
+  },
+  "code": {
+    "contract_version": "1.0",
+    "damage_proxy_type": "SIDE_CHAIN_LOSS",
+    "damage_proxy_version": "2.0"
+  },
+  "environment": {
+    "python": "3.11.14",
+    "os": "Windows 10 AMD64",
+    "openmm": "8.6",
+    "mdtraj": "1.11.1.post2",
+    "scikit_learn": "1.7.1",
+    "xgboost": "2.1.3",
+    "numpy": "2.1.3",
+    "pandas": "2.2.3",
+    "openmm_platforms": [
+      "Reference",
+      "CPU",
+      "OpenCL"
+    ],
+    "forcefield": [
+      "amber14-all.xml",
+      "implicit/gbn2.xml"
+    ],
+    "solvent_model": "implicit_gbn2"
+  },
+  "models": {
+    "mock_bundle_sha256": "00828fda47e2550c834b2c2d9e6b6a4786ee62721cbda759b15462e39353b6ba",
+    "real_bundle_sha256": "b29bbe771d82385670aae4f1fada84bb83940a816314f6afeb4d75277542bd23",
+    "feature_schema_sha256": "c8adb0010d73b02f7a4b956401dbbb0c85dc2305ed2d8f2b9cdad67b50978d1f"
+  },
+  "dataset": {
+    "file": "stiffness_results_REAL_v1.csv",
+    "dataset_sha256": "53380a8a4c1407400a676e0efa3ece5e22d9101e05cfc68915799863c5926a7b",
+    "manifest_sha256": "fe544f7c161e276a4478334214089c65d864467620d76f90b283312738790495",
+    "rows_total": 520,
+    "rows_accepted": 130,
+    "proteins": [
+      "1AKI",
+      "1TIT",
+      "1UBQ",
+      "1WIT"
+    ],
+    "sim_config_hashes": [
+      "779b297ee54d560c11b07397c92fa69e593a32de7fc748657547006a26ac50d5"
+    ]
+  },
+  "protocol": {
+    "protocol_version": "1.0",
+    "engine": "openmm",
+    "forcefield": [
+      "amber14-all.xml",
+      "implicit/gbn2.xml"
+    ],
+    "solvent_model": "implicit_gbn2",
+    "explicit_water": false,
+    "water_model": null,
+    "nonbonded_method": "CutoffNonPeriodic",
+    "nonbonded_cutoff_nm": 1.2,
+    "constraints": "HBonds",
+    "integrator": "LangevinMiddleIntegrator",
+    "temperature_kelvin": 300.0,
+    "friction_per_ps": 1.0,
+    "timestep_fs": 2.0,
+    "pressure_bar": null,
+    "barostat": null,
+    "minimisation_steps": 1000,
+    "equilibration_steps": 5000,
+    "production_steps": 20000,
+    "equilibration_ps": 10.0,
+    "production_ps": 40.0,
+    "pull_anchor": "first Ca of the chain (N-terminus)",
+    "pull_attachment": "last Ca of the chain (C-terminus)",
+    "pull_direction": "along the anchor-to-attachment interatomic distance",
+    "pull_velocity_nm_per_ps": 0.03,
+    "spring_constant_kj_mol_nm2": 1000.0,
+    "spring_constant_pn_per_nm": 1660.5391,
+    "restraint_update_steps": 10,
+    "sample_interval_steps": 20,
+    "stiffness_method": "linear least squares of force (pN) vs extension (nm)",
+    "stiffness_unit": "pN/nm",
+    "proxy_type": "SIDE_CHAIN_LOSS",
+    "sim_config_hash": "e5a910df6a5194a761b876ff019e6c114c816203b8283bae5f2706e8773d1c1d",
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "structures": {
+    "1PGA.pdb": "908f8dbf3bb7567f36eec4683eb8cfab5ac0c011dfee1b9c940cab7f482bc841",
+    "1TEN.pdb": "5b2165e4e495d05e230c6438a8585966578fc70006ec228ac0a0d8b65d06c73c",
+    "1TIT.pdb": "3f2efc602095f0482278df61b6dacd13d99340f2c99f9aa1fe14a8db92c62d79",
+    "1UBQ.pdb": "d4a6812d8951cf6594e6a0763f089e35f5a80b62acb3c117b2c5565228a7b161",
+    "2SPC.pdb": "6ba6661e3b86e6807a9b0e2e0e9344f059b744bc12ca7e236a4843dc20fbf24b"
+  },
+  "release_tag": "v0.2.0",
+  "provenance_complete": true,
+  "provenance_missing": []
+}

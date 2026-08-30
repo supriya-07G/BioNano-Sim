@@ -1,0 +1,30 @@
+# Code ownership by workstream (issue #12).
+# A PR touching these paths requests review from the listed owner.
+# Replace the placeholders with real GitHub handles before enabling
+# required reviews in branch protection.
+
+# Default: anything not matched below.
+*                               @supriya-07G
+
+# Simulation -- physics, protocol and the damage proxy.
+/backend/app/simulation/        @supriya-07G
+/scripts/run_paired_experiment.py @supriya-07G
+
+# Data contract and dataset -- changes here affect every downstream team.
+/backend/app/contracts/         @supriya-07G
+/scripts/validate_dataset.py    @supriya-07G
+/data/ml/                       @supriya-07G
+/docs/experiment-contract.md    @supriya-07G
+
+# ML -- model bundles, features and training.
+/backend/app/ml/                @supriya-07G
+/models/                        @supriya-07G
+/notebooks/                     @supriya-07G
+
+# Dashboard.
+/frontend/                      @supriya-07G
+
+# Scientific claims -- must not drift without review.
+/docs/scientific-claims-checklist.md @supriya-07G
+/docs/RESULTS.md                @supriya-07G
+/README.md                      @supriya-07G

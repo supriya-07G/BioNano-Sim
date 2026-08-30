@@ -72,6 +72,9 @@ validate: validate-env validate-model validate-dataset ## Run every environment,
 validate-env: ## Check interpreter, packages, OpenMM platforms and data files
 	@$(PY) scripts/validate_environment.py
 
+provenance: ## Build the reproducibility manifest (add RELEASE=1 to enforce)
+	@$(PY) scripts/build_reproducibility_manifest.py $(if $(RELEASE),--release)
+
 validate-dataset: ## Validate the real stiffness dataset and write its manifest
 	@$(PY) scripts/validate_dataset.py
 
