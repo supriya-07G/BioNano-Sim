@@ -1,0 +1,14 @@
+{
+  "input_rows": 8,
+  "rows_skipped_not_completed_or_synthetic": 2,
+  "perturbations": 2,
+  "usable_labels": 0,
+  "typical_label_std_pct": 27.3002,
+  "seeds_needed_for_sem": {
+    "sem_10.0pct": 8,
+    "sem_5.0pct": 30,
+    "sem_2.0pct": 187
+  },
+  "min_seeds_required": 3,
+  "max_label_sem_pct": 10.0
+}

@@ -77,3 +77,7 @@ data/external/
 *.parquet
 *.feather
 notebooks/**/*.ipynb_checkpoints/
+
+# Generated experiment outputs (trajectories, force-extension curves)
+runtime/experiments/
+runtime/*_test/

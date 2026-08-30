@@ -8,9 +8,12 @@ expectations rather than whatever the depositor used.
 
 from __future__ import annotations
 
+import random
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
+import numpy as np
 
 from app.core.exceptions import InvalidSimulationInputError
 from app.core.logging import get_logger
@@ -137,7 +140,9 @@ def extract_chain(
     )
 
 
-def select_platform(preferred: str) -> tuple[Any, dict[str, str], str]:
+def select_platform(
+    preferred: str, *, deterministic: bool = False
+) -> tuple[Any, dict[str, str], str]:
     """Pick an OpenMM platform. Returns (platform, properties, note).
 
     ``preferred='auto'`` walks a speed-ordered preference list. On this class of
@@ -146,8 +151,16 @@ def select_platform(preferred: str) -> tuple[Any, dict[str, str], str]:
     85 s demo. An explicit platform name is always honoured.
 
     Trade-off worth knowing: the CPU platform is bit-reproducible for a fixed
-    seed, while GPU platforms may differ slightly between runs. The platform
-    actually used is recorded in the job's reproducibility block.
+    seed *only when it runs on a single thread*. With more than one thread the
+    force reductions are summed in a nondeterministic order, and two runs of an
+    identical configuration diverge measurably — around 0.03 nm of atomic
+    displacement after a few hundred steps on a 16-thread machine. GPU platforms
+    are likewise not bit-reproducible.
+
+    ``deterministic=True`` therefore pins the run to a single-threaded CPU, which
+    is the only configuration that repeats exactly. It is much slower, so it is
+    opt-in rather than the default. The platform and thread count actually used
+    are recorded in the job's reproducibility block either way.
     """
     import os
 
@@ -159,10 +172,33 @@ def select_platform(preferred: str) -> tuple[Any, dict[str, str], str]:
 
     def _props(name: str) -> dict[str, str]:
         if name == "CPU":
-            # Default is one thread per physical core; be explicit so the value
-            # lands in the reproducibility record.
-            return {"Threads": str(os.cpu_count() or 1)}
+            # Be explicit so the value lands in the reproducibility record. One
+            # thread is the only bit-reproducible setting; the default is one
+            # thread per physical core, for speed.
+            threads = 1 if deterministic else (os.cpu_count() or 1)
+            return {"Threads": str(threads)}
         return {}
+
+    if deterministic:
+        if "CPU" not in available:
+            raise InvalidSimulationInputError(
+                "Deterministic runs require the CPU platform, which is not "
+                f"available. Available: {', '.join(sorted(available))}.",
+                code="PLATFORM_UNAVAILABLE",
+            )
+        if preferred not in ("auto", "CPU"):
+            raise InvalidSimulationInputError(
+                f"Deterministic runs require the CPU platform, but '{preferred}' "
+                "was requested. Use platform 'CPU' or 'auto'.",
+                code="PLATFORM_NOT_DETERMINISTIC",
+            )
+        return (
+            Platform.getPlatformByName("CPU"),
+            _props("CPU"),
+            "Deterministic mode: CPU platform pinned to a single thread. This is "
+            "the only configuration that reproduces a trajectory exactly for a "
+            "fixed seed, and it is several times slower than the default.",
+        )
 
     if preferred != "auto":
         if preferred not in available:
@@ -190,8 +226,9 @@ def select_platform(preferred: str) -> tuple[Any, dict[str, str], str]:
         )
         if candidate not in ("CPU", "Reference"):
             note += (
-                " GPU platforms are faster but not bit-reproducible; use platform "
-                "'CPU' if you need an exactly repeatable trajectory."
+                " GPU platforms are faster but not bit-reproducible. Neither is a "
+                "multi-threaded CPU run: use a preset with deterministic=True for "
+                "an exactly repeatable trajectory."
             )
         return platform, _props(candidate), note
 
@@ -211,7 +248,7 @@ def build_openmm_system(
     an ~8x speedup over the uncut O(N²) Born-radius calculation; it is declared
     in the preset and echoed in every result payload.
     """
-    from openmm import LangevinMiddleIntegrator
+    from openmm import LangevinMiddleIntegrator, Platform
     from openmm.app import (
         CutoffNonPeriodic,
         ForceField,
@@ -227,16 +264,43 @@ def build_openmm_system(
     forcefield = ForceField(*preset.forcefield)
 
     modeller = Modeller(pdb.topology, pdb.positions)
+
+    # addHydrogens is not deterministic by default, and the difference is not
+    # small: where a hydrogen's position is ambiguous (rotatable OH, SH, NH3+)
+    # Modeller chooses using the global RNG, then refines the choice with a short
+    # minimisation on a platform of its own choosing. Two preparations of the
+    # same PDB were measured 0.18 nm apart before a single dynamics step -- far
+    # larger than anything the trajectory subsequently does, so it dominates any
+    # attempt at reproducibility. Seeding the RNG and pinning that refinement to
+    # the single-threaded Reference platform makes preparation bit-identical.
+    deterministic = bool(getattr(preset, "deterministic", False))
+    hydrogen_kwargs: dict[str, Any] = {}
+    rng_state = random.getstate()
+    numpy_state = np.random.get_state()
+    if deterministic:
+        random.seed(seed)
+        np.random.seed(int(seed) % (2**32))
+        hydrogen_kwargs["platform"] = Platform.getPlatformByName("Reference")
+
     try:
-        added = modeller.addHydrogens(forcefield)
+        added = modeller.addHydrogens(forcefield, **hydrogen_kwargs)
         if added:
             notes.append(f"Added {len(added)} hydrogen atoms using the force field.")
+        if deterministic:
+            notes.append(
+                "Deterministic mode: hydrogen placement was seeded and pinned to the "
+                "Reference platform, so preparation repeats exactly."
+            )
     except Exception as exc:  # noqa: BLE001
         raise InvalidSimulationInputError(
             "OpenMM could not add hydrogens to this structure, which usually means a "
             f"residue does not match an amber14 template: {type(exc).__name__}: {exc}",
             code="HYDROGEN_ADDITION_FAILED",
         ) from exc
+    finally:
+        # Never leave the process-wide RNGs reseeded behind us.
+        random.setstate(rng_state)
+        np.random.set_state(numpy_state)
 
     try:
         system = forcefield.createSystem(
@@ -265,7 +329,9 @@ def build_openmm_system(
     # produce the same trajectory.
     integrator.setRandomNumberSeed(int(seed))
 
-    platform, properties, platform_note = select_platform(preset.platform)
+    platform, properties, platform_note = select_platform(
+        preset.platform, deterministic=getattr(preset, "deterministic", False)
+    )
     notes.append(platform_note)
     try:
         simulation = Simulation(
@@ -293,6 +359,11 @@ def build_openmm_system(
         "n_constraints": system.getNumConstraints(),
         "platform": simulation.context.getPlatform().getName(),
         "platform_properties": properties,
+        # True only for a single-threaded CPU run: see select_platform.
+        "bit_reproducible": (
+            simulation.context.getPlatform().getName() == "CPU"
+            and properties.get("Threads") == "1"
+        ),
         "nonbonded_cutoff_nm": preset.nonbonded_cutoff_nm,
         "topology_file": topology_path.name,
         "forcefield": list(preset.forcefield),

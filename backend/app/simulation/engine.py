@@ -28,6 +28,14 @@ from app.analysis.rmsf import rmsf_per_atom
 from app.core.logging import get_logger
 from app.schemas.simulation import JobStage
 from app.simulation.preparation import build_openmm_system, extract_chain
+from app.simulation.pulling import (
+    CSV_HEADER as PULL_CSV_HEADER,
+)
+from app.simulation.pulling import (
+    PullCancelledError,
+    PullResult,
+    run_steered_pull,
+)
 from app.utils.files import write_csv
 
 logger = get_logger("bionano.simulation.engine")
@@ -282,13 +290,50 @@ def run_simulation(
         JobStage.EQUILIBRATION, report, should_cancel, log, simulation_kelvin=kelvin,
     )
 
+    # The post-equilibration, pre-production conformation. A paired experiment
+    # can start both of its runs from this one structure, which removes the
+    # single largest nuisance term in a baseline-vs-damaged comparison: two
+    # independent equilibration trajectories drifting to different microstates.
+    with (job_dir / "equilibrated.pdb").open("w", encoding="utf-8") as fh:
+        PDBFile.writeFile(
+            simulation.topology,
+            simulation.context.getState(getPositions=True).getPositions(),
+            fh,
+        )
+    log("equilibrate: wrote equilibrated.pdb")
+
     # --- Stage 6: production --------------------------------------------
-    report(JobStage.PRODUCTION, "Running production dynamics", None)
-    log(f"production: {preset.production_steps} steps")
-    steps_done = _advance(
-        simulation, preset.production_steps, steps_done, total_dynamics,
-        JobStage.PRODUCTION, report, should_cancel, log, simulation_kelvin=kelvin,
-    )
+    # A pulling preset replaces free production dynamics with a steered-MD
+    # pull. Everything downstream (trajectory, analysis, proxy) is unchanged,
+    # because the pull writes the same DCD through the same reporters.
+    pull_config = getattr(preset, "pulling", None)
+    pull_result: PullResult | None = None
+    if pull_config is not None:
+        report(JobStage.PRODUCTION, "Running steered-MD pull", None)
+        log(f"production: steered-MD pull, {preset.production_steps} steps")
+        try:
+            steps_done, pull_result = run_steered_pull(
+                simulation=simulation,
+                config=pull_config,
+                n_steps=preset.production_steps,
+                steps_done=steps_done,
+                total_dynamics=total_dynamics,
+                timestep_fs=preset.timestep_fs,
+                report=report,
+                should_cancel=should_cancel,
+                log=log,
+            )
+        except PullCancelledError as exc:
+            raise _CancelledError() from exc
+        notes.extend(pull_result.notes)
+    else:
+        report(JobStage.PRODUCTION, "Running production dynamics", None)
+        log(f"production: {preset.production_steps} steps")
+        steps_done = _advance(
+            simulation, preset.production_steps, steps_done, total_dynamics,
+            JobStage.PRODUCTION, report, should_cancel, log,
+            simulation_kelvin=kelvin,
+        )
 
     # Flush reporters so the DCD is complete before we read it.
     for reporter in list(simulation.reporters):
@@ -319,6 +364,43 @@ def run_simulation(
         total_dynamics_steps=total_dynamics,
         log=log,
     )
+    # --- Force-extension export (task 5) ---------------------------------
+    if pull_result is not None:
+        fe_path = analysis_dir / "force_extension.csv"
+        write_csv(
+            fe_path,
+            PULL_CSV_HEADER,
+            [[s[col] for col in PULL_CSV_HEADER] for s in pull_result.samples],
+        )
+        log(
+            f"analysis: wrote force_extension.csv "
+            f"({len(pull_result.samples)} samples)"
+        )
+        result.series["force_extension"] = pull_result.samples
+        result.metrics["pulling"] = {
+            **pull_result.summary,
+            # Everything needed to reproduce this pull exactly (task 6).
+            # bit_reproducible is false unless the run was pinned to a
+            # single-threaded CPU, so nobody reads repeatability into a
+            # trajectory that cannot deliver it.
+            "config": {
+                **pull_result.config,
+                "preset_id": preset.preset_id,
+                "seed": seed,
+                "temperature_kelvin": temperature_kelvin,
+                "platform": topology["platform"],
+                "platform_properties": topology["platform_properties"],
+                "bit_reproducible": topology.get("bit_reproducible", False),
+            },
+            "force_extension_csv": "analysis/force_extension.csv",
+            "units": {
+                "force": "pN",
+                "extension": "nm",
+                "work": "kJ/mol",
+                "stiffness": "pN/nm",
+            },
+        }
+
     result.notes = [*notes, *result.notes]
     return result
 

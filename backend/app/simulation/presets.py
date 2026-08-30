@@ -12,6 +12,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from app.config import settings
+from app.simulation.pulling import PullConfig
 
 
 @dataclass(frozen=True)
@@ -34,6 +35,12 @@ class Preset:
     scientific_label: str
     is_default: bool = False
     limitations: list[str] = field(default_factory=list)
+    # When set, the production stage applies a moving harmonic restraint
+    # instead of running free dynamics. See app/simulation/pulling.py.
+    pulling: PullConfig | None = None
+    # Pin to a single-threaded CPU so the trajectory repeats exactly for a fixed
+    # seed. Much slower, so it is off by default. See select_platform.
+    deterministic: bool = False
 
     @property
     def simulated_time_ps(self) -> float:
@@ -147,8 +154,50 @@ MINIMISATION_ONLY = Preset(
     ],
 )
 
+MECHANICAL_PULL = Preset(
+    preset_id="mechanical_pull",
+    label="Mechanical Pull (steered MD)",
+    summary=(
+        "Constant-velocity steered MD. After equilibration a moving harmonic "
+        "restraint stretches the Ca N-to-C end-to-end distance, and the spring "
+        "force is sampled against the extension the molecule actually reached, "
+        "producing a real force-extension curve."
+    ),
+    platform="auto",
+    solvent="implicit_gbn2",
+    nonbonded_cutoff_nm=1.2,
+    forcefield=("amber14-all.xml", "implicit/gbn2.xml"),
+    production_steps=10_000,
+    equilibration_steps=1_000,
+    minimisation_steps=500,
+    timestep_fs=2.0,
+    report_interval=100,
+    friction_per_ps=1.0,
+    constraints="HBonds",
+    estimated_runtime_note=(
+        "About 40-60 s on a GPU platform or 3-5 min on a multi-core CPU, for a "
+        "56-107 residue domain."
+    ),
+    scientific_label="Steered MD Force-Extension (non-equilibrium)",
+    pulling=PullConfig(),
+    limitations=[
+        "The pulling velocity is roughly a million times faster than an AFM "
+        "experiment. SMD forces rise with loading rate, so the forces reported "
+        "here are far above experimental rupture forces and are comparable only "
+        "to other runs of this identical protocol.",
+        "20 ps of pulling reaches the elastic and early-yield regime only. No "
+        "unfolding or native-contact rupture is produced or claimed.",
+        "The fitted stiffness is an apparent, loading-rate-dependent slope, not "
+        "an equilibrium elastic constant.",
+        "A single pull is a single sample. No error bars are reported because "
+        "one trajectory cannot produce them.",
+        *_SHARED_LIMITATIONS,
+    ],
+)
+
 PRESETS: dict[str, Preset] = {
-    p.preset_id: p for p in (RAPID_DEMO, EXTENDED_DEMO, MINIMISATION_ONLY)
+    p.preset_id: p
+    for p in (RAPID_DEMO, EXTENDED_DEMO, MINIMISATION_ONLY, MECHANICAL_PULL)
 }
 
 DEFAULT_PRESET_ID = RAPID_DEMO.preset_id
