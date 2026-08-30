@@ -88,6 +88,37 @@ make backend
 make frontend
 ```
 
+### Windows without `make`
+
+`make` is not installed by default on Windows. Run the same four steps
+directly — this path is verified in
+[docs/validation](docs/validation/2026-08-30-clean-checkout.md):
+
+```bash
+uv venv .venv311 --python 3.11 && uv pip install --python .venv311 -r backend/requirements-dev.txt
+```
+
+```bash
+.venv311/Scripts/python.exe scripts/setup_local.py && cd frontend && npm install && cd ..
+```
+
+```bash
+.venv311/Scripts/python.exe scripts/validate_environment.py && .venv311/Scripts/python.exe scripts/validate_model.py
+```
+
+Then the two servers, in separate terminals:
+
+```bash
+cd backend && ../.venv311/Scripts/python.exe -m uvicorn app.main:app --port 8000
+```
+
+```bash
+cd frontend && npm run dev
+```
+
+If you do not have [uv](https://docs.astral.sh/uv/), substitute
+`python3.11 -m venv .venv311` and `.venv311/Scripts/python.exe -m pip install`.
+
 - Dashboard: <http://localhost:5173>
 - API: <http://localhost:8000>
 - API docs: <http://localhost:8000/docs>

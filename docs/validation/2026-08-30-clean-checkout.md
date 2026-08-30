@@ -92,6 +92,34 @@ Fixed in commit `f6467b2` by negating the ignore rule for
 `data/precomputed/**` and committing the fixture. The `precomputed_fallback`
 component now reports ready, as shown above.
 
+## Second defect: `make setup` is unusable on Windows
+
+Task 1 of the issue is to test `make setup` on a clean environment. It cannot
+be run here at all:
+
+```
+/usr/bin/bash: line 1: make: command not found
+```
+
+`make` is not installed by default on Windows, so the README's documented
+one-shot setup fails immediately for a new Windows team member. The Makefile
+itself is fine; the documentation assumed a tool that is not present.
+
+The four underlying steps were run individually against the clean clone and all
+succeeded:
+
+| Step | Command | Outcome |
+|---|---|---|
+| 1 | `uv venv .venv311 --python 3.11` + `uv pip install -r backend/requirements-dev.txt` | venv created, dependencies installed |
+| 2 | `scripts/setup_local.py` | 5 structures present, registry written, schema current, viewer present |
+| 3 | `cd frontend && npm install` | completed |
+| 4 | `scripts/fetch_viewer.py` | 3Dmol bundle present (537,792 bytes) |
+
+Re-validated on that freshly-built environment: `validate_environment.py`
+reports no blocking problems, `validate_model.py` passes 25/25.
+
+Fixed by documenting the no-`make` path in the README quick start.
+
 ## Known warnings (non-blocking)
 
 - ~~`DeprecationWarning: invalid escape sequence` in
