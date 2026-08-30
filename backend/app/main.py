@@ -11,10 +11,13 @@ from __future__ import annotations
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.router import api_router
@@ -129,8 +132,24 @@ app.add_exception_handler(Exception, unhandled_exception_handler)
 app.include_router(api_router, prefix=settings.api_prefix)
 
 
+# --- Static frontend ---------------------------------------------------------
+# The Dockerfile copies the Vite build here. It is absent in a dev checkout, in
+# which case the API behaves exactly as before and Vite serves the frontend on
+# :5173. When it is present, the built app and the API share an origin, so the
+# frontend's relative /api/v1 base works with no CORS entry at all.
+STATIC_DIR = Path(__file__).resolve().parent / "static"
+STATIC_INDEX = STATIC_DIR / "index.html"
+SERVING_FRONTEND = STATIC_INDEX.is_file()
+
+if SERVING_FRONTEND:
+    # Hashed build assets, mounted explicitly so they never reach the catch-all.
+    app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
+
+
 @app.get("/", include_in_schema=False)
-def root() -> dict[str, str]:
+def root() -> FileResponse | dict[str, str]:
+    if SERVING_FRONTEND:
+        return FileResponse(STATIC_INDEX)
     return {
         "app": settings.app_name,
         "version": settings.version,
@@ -138,3 +157,19 @@ def root() -> dict[str, str]:
         "api": settings.api_prefix,
         "scientific_status": "MVP — see /api/v1/model and /api/v1/system/readiness",
     }
+
+
+if SERVING_FRONTEND:
+
+    @app.get("/{asset_path:path}", include_in_schema=False)
+    def spa_fallback(asset_path: str) -> FileResponse:
+        """Serve a real file if one exists, else index.html for a client route.
+
+        Registered last, so /api/v1/*, /docs and /openapi.json still match their
+        own routes first. This only catches paths no route claimed.
+        """
+        candidate = (STATIC_DIR / asset_path).resolve()
+        # Containment check: a crafted path must not escape the build output.
+        if asset_path and candidate.is_file() and STATIC_DIR in candidate.parents:
+            return FileResponse(candidate)
+        return FileResponse(STATIC_INDEX)
