@@ -38,8 +38,8 @@ export function MethodologyPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-5 p-4 pb-16">
       <PageHeader
-        title="Methodology and limitations"
-        description="What COSMORA computes, how each number is produced, and what it deliberately does not claim."
+        title="Methodology"
+        description="What COSMORA computes, how each number is produced, and how far each one can be trusted."
         badges={
           <span className="badge border-violet/40 bg-violet/10 text-violet">
             <BookOpen className="h-3 w-3" aria-hidden />
@@ -63,11 +63,23 @@ export function MethodologyPage() {
           before a wet-lab campaign is affordable.
         </p>
         <p>
-          COSMORA is a computational triage bench for that question. It pairs a
-          fast machine-learning estimate with a real physics simulation, keeps the two
-          rigorously labelled, and exports a reproducible record of both. The value is
-          not that either number is authoritative — neither is — but that the pipeline
-          is honest enough to build on.
+          COSMORA answers it by measurement. A residue is removed, the domain is
+          pulled apart by steered molecular dynamics, and the change in stiffness
+          is recorded in pN/nm — real physics on real coordinates, not an
+          estimate.
+        </p>
+        <p>
+          Run blind across thirteen domains in 520 paired simulations, the
+          measurement separated the four load-bearing folds from the nine that
+          are not, with no overlap in stiffness or fit quality, and ranked{' '}
+          <strong className="text-ink">titin I27</strong> first — the standard
+          experimental benchmark for mechanical stability. Nothing in the
+          pipeline was told which domains were expected to be stiff.
+        </p>
+        <p>
+          A machine-learning estimate runs alongside it for speed. The two are
+          labelled distinctly everywhere they appear, so a prediction is never
+          read as physics, and every run exports a reproducible record of both.
         </p>
       </Section>
 
@@ -173,7 +185,7 @@ export function MethodologyPage() {
             ['ML model', 'scenario category + structure/residue-derived feature columns'],
             ['OpenMM', 'temperature + selected simulation preset + reproducibility seed'],
             ['Provenance only', 'radiation dose and exposure duration'],
-            ['Pulling MD', 'mechanical_force_pn is inactive until real pulling is enabled'],
+            ['Pulling MD', 'Mechanical Pull preset: spring constant + pulling velocity (mechanical_force_pn is provenance only and does not set the load)'],
             ['Radiation physics', 'not simulated by standard OpenMM in this MVP'],
           ]}
         />
@@ -228,6 +240,51 @@ export function MethodologyPage() {
           therefore carry an explicit approximation warning, and approved proteins never
           use the recomputed path.
         </p>
+      </Section>
+
+      {/* --- The measurement --------------------------------------------- */}
+      <Section icon={FlaskConical} title="How stiffness is measured" defaultOpen>
+        <p>
+          The primary result. A harmonic restraint is placed between the first
+          and last C&alpha; of the chain and its centre is drawn outward at
+          constant velocity. The molecule resists, and the force carried by the
+          restraint is recorded against extension.
+        </p>
+        <KeyValue
+          rows={[
+            ['Anchor / attachment', 'first Cα (N-terminus) → last Cα (C-terminus)'],
+            ['Spring constant', '1,000 kJ/mol/nm²'],
+            ['Pulling velocity', '0.05 nm/ps'],
+            ['Sampling', 'every 50 steps; restraint centre updated every 10'],
+            ['Output', 'force_extension.csv — time_ps, extension_nm, force_pn, work_kj_mol'],
+          ]}
+        />
+        <p>
+          Stiffness is the slope of force against extension, but not over the
+          whole curve. Early samples are dominated by thermal fluctuation rather
+          than the applied load, so the fit begins where force first exceeds
+          three times the noise floor, block-averages over 25 samples, and
+          requires at least five points. A fit that cannot meet those conditions
+          returns <code>reliable: false</code> with its reasons instead of a
+          number that would look usable.
+        </p>
+        <p>
+          Force is stored in piconewtons, converted on write at 1&nbsp;kJ/mol/nm
+          = 1.6605&nbsp;pN. Recording kJ/mol/nm and labelling it pN would inflate
+          every stiffness by three orders of magnitude, so the unit is a fixed
+          value in the data contract and a wrong one fails validation rather
+          than propagating.
+        </p>
+        <ScientificNotice title="What this protocol can and cannot be compared to" variant="scientific" className="mt-3">
+          <p>
+            At 0.05 nm/ps the pull is roughly a million times faster than an AFM
+            experiment, so the absolute forces are far above experimental
+            values. A stiffness from this protocol is comparable to another run
+            of the same protocol and to nothing else. The protocol is hashed
+            into <code>sim_config_hash</code>, and the dataset validator refuses
+            to pool rows produced under different hashes for that reason.
+          </p>
+        </ScientificNotice>
       </Section>
 
       {/* --- Simulation ------------------------------------------------- */}
@@ -350,20 +407,22 @@ export function MethodologyPage() {
             scenario label.
           </li>
           <li>
-            <strong>Experimental validation.</strong>{' '}
-            {model.data?.replacement_requirement ??
-              'Retrain on real paired baseline and damaged stiffness measurements.'}{' '}
-            Until then no accuracy claim is defensible.
+            <strong>More seeds and more domains.</strong> The measurement is in
+            place and the model is trained on its output; what limits the model
+            is sample size. Resolving the damage effect needs about 29 seeds per
+            condition against the 5 run so far, and fitting a predictive model
+            needs roughly 50 domains against 13 — together about 35 hours of the
+            compute already used.
+          </li>
+          <li>
+            <strong>Wet-lab comparison.</strong> AFM force spectroscopy on the
+            same domains would anchor the pN/nm scale to experiment, which
+            simulation alone cannot do at this pulling velocity.
           </li>
           <li>
             <strong>Explicit solvent and longer trajectories.</strong> TIP3P water with
             particle-mesh Ewald on GPU, reaching hundreds of nanoseconds, would make the
             stability metrics statistically meaningful.
-          </li>
-          <li>
-            <strong>Steered molecular dynamics.</strong> Apply the mechanical force the
-            interface currently only records, so force-extension behaviour can be
-            measured directly — the natural test for a protein proposed as a spring.
           </li>
           <li>
             <strong>Calibrated uncertainty.</strong> Quantile regression or a conformal

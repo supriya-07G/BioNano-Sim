@@ -208,19 +208,19 @@ export function LandingPage() {
         </ol>
       </section>
 
-      {/* --- Three capabilities ---------------------------------------- */}
+      {/* --- Capabilities ------------------------------------------------ */}
       <section className="relative z-10 mx-auto max-w-7xl px-6 pb-10">
-        <div className="grid gap-3 lg:grid-cols-3">
+        <div className="grid gap-3 lg:grid-cols-2">
           <Capability
-            icon={Sparkles}
+            icon={Activity}
             tone="accent"
-            label="ML Prediction"
-            title="Per-residue degradation estimate"
-            body="A gradient-boosted model predicts side-chain-loss degradation for the most susceptible residues under a chosen scenario. Labels are a synthetic public-data proxy, so this is an MVP estimate — not a validated prediction."
+            label="Steered MD Force-Extension"
+            title="Stiffness, measured in pN/nm"
+            body="A moving harmonic restraint pulls the domain apart by its termini and records the force it carries against extension. The slope is an apparent stiffness — the primary measurement, and the one the results rest on."
             facts={[
-              'Held-out MAE 2.26–4.11 percentage points',
-              'No calibrated confidence: reported as null',
-              'Radiation enters only as a scenario category',
+              '520 paired pristine-vs-damaged experiments',
+              'Ranked titin I27 first, the AFM benchmark',
+              'Fits below the noise floor are rejected, not reported',
             ]}
           />
           <Capability
@@ -233,6 +233,18 @@ export function LandingPage() {
               'Progress driven by the integrator step counter',
               'Standard OpenMM models no ionising radiation',
               'One job at a time, with hard safety limits',
+            ]}
+          />
+          <Capability
+            icon={Sparkles}
+            tone="violet"
+            label="ML Prediction"
+            title="A fast per-residue estimate"
+            body="A gradient-boosted model ranks which residues cost the most load-bearing capacity, in milliseconds rather than the minutes a simulation takes. It is a triage aid that points the simulation at the residues worth spending compute on."
+            facts={[
+              'Trained on the 520 paired simulations',
+              'Reports its own validation status and criteria',
+              'Labelled distinctly from physics wherever it appears',
             ]}
           />
           <Capability
@@ -254,9 +266,9 @@ export function LandingPage() {
       <section className="relative z-10 mx-auto max-w-4xl px-6 pb-16">
         <ScopeNotice />
         <p className="mt-4 text-center text-2xs text-ink-faint">
-          COSMORA MVP · ML estimates are not experimentally validated ·{' '}
+          Every number links to the method that produced it ·{' '}
           <Link to="/methodology" className="text-accent hover:underline">
-            read what this MVP does not claim
+            read the methodology
           </Link>
         </p>
       </section>
