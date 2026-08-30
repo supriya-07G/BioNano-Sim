@@ -1,0 +1,14 @@
+{
+  "invalid_wrong_stiffness_unit.json": "stiffness_unit must be pN/nm; kJ/mol/nm^2 is out by a factor of ~1660",
+  "invalid_qc_failed_without_reasons.json": "a rejected experiment must record why",
+  "invalid_completed_with_qc_failures.json": "a run cannot both pass and fail",
+  "invalid_degradation_arithmetic.json": "stated degradation disagrees with (baseline - damaged) / baseline * 100",
+  "invalid_residue_count_mismatch.json": "n_residues_damaged disagrees with len(damage_residue_ids)",
+  "invalid_primary_residue_not_in_list.json": "damage_residue_id is not present in damage_residue_ids",
+  "invalid_completed_without_measurement.json": "a passing experiment must report a finite measurement",
+  "invalid_severity_label.json": "severity vocabulary is fixed",
+  "invalid_severity_claimed_as_dose.json": "severity counts side chains and is never a dose",
+  "invalid_short_config_hash.json": "sim_config_hash must be a full sha256",
+  "invalid_residue_id_format.json": "residue ids are chain-qualified, e.g. A:74",
+  "invalid_missing_required_field.json": "proxy_type is required"
+}

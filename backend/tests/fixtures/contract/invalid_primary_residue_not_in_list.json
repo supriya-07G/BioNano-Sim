@@ -1,0 +1,25 @@
+{
+  "experiment_id": "1UBQ_MILD_74_seed1",
+  "schema_version": "1.0",
+  "status": "COMPLETED",
+  "protein_id": "1UBQ",
+  "pdb_id": "1UBQ",
+  "chain_id": "A",
+  "damage_residue_id": "A:99",
+  "residue_type": "ARG",
+  "proxy_type": "SIDE_CHAIN_LOSS",
+  "severity_label": "MILD",
+  "n_residues_damaged": 1,
+  "damage_residue_ids": [
+    "A:74"
+  ],
+  "severity_is_a_dose": false,
+  "random_seed": 1,
+  "sim_config_hash": "779b297ee54d560c11b07397c92fa69e593a32de7fc748657547006a26ac50d5",
+  "is_synthetic": false,
+  "baseline_stiffness": 603.0,
+  "damaged_stiffness": 504.0,
+  "stiffness_unit": "pN/nm",
+  "mechanical_degradation_pct": 16.4179,
+  "qc_failures": []
+}
