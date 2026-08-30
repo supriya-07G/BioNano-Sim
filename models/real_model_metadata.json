@@ -1,0 +1,86 @@
+{
+  "model_name": "BioNano-Sim Real Simulation Model",
+  "model_version": "1.0.0-real",
+  "scientific_status": "REAL_PAIRED_SIMULATION_LABELS",
+  "label_source": "BIONANO_PAIRED_STEERED_MD",
+  "scientifically_validated": false,
+  "validation_criteria": {
+    "min_labels": 30,
+    "min_proteins": 8,
+    "max_label_sem_pp": 10.0,
+    "must_beat_mean_baseline": true
+  },
+  "validation_failures": [
+    "only 18 labels, need 30",
+    "only 4 proteins, need 8",
+    "worst label SE 13.6 pp exceeds 10.0 pp"
+  ],
+  "approved_use": "RESEARCH_PREVIEW_LIMITATIONS_DISCLOSED",
+  "target_column": "mechanical_degradation_pct",
+  "target_definition": "(baseline_stiffness - damaged_stiffness) / baseline_stiffness * 100, from paired steered-MD pulls",
+  "target_unit": "percent",
+  "stiffness_unit": "pN/nm",
+  "feature_columns": [
+    "protein_length",
+    "molecular_weight",
+    "hydrophobic_fraction",
+    "charged_fraction",
+    "residue_index_norm",
+    "residue_sasa_norm",
+    "residue_contact_count",
+    "proxy_rank",
+    "n_residues_damaged",
+    "n_atoms_removed",
+    "baseline_end_to_end_nm",
+    "residue_type",
+    "qualitative_susceptibility",
+    "severity_label"
+  ],
+  "numeric_features": [
+    "protein_length",
+    "molecular_weight",
+    "hydrophobic_fraction",
+    "charged_fraction",
+    "residue_index_norm",
+    "residue_sasa_norm",
+    "residue_contact_count",
+    "proxy_rank",
+    "n_residues_damaged",
+    "n_atoms_removed",
+    "baseline_end_to_end_nm"
+  ],
+  "categorical_features": [
+    "residue_type",
+    "qualitative_susceptibility",
+    "severity_label"
+  ],
+  "n_training_labels": 18,
+  "n_proteins": 4,
+  "proteins": [
+    "1AKI",
+    "1TIT",
+    "1UBQ",
+    "1WIT"
+  ],
+  "seeds_per_label_median": 5.0,
+  "label_sem_pp_median": 8.869988726393444,
+  "label_sem_pp_max": 13.636457863023725,
+  "cv_scheme": "GroupKFold by protein (held-out protein)",
+  "cv_r2": -0.003890432723263837,
+  "cv_mae_pp": 10.365494820555034,
+  "mean_baseline_r2": -0.20290743753335305,
+  "label_noise_r2_ceiling": 0.5609681981438599,
+  "sim_config_hash": "779b297ee54d560c11b07397c92fa69e593a32de7fc748657547006a26ac50d5",
+  "excluded_features": {
+    "scenario_id": "does not enter the simulation, so it carries no signal and would be fitted to noise",
+    "dose_gy / let / fluence": "not consumed by the simulation and not verified against NASA references"
+  },
+  "limitations": [
+    "Radiation is not simulated. The damage proxy is a side-chain truncation at residues selected for literature radiosensitivity.",
+    "Pulls are 40 ps of non-equilibrium steered MD, ~1e6 times faster than an AFM experiment. Absolute forces are not comparable to experiment.",
+    "Severity is a count of removed side chains and is not a dose.",
+    "The target carries measurable run-to-run noise; see label_sem_pp_median."
+  ],
+  "rebuilt_locally": "Refitted from stiffness_results_REAL_v1.csv under the pinned scikit-learn 1.7.1; the Kaggle export referenced a private class removed in that version.",
+  "created_at_utc": "2026-08-30T05:56:45.024380+00:00"
+}

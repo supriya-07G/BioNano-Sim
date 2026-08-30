@@ -1,0 +1,37 @@
+{
+  "experiments": 520,
+  "passed_qc": 130,
+  "perturbations": 32,
+  "usable_labels": 18,
+  "median_label_std_pp": 26.7367309924809,
+  "seeds_run": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "protocol": {
+    "forcefield": [
+      "amber14-all.xml",
+      "implicit/gbn2.xml"
+    ],
+    "temperature_k": 300.0,
+    "friction_per_ps": 1.0,
+    "timestep_fs": 2.0,
+    "nonbonded_cutoff_nm": 1.2,
+    "minimisation_steps": 1000,
+    "shared_equilibration_steps": 5000,
+    "settle_steps": 1000,
+    "pull_steps": 20000,
+    "spring_k_kj_mol_nm2": 1000.0,
+    "pull_velocity_nm_per_ps": 0.03,
+    "restraint_update_steps": 10,
+    "sample_interval_steps": 20,
+    "fit_block_size": 25,
+    "fit_noise_multiple": 3.0
+  },
+  "sim_config_hash": "779b297ee54d560c11b07397c92fa69e593a32de7fc748657547006a26ac50d5",
+  "scenario_note": "scenario_id does not enter the simulation and must not be a feature",
+  "is_synthetic": false
+}
