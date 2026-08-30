@@ -18,6 +18,14 @@ final.pdb
 prepared.pdb
 topology.pdb
 
+# ...except the committed demo fixture. data/precomputed/ is a checked-in
+# result that the API serves and the test suite asserts on; the broad patterns
+# above were swallowing final.pdb and topology.pdb, so a clean checkout served
+# 404 for the default ?which=final and the endpoint test failed in CI while
+# passing on any machine that had once run a simulation.
+!data/precomputed/**/final.pdb
+!data/precomputed/**/topology.pdb
+
 # ---------------------------------------------------------------------------
 # Python
 # ---------------------------------------------------------------------------
