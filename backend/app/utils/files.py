@@ -11,8 +11,35 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
+
+# os.replace is atomic, but on Windows it can still fail transiently with
+# PermissionError (WinError 5 / 32) when an antivirus scanner or the search
+# indexer briefly holds a handle on the temp file or the destination. This is
+# not hypothetical: a real 22,000-step job died at equilibration step 500 with
+#   PermissionError: [WinError 5] Access is denied:
+#   '...\\.status.json.khlkq4_1.tmp' -> '...\\status.json'
+# and lost 43 seconds of work plus the whole run. status.json is rewritten on
+# every progress publish, so a long job gets hundreds of chances to hit it.
+#
+# A bounded retry costs milliseconds in the normal case and saves the job in the
+# pathological one. The total budget below is about 2.75 s before giving up.
+_REPLACE_ATTEMPTS = 10
+_REPLACE_BACKOFF_S = 0.05
+
+
+def _replace_with_retry(src: Path, dest: Path) -> None:
+    """os.replace, retried through transient Windows sharing violations."""
+    for attempt in range(_REPLACE_ATTEMPTS):
+        try:
+            os.replace(src, dest)
+            return
+        except PermissionError:
+            if attempt == _REPLACE_ATTEMPTS - 1:
+                raise
+            time.sleep(_REPLACE_BACKOFF_S * (attempt + 1))
 
 
 def atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> None:
@@ -26,7 +53,7 @@ def atomic_write_text(path: Path, text: str, *, encoding: str = "utf-8") -> None
             fh.write(text)
             fh.flush()
             os.fsync(fh.fileno())
-        os.replace(tmp, path)
+        _replace_with_retry(tmp, path)
     except BaseException:
         tmp.unlink(missing_ok=True)
         raise
