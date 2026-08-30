@@ -256,7 +256,7 @@ BioNano-Sim/
 │   │   ├── analysis/   RMSD, RMSF, Rg, energy, degradation proxy
 │   │   ├── services/   orchestration for proteins, predictions, jobs, reports
 │   │   └── api/        versioned routes
-│   └── tests/          100 tests, including real OpenMM runs
+│   └── tests/          196 tests, including real OpenMM runs
 ├── frontend/           React + TypeScript + Vite dashboard
 ├── data/
 │   ├── proteins/       the five approved PDB structures + metadata
@@ -300,7 +300,7 @@ All of the following pass on a clean checkout:
   your environment reproduces the shipped
   `data/ml/reports/{validation,test}_predictions.csv` to `max|diff| ≈ 1.9e-06`
   (CSV write precision) and the published MAE to six decimal places.
-- `backend`: **147 tests** — 138 fast plus 9 marked `slow` that execute real
+- `backend`: **196 tests** — 187 fast plus 9 marked `slow` that execute real
   OpenMM runs, including paired steered-MD pulls.
 - `frontend`: `tsc --noEmit` clean, `eslint --max-warnings 0` clean, production
   build succeeds.
