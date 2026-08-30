@@ -298,13 +298,22 @@ export function ResultsPage() {
           <section className="card p-3">
             <h3 className="mb-2 flex items-center gap-1.5 text-xs font-medium text-ink">
               Structural stability
-              <Tooltip width="lg" content={results.stability_summary.threshold_note} />
+              {results.stability_summary?.threshold_note && (
+                <Tooltip width="lg" content={results.stability_summary.threshold_note} />
+              )}
             </h3>
+            {/*
+              stability_summary can be an empty object: a minimisation-only run
+              produces no trajectory to judge stability from. Reading .verdict
+              off it unguarded crashed the whole results page rather than
+              omitting one panel.
+            */}
             <p className="text-xs capitalize text-accent">
-              {results.stability_summary.verdict.replace(/_/g, ' ')}
+              {results.stability_summary?.verdict?.replace(/_/g, ' ') ?? 'Not assessed'}
             </p>
             <p className="mt-1.5 text-2xs leading-relaxed text-ink-muted">
-              {results.stability_summary.explanation}
+              {results.stability_summary?.explanation ??
+                'This run produced no trajectory-derived stability assessment.'}
             </p>
 
             {results.highest_mobility_residues.length > 0 && (

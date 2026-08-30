@@ -14,6 +14,18 @@ import { Topbar } from './Topbar'
 export function AppShell() {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-void">
+      {/*
+        First focusable element on the page, visually hidden until focused.
+        Without it a keyboard user tabs through the whole sidebar on every
+        navigation before reaching the content.
+      */}
+      <a
+        href="#main-content"
+        className="sr-only z-50 focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded-md focus:bg-elevated focus:px-4 focus:py-2 focus:text-sm focus:text-ink focus:ring-2 focus:ring-accent"
+      >
+        Skip to main content
+      </a>
+
       {/* Fixed decorative ground; all content sits above it. */}
       <div
         aria-hidden
@@ -25,7 +37,12 @@ export function AppShell() {
         <Topbar />
         <div className="flex min-h-0 flex-1">
           <Sidebar className="w-48 lg:w-56" />
-          <main className="min-w-0 flex-1 overflow-y-auto">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            aria-label="Main content"
+            className="min-w-0 flex-1 overflow-y-auto"
+          >
             <Outlet />
           </main>
         </div>

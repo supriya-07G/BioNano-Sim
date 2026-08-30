@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MotionConfig } from 'framer-motion'
 import { RouterProvider } from 'react-router-dom'
 
 import { router } from './routes/router'
@@ -30,7 +31,15 @@ const queryClient = new QueryClient({
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      {/*
+        reducedMotion="user" makes every Framer animation respect the OS
+        setting. The global CSS rule in globals.css cannot do this on its own:
+        Framer animates via JavaScript, so an !important transition-duration
+        never applies to it.
+      */}
+      <MotionConfig reducedMotion="user">
+        <RouterProvider router={router} />
+      </MotionConfig>
     </QueryClientProvider>
   )
 }

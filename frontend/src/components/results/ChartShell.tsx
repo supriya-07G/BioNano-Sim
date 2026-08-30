@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import type { ReactNode } from 'react'
 import {
   Area,
@@ -57,7 +58,17 @@ interface ChartShellProps {
   emptyMessage?: string
   className?: string
   height?: number
+  /**
+   * What the chart shows, for a screen reader. A recharts SVG exposes no
+   * accessible content at all, so without this the chart is silent and the
+   * reader learns only that a region exists. State the trend and the range
+   * rather than repeating the title.
+   */
+  summary?: string
 }
+
+let chartSequence = 0
+const nextChartId = () => `chart-${(chartSequence += 1)}`
 
 export function ChartShell({
   title,
@@ -69,22 +80,45 @@ export function ChartShell({
   emptyMessage = 'No data was produced for this metric.',
   className,
   height = 200,
+  summary,
 }: ChartShellProps) {
+  const headingId = useMemo(nextChartId, [])
+  const describedBy = `${headingId}-desc`
+
   return (
-    <section className={cn('card p-3', className)}>
+    <section className={cn('card p-3', className)} aria-labelledby={headingId}>
       <header className="mb-2 flex items-start justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <h3 className="text-xs font-medium text-ink">{title}</h3>
+          <h3 id={headingId} className="text-xs font-medium text-ink">
+            {title}
+          </h3>
           {unit && <span className="font-mono text-2xs text-ink-faint">({unit})</span>}
           <Tooltip width="lg" content={help} />
         </div>
         {actions}
       </header>
 
+      {/*
+        The help text explains the metric and is otherwise reachable only by
+        hovering the tooltip, which a keyboard or screen-reader user cannot do.
+        Exposing it here makes it available to both without duplicating it
+        visually.
+      */}
+      <p id={describedBy} className="sr-only">
+        {summary ? `${summary} ` : ''}
+        {help}
+        {unit ? ` Values are in ${unit}.` : ''}
+      </p>
+
       {isEmpty ? (
         <EmptyState compact title="Not available" description={emptyMessage} />
       ) : (
-        <div style={{ height }}>
+        <div
+          style={{ height }}
+          role="img"
+          aria-labelledby={headingId}
+          aria-describedby={describedBy}
+        >
           <ResponsiveContainer width="100%" height="100%">
             {children as React.ReactElement}
           </ResponsiveContainer>
