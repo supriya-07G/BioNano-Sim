@@ -1,6 +1,6 @@
 {
   "model_file": "COSMORA_real_model_bundle.pkl",
-  "model_sha256": "b29bbe771d82385670aae4f1fada84bb83940a816314f6afeb4d75277542bd23",
+  "model_sha256": "8b5e4bda64dcb9598522713132809e613e92e74a9f7a009841651fa587c43d2f",
   "metadata_file": "real_model_metadata.json",
   "scientific_status": "REAL_PAIRED_SIMULATION_LABELS",
   "created_at_utc": "2026-08-30T05:56:45.024380+00:00"

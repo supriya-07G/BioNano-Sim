@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 
 import { EmptyState } from '@/components/common/EmptyState'
+import { MissionBrief } from '@/components/dashboard/MissionBrief'
 import { ErrorState } from '@/components/common/ErrorState'
 import { SkeletonCard, SkeletonRows } from '@/components/common/LoadingState'
 import { ScopeNotice } from '@/components/common/ScientificNotice'
@@ -66,6 +67,8 @@ export function DashboardPage() {
           </button>
         }
       />
+
+      <MissionBrief />
 
       {/* --- Top stats ---------------------------------------------------- */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
