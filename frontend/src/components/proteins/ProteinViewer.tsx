@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import {
   Camera,
   Maximize2,
@@ -55,6 +56,15 @@ interface ProteinViewerProps {
    * isolates the structure from the page.
    */
   transparent?: boolean
+  /**
+   * Rendered as a side panel only while full screen. The viewer stays generic:
+   * it knows nothing about experiments, and the caller supplies whatever
+   * belongs beside a large structure. Nothing is rendered inline, so the
+   * embedded viewer is unchanged.
+   */
+  fullscreenPanel?: ReactNode
+  /** Announced above the panel, e.g. the protein being configured. */
+  fullscreenTitle?: string
   onRetry?: () => void
 }
 
@@ -86,6 +96,8 @@ export function ProteinViewer({
   showControls = true,
   autoSpin = false,
   transparent = false,
+  fullscreenPanel,
+  fullscreenTitle,
   onRetry,
 }: ProteinViewerProps) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -289,6 +301,16 @@ export function ProteinViewer({
     return () => observer.disconnect()
   }, [])
 
+  // The panel narrows the canvas, and 3Dmol does not observe that itself.
+  useEffect(() => {
+    if (!engineReady) return
+    const id = window.setTimeout(() => {
+      viewerRef.current?.resize()
+      viewerRef.current?.render()
+    }, 220)
+    return () => window.clearTimeout(id)
+  }, [engineReady, fullscreen, fullscreenPanel])
+
   // Escape leaves fullscreen.
   useEffect(() => {
     if (!fullscreen) return
@@ -334,9 +356,37 @@ export function ProteinViewer({
     )
   }
 
+  const panelOpen = Boolean(fullscreen && fullscreenPanel)
+
   return (
     <div className={wrapper}>
-      <div ref={hostRef} className="absolute inset-0" />
+      {/*
+        The canvas is inset from the right while the panel is open rather than
+        sitting behind it: a structure half-hidden under an overlay cannot be
+        rotated into the part you want to see.
+      */}
+      <div
+        ref={hostRef}
+        className={cn(
+          'absolute inset-0 transition-[right] duration-200',
+          panelOpen && 'right-0 lg:right-[22rem]',
+        )}
+      />
+
+      {panelOpen && (
+        <aside
+          className="absolute inset-y-0 right-0 z-10 hidden w-[22rem] overflow-y-auto border-l border-hairline bg-surface/95 backdrop-blur lg:block"
+          aria-label="Experiment variables"
+        >
+          <div className="border-b border-hairline px-4 py-3">
+            <p className="label">Lab variables</p>
+            {fullscreenTitle && (
+              <p className="mt-0.5 font-mono text-xs text-ink">{fullscreenTitle}</p>
+            )}
+          </div>
+          <div className="space-y-4 p-4">{fullscreenPanel}</div>
+        </aside>
+      )}
 
       {(isLoading || (!engineReady && !error)) && (
         <div className="absolute inset-0 grid place-items-center bg-void/85">

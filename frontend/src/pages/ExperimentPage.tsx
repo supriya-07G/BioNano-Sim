@@ -8,6 +8,7 @@ import { LoadingState } from '@/components/common/LoadingState'
 import { ScientificNotice } from '@/components/common/ScientificNotice'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ExperimentSummary } from '@/components/experiment/ExperimentSummary'
+import { LabVariables } from '@/components/experiment/LabVariables'
 import { ScenarioForm } from '@/components/experiment/ScenarioForm'
 import { PredictionCard } from '@/components/prediction/PredictionCard'
 import { ProteinSummary } from '@/components/proteins/ProteinSummary'
@@ -287,6 +288,10 @@ export function ExperimentPage() {
               }
               screenshotName={`COSMORA-${draft.pdbId ?? 'upload'}-${draft.chainId}`}
               onRetry={() => void structureQuery.refetch()}
+              fullscreenTitle={`${draft.pdbId ?? 'upload'} · chain ${draft.chainId}`}
+              fullscreenPanel={
+                <LabVariables draft={draft} scenario={scenario} preset={preset} />
+              }
             />
           </div>
 
