@@ -45,6 +45,14 @@ export interface SimulationPreset {
   /** The exact label results from this preset must carry in the UI. */
   scientific_label: string
   limitations: string[]
+  /**
+   * Present only on presets that actually pull. The load comes from these
+   * values, never from the mechanical_force_pn request field.
+   */
+  pulling?: {
+    spring_constant_kj_mol_nm2: number
+    pull_velocity_nm_per_ps: number
+  } | null
 }
 
 export interface SimulationRequest {

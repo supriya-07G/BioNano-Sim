@@ -38,7 +38,12 @@ export function ExperimentSummary({ draft, scenario, preset, model }: Experiment
     ['Dose', `${draft.dose} ${draft.doseUnit}`],
     ['Duration', `${draft.exposureDurationDays} days`],
     ['Temperature', `${draft.temperatureKelvin} K`],
-    ['Mechanical force', '0 pN · inactive until pulling MD'],
+    [
+      'Mechanical force',
+      preset?.pulling
+        ? `set by the preset: ${preset.pulling.spring_constant_kj_mol_nm2} kJ/mol/nm² at ${preset.pulling.pull_velocity_nm_per_ps} nm/ps`
+        : 'provenance only · this preset applies no pull',
+    ],
     ['Seed', `${draft.randomSeed}`],
     ['Preset', preset?.label ?? draft.presetId],
   ]
@@ -127,7 +132,17 @@ function CalculationMode({
         </div>
         <div>
           <dt className="text-ink-faint">Pulling force</dt>
-          <dd className="text-danger">inactive (0 pN)</dd>
+          {/*
+            Preset-dependent, not a constant. This said "inactive (0 pN)" in
+            red for every preset, including Mechanical Pull, which applies a
+            real load -- so the summary contradicted the run it was
+            summarising.
+          */}
+          <dd className={preset?.pulling ? 'text-ok' : 'text-ink-muted'}>
+            {preset?.pulling
+              ? `${preset.pulling.spring_constant_kj_mol_nm2} kJ/mol/nm² @ ${preset.pulling.pull_velocity_nm_per_ps} nm/ps`
+              : 'none for this preset'}
+          </dd>
         </div>
         <div>
           <dt className="text-ink-faint">Radiation physics</dt>
