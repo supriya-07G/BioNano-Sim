@@ -89,21 +89,30 @@ export function MechanicalControls({
         </div>
       </label>
 
-      {/* Mechanical force: recorded but not applied by this engine. */}
+      {/*
+        This field is provenance-only, but pulling itself is NOT future scope:
+        the Mechanical Pull preset below runs real steered MD. Saying otherwise
+        made the form contradict its own preset list two rows down, and
+        understated a capability the project actually has. What is true is
+        narrower: the load comes from the preset's spring constant and pulling
+        velocity, not from this number.
+      */}
       <label className="block">
         <span className="mb-1 flex items-center gap-1.5 text-2xs text-ink-faint">
           Mechanical force (pN)
-          <span className="badge border-danger/30 bg-danger/[0.07] text-danger">
-            inactive · pulling unavailable
+          <span className="badge border-hairline bg-raised text-ink-faint">
+            provenance only
           </span>
           <Tooltip
             width="lg"
             content={
               <span>
-                Recorded for provenance. The Rapid Demo engine applies{' '}
-                <strong>no external pulling force</strong> — steered molecular dynamics
-                is future scope. Any non-zero value here is reported in the job
-                warnings so it cannot be mistaken for an applied load.
+                Recorded for provenance; it does not set the load. Real pulling{' '}
+                <strong>is</strong> available — select the{' '}
+                <strong>Mechanical Pull</strong> preset below, which applies a
+                moving harmonic restraint to the terminal Cα distance. The force
+                the molecule actually carried is reported in the resulting
+                force-extension curve.
               </span>
             }
           />
@@ -122,8 +131,10 @@ export function MechanicalControls({
           }
         />
         <p id="force-coupling-note" className="mt-1 text-2xs leading-relaxed text-ink-faint">
-          No external pulling force is enabled in this MVP. The value is fixed at
-          zero and cannot affect the trajectory until pulling MD is implemented.
+          This field never sets the load. To apply a real force, choose the{' '}
+          <strong className="text-ink-muted">Mechanical Pull (steered MD)</strong>{' '}
+          preset below — its spring constant and pulling velocity determine the
+          load, and the measured force appears in the force-extension curve.
         </p>
       </label>
 
