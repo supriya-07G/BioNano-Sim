@@ -160,7 +160,7 @@ export function ExperimentPage() {
       dose_unit: draft.doseUnit,
       exposure_duration_days: draft.exposureDurationDays,
       temperature_kelvin: draft.temperatureKelvin,
-      mechanical_force_pn: draft.mechanicalForcePn,
+      mechanical_force_pn: 0,
       random_seed: draft.randomSeed,
       top_n_residues: draft.topNResidues,
     })
@@ -178,7 +178,7 @@ export function ExperimentPage() {
         dose: draft.dose,
         dose_unit: draft.doseUnit,
         exposure_duration_days: draft.exposureDurationDays,
-        mechanical_force_pn: draft.mechanicalForcePn,
+        mechanical_force_pn: 0,
         random_seed: draft.randomSeed,
         prediction_id: prediction.data?.prediction_id ?? null,
         ml_degradation_percent: prediction.data?.degradation_percent ?? null,
@@ -327,7 +327,12 @@ export function ExperimentPage() {
 
             <div className="hairline-divider" />
 
-            <ExperimentSummary draft={draft} scenario={scenario} preset={preset} />
+            <ExperimentSummary
+              draft={draft}
+              scenario={scenario}
+              preset={preset}
+              model={modelQuery.data}
+            />
 
             <div className="hairline-divider" />
 

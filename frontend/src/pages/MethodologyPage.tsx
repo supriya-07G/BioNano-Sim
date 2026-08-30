@@ -160,6 +160,25 @@ export function MethodologyPage() {
         </ol>
       </Section>
 
+      {/* --- Input coupling --------------------------------------------- */}
+      <Section icon={Cpu} title="Input-coupling guide" defaultOpen>
+        <p>
+          The experiment workspace separates <strong>model inputs</strong>,
+          <strong> active simulation inputs</strong> and <strong>provenance-only fields</strong>.
+          This prevents a numeric control from looking causal when the underlying engine
+          does not use it.
+        </p>
+        <KeyValue
+          rows={[
+            ['ML model', 'scenario category + structure/residue-derived feature columns'],
+            ['OpenMM', 'temperature + selected simulation preset + reproducibility seed'],
+            ['Provenance only', 'radiation dose and exposure duration'],
+            ['Pulling MD', 'mechanical_force_pn is inactive until real pulling is enabled'],
+            ['Radiation physics', 'not simulated by standard OpenMM in this MVP'],
+          ]}
+        />
+      </Section>
+
       {/* --- Provenance ------------------------------------------------- */}
       <Section icon={Database} title="Dataset provenance and preprocessing">
         <p>

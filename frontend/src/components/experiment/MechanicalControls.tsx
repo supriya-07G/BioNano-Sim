@@ -93,8 +93,8 @@ export function MechanicalControls({
       <label className="block">
         <span className="mb-1 flex items-center gap-1.5 text-2xs text-ink-faint">
           Mechanical force (pN)
-          <span className="badge border-hairline bg-elevated text-ink-faint">
-            recorded only
+          <span className="badge border-danger/30 bg-danger/[0.07] text-danger">
+            inactive · pulling unavailable
           </span>
           <Tooltip
             width="lg"
@@ -115,17 +115,23 @@ export function MechanicalControls({
           min={0}
           step={10}
           value={mechanicalForcePn}
-          disabled={disabled}
+          disabled
+          aria-describedby="force-coupling-note"
           onChange={(event) =>
             onChange({ mechanicalForcePn: Number(event.target.value) })
           }
         />
+        <p id="force-coupling-note" className="mt-1 text-2xs leading-relaxed text-ink-faint">
+          No external pulling force is enabled in this MVP. The value is fixed at
+          zero and cannot affect the trajectory until pulling MD is implemented.
+        </p>
       </label>
 
       {/* Preset */}
       <label className="block">
         <span className="mb-1 flex items-center gap-1.5 text-2xs text-ink-faint">
           Simulation preset
+          <span className="badge border-ok/40 bg-ok/10 text-ok">drives simulation</span>
           <Tooltip
             width="lg"
             content="Controls trajectory length and therefore runtime. Every preset is a real OpenMM run; none is production-scale molecular dynamics."
@@ -165,6 +171,7 @@ export function MechanicalControls({
       <label className="block">
         <span className="mb-1 flex items-center gap-1.5 text-2xs text-ink-faint">
           Random seed
+          <span className="badge border-ok/40 bg-ok/10 text-ok">reproducibility</span>
           <Tooltip
             width="lg"
             content="Seeds both the integrator and the initial velocities. On the CPU platform the same seed reproduces the trajectory exactly; GPU platforms are faster but not bit-reproducible. The platform actually used is recorded in the job's reproducibility block."

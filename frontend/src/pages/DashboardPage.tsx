@@ -198,6 +198,14 @@ export function DashboardPage() {
             <p className="mt-3 text-2xs leading-relaxed text-ink-faint">
               {scenarios.data?.provenance.ml_coupling}
             </p>
+            <div className="mt-3 rounded-lg border border-hairline bg-void/40 p-2.5">
+              <p className="text-2xs font-medium text-ink-muted">Input-coupling guide</p>
+              <p className="mt-1 text-2xs leading-relaxed text-ink-faint">
+                Scenario category affects the ML estimate. Temperature and the selected
+                preset affect the OpenMM run. Dose and exposure duration are provenance
+                only; mechanical pulling is inactive in this MVP.
+              </p>
+            </div>
           </section>
 
           {/* --- Recent experiments ----------------------------------- */}
