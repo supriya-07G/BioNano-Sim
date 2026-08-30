@@ -12,6 +12,7 @@ import {
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
 import { cn } from '@/components/ui/cn'
+import { useTheme } from '@/hooks/useTheme'
 import { load3Dmol, type Mol3DAtom, type Mol3DViewer } from './viewerLoader'
 
 export type RenderMode = 'cartoon' | 'surface' | 'stick' | 'sphere'
@@ -76,6 +77,10 @@ export function ProteinViewer({
   onRetry,
 }: ProteinViewerProps) {
   const hostRef = useRef<HTMLDivElement>(null)
+  const { resolvedTheme } = useTheme()
+
+  const viewerBackground = () =>
+    getComputedStyle(document.documentElement).getPropertyValue('--theme-viewer-bg').trim() || '#050816'
   const viewerRef = useRef<Mol3DViewer | null>(null)
   const [engineError, setEngineError] = useState<Error | null>(null)
   const [engineReady, setEngineReady] = useState(false)
@@ -89,7 +94,7 @@ export function ProteinViewer({
       .then((mol) => {
         if (cancelled || !hostRef.current) return
         viewerRef.current = mol.createViewer(hostRef.current, {
-          backgroundColor: '#050816',
+          backgroundColor: viewerBackground(),
           antialias: true,
 brightness: 0.9,
         })
@@ -109,6 +114,14 @@ brightness: 0.9,
       viewerRef.current = null
     }
   }, [])
+
+  // Keep the WebGL viewport background in sync with the semantic theme.
+  useEffect(() => {
+    const viewer = viewerRef.current
+    if (!engineReady || !viewer) return
+    viewer.setBackgroundColor(viewerBackground())
+    viewer.render()
+  }, [engineReady, resolvedTheme])
 
   // --- apply styles -----------------------------------------------------
   const applyStyles = useCallback(

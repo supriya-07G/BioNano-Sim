@@ -10,10 +10,10 @@ import { fmtPercent } from '@/utils/formatters'
  * "in the worst quartile of what this model produces".
  */
 const BANDS: { max: number; level: RiskLevel; colour: string }[] = [
-  { max: 46.23, level: 'low', colour: '#22C55E' },
-  { max: 52.34, level: 'moderate', colour: '#38BDF8' },
-  { max: 58.91, level: 'elevated', colour: '#F59E0B' },
-  { max: 100, level: 'high', colour: '#EF4444' },
+  { max: 46.23, level: 'low', colour: 'rgb(var(--color-ok))' },
+  { max: 52.34, level: 'moderate', colour: 'rgb(var(--color-accent))' },
+  { max: 58.91, level: 'elevated', colour: 'rgb(var(--color-warn))' },
+  { max: 100, level: 'high', colour: 'rgb(var(--color-danger))' },
 ]
 
 /** Observed range of the model's target across the full mock dataset. */
@@ -37,7 +37,7 @@ export function RiskGauge({
   comparisonLabel,
 }: RiskGaugeProps) {
   const clamped = Math.max(0, Math.min(100, percent))
-  const colour = BANDS.find((band) => band.level === level)?.colour ?? '#38BDF8'
+  const colour = BANDS.find((band) => band.level === level)?.colour ?? 'rgb(var(--color-accent))'
 
   // Semicircular arc: 180 degrees mapped over 0..100 %.
   const radius = 68
@@ -105,7 +105,7 @@ export function RiskGauge({
               y1={cy - (radius - 9) * Math.sin(a)}
               x2={cx + (radius + 9) * Math.cos(a)}
               y2={cy - (radius + 9) * Math.sin(a)}
-              stroke="#64748B"
+              stroke="rgb(var(--color-ink-faint))"
               strokeWidth={1}
               strokeDasharray="2 2"
             />
@@ -120,7 +120,7 @@ export function RiskGauge({
               y1={cy - (radius - 14) * Math.sin(comparisonAngle)}
               x2={cx + (radius + 6) * Math.cos(comparisonAngle)}
               y2={cy - (radius + 6) * Math.sin(comparisonAngle)}
-              stroke="#8B5CF6"
+              stroke="rgb(var(--color-violet))"
               strokeWidth={2.5}
               strokeLinecap="round"
             />

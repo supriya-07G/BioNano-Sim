@@ -13,28 +13,28 @@ export default {
     extend: {
       colors: {
         // Grounds, darkest to lightest.
-        void: '#050816',      // page background
-        surface: '#0B1024',   // panels
-        elevated: '#111936',  // cards
-        raised: '#18213F',    // hover / nested cards
-        hairline: '#1E2A4A',  // borders
+        void: 'rgb(var(--color-void) / <alpha-value>)',
+        surface: 'rgb(var(--color-surface) / <alpha-value>)',
+        elevated: 'rgb(var(--color-elevated) / <alpha-value>)',
+        raised: 'rgb(var(--color-raised) / <alpha-value>)',
+        hairline: 'rgb(var(--color-hairline) / <alpha-value>)',
 
         accent: {
-          DEFAULT: '#38BDF8', // cyan
-          soft: '#7DD3FC',
-          deep: '#0EA5E9',
+          DEFAULT: 'rgb(var(--color-accent) / <alpha-value>)',
+          soft: 'rgb(var(--color-accent-soft) / <alpha-value>)',
+          deep: 'rgb(var(--color-accent-deep) / <alpha-value>)',
         },
-        electric: '#6366F1',
-        violet: '#8B5CF6',
+        electric: 'rgb(var(--color-electric) / <alpha-value>)',
+        violet: 'rgb(var(--color-violet) / <alpha-value>)',
 
-        ok: '#22C55E',
-        warn: '#F59E0B',
-        danger: '#EF4444',
+        ok: 'rgb(var(--color-ok) / <alpha-value>)',
+        warn: 'rgb(var(--color-warn) / <alpha-value>)',
+        danger: 'rgb(var(--color-danger) / <alpha-value>)',
 
         ink: {
-          DEFAULT: '#F8FAFC', // primary text
-          muted: '#94A3B8',   // secondary text
-          faint: '#64748B',   // tertiary / captions
+          DEFAULT: 'rgb(var(--color-ink) / <alpha-value>)',
+          muted: 'rgb(var(--color-ink-muted) / <alpha-value>)',
+          faint: 'rgb(var(--color-ink-faint) / <alpha-value>)',
         },
       },
       fontFamily: {
@@ -61,18 +61,18 @@ export default {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }],
       },
       boxShadow: {
-        panel: '0 1px 2px rgba(0,0,0,0.4), 0 8px 24px -12px rgba(0,0,0,0.6)',
-        'glow-accent': '0 0 0 1px rgba(56,189,248,0.28), 0 0 28px -8px rgba(56,189,248,0.32)',
-        'glow-violet': '0 0 0 1px rgba(139,92,246,0.28), 0 0 28px -8px rgba(139,92,246,0.30)',
-        inset: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+        panel: 'var(--shadow-panel)',
+        'glow-accent': '0 0 0 1px rgb(var(--color-accent) / 0.28), 0 0 28px -8px rgb(var(--color-accent) / 0.32)',
+        'glow-violet': '0 0 0 1px rgb(var(--color-violet) / 0.28), 0 0 28px -8px rgb(var(--color-violet) / 0.30)',
+        inset: 'var(--shadow-inset)',
       },
       backgroundImage: {
         'grid-fine':
-          'linear-gradient(rgba(56,189,248,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(56,189,248,0.055) 1px, transparent 1px)',
+          'linear-gradient(rgb(var(--color-grid) / 0.055) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--color-grid) / 0.055) 1px, transparent 1px)',
         'orbit-glow':
-          'radial-gradient(1100px 520px at 22% -12%, rgba(56,189,248,0.12), transparent 62%), radial-gradient(880px 420px at 88% 8%, rgba(139,92,246,0.11), transparent 60%)',
+          'radial-gradient(1100px 520px at 22% -12%, rgb(var(--color-grid) / 0.12), transparent 62%), radial-gradient(880px 420px at 88% 8%, rgb(var(--color-orbit) / 0.11), transparent 60%)',
         'hairline-b':
-          'linear-gradient(90deg, transparent, rgba(56,189,248,0.32), transparent)',
+          'linear-gradient(90deg, transparent, rgb(var(--color-grid) / 0.32), transparent)',
       },
       backgroundSize: { 'grid-fine': '44px 44px' },
       keyframes: {

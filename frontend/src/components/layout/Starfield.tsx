@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useTheme } from '@/hooks/useTheme'
 
 import { cn } from '@/components/ui/cn'
 
@@ -28,6 +29,7 @@ interface Star {
  */
 export function Starfield({ className, density = 0.00013, animated = true }: StarfieldProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const { resolvedTheme } = useTheme()
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -72,7 +74,7 @@ export function Starfield({ className, density = 0.00013, animated = true }: Sta
           ? star.alpha + Math.sin(frame * star.twinkle) * 0.12
           : star.alpha
         context.globalAlpha = Math.max(0.05, Math.min(0.78, pulse))
-        context.fillStyle = '#CBE9FF'
+        context.fillStyle = resolvedTheme === 'dark' ? '#CBE9FF' : '#0E7490'
         context.beginPath()
         context.arc(star.x, star.y, star.r, 0, Math.PI * 2)
         context.fill()
@@ -122,7 +124,7 @@ export function Starfield({ className, density = 0.00013, animated = true }: Sta
       observer.disconnect()
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [animated, density])
+  }, [animated, density, resolvedTheme])
 
   return (
     <canvas
@@ -145,9 +147,9 @@ export function OrbitLines({ className }: { className?: string }) {
     >
       <defs>
         <linearGradient id="orbit-stroke" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.24" />
-          <stop offset="55%" stopColor="#8B5CF6" stopOpacity="0.12" />
-          <stop offset="100%" stopColor="#38BDF8" stopOpacity="0" />
+          <stop offset="0%" stopColor="rgb(var(--color-accent))" stopOpacity="0.24" />
+          <stop offset="55%" stopColor="rgb(var(--color-violet))" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="rgb(var(--color-accent))" stopOpacity="0" />
         </linearGradient>
       </defs>
       <g stroke="url(#orbit-stroke)" strokeWidth="1">
@@ -161,8 +163,8 @@ export function OrbitLines({ className }: { className?: string }) {
           transform="rotate(-18 600 300)"
         />
       </g>
-      <circle cx="1080" cy="238" r="2.5" fill="#38BDF8" opacity="0.5" />
-      <circle cx="238" cy="392" r="2" fill="#8B5CF6" opacity="0.42" />
+      <circle cx="1080" cy="238" r="2.5" fill="rgb(var(--color-accent))" opacity="0.5" />
+      <circle cx="238" cy="392" r="2" fill="rgb(var(--color-violet))" opacity="0.42" />
     </svg>
   )
 }
