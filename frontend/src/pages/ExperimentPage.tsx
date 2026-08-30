@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Boxes, Eye, Layers, Palette } from 'lucide-react'
+import { Boxes, Eye, FileText, Layers, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Palette } from 'lucide-react'
 
 import { ErrorState } from '@/components/common/ErrorState'
 import { LoadingState } from '@/components/common/LoadingState'
@@ -9,6 +9,7 @@ import { ScientificNotice } from '@/components/common/ScientificNotice'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ExperimentSummary } from '@/components/experiment/ExperimentSummary'
 import { LabVariables } from '@/components/experiment/LabVariables'
+import { ScientificReportModal } from '@/components/experiment/ScientificReportModal'
 import { ControlGroup } from '@/components/ui/ControlGroup'
 import { ScenarioForm } from '@/components/experiment/ScenarioForm'
 import { PredictionCard } from '@/components/prediction/PredictionCard'
@@ -36,13 +37,6 @@ const COLOUR_MODES: { value: ColourMode; label: string }[] = [
   { value: 'element', label: 'Element' },
 ]
 
-/**
- * The experiment workspace: configuration, molecular viewport, prediction.
- *
- * Laid out as three columns that fill the viewport height so the 3D viewer needs
- * no page scrolling at 1366x768 — the left and right panels scroll
- * independently instead.
- */
 export function ExperimentPage() {
   const navigate = useNavigate()
   const { draft, setDraft, selectApprovedProtein, selectUpload, resetDraft, setLastJobId } =
@@ -51,6 +45,9 @@ export function ExperimentPage() {
   const [renderMode, setRenderMode] = useState<RenderMode>('cartoon')
   const [colourMode, setColourMode] = useState<ColourMode>('chain')
   const [selectedResidue, setSelectedResidue] = useState<string | null>(null)
+  const [leftPanelOpen, setLeftPanelOpen] = useState(true)
+  const [rightPanelOpen, setRightPanelOpen] = useState(true)
+  const [showReportModal, setShowReportModal] = useState(false)
 
   // --- data ------------------------------------------------------------
   const proteinsQuery = useQuery({
@@ -88,8 +85,6 @@ export function ExperimentPage() {
   )
   const preset = presetsQuery.data?.find((item) => item.preset_id === draft.presetId)
   const chains = detailQuery.data?.chains ?? []
-  // Memoised because `highlights` depends on it; a fresh [] each render would
-  // invalidate that memo on every pass.
   const candidates = useMemo(
     () => detailQuery.data?.candidate_residues ?? [],
     [detailQuery.data],
@@ -103,8 +98,6 @@ export function ExperimentPage() {
     return map
   }, [prediction.data])
 
-  // Highlight candidate residues, weighted by their predicted degradation so
-  // the viewport shows where the model thinks the damage concentrates.
   const highlights = useMemo(() => {
     const values = [...residuePredictions.values()].map((r) => r.degradation_percent)
     const min = values.length ? Math.min(...values) : 0
@@ -135,8 +128,6 @@ export function ExperimentPage() {
         ? 'The ML model is unavailable. Simulation still works.'
         : null
 
-  // The prediction must complete before the simulation starts, except for
-  // scenarios the model cannot score at all.
   const canSimulate =
     structureSelected &&
     !jobRunning &&
@@ -212,67 +203,95 @@ export function ExperimentPage() {
         />
       </div>
 
-      {/* Three-panel layout. Each panel scrolls on its own so the viewport
-          never forces the page to scroll. */}
-      <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[19rem_1fr_21rem] xl:grid-cols-[21rem_1fr_23rem]">
+      {/* Three-panel layout with dynamic collapse */}
+      <div className="flex min-h-0 flex-1 overflow-hidden transition-all duration-300">
         {/* Left: configuration */}
-        <section className="min-h-0 overflow-y-auto border-hairline p-3 lg:border-r">
-          <ScenarioForm
-            draft={draft}
-            proteins={proteinsQuery.data}
-            proteinsLoading={proteinsQuery.isLoading}
-            proteinsError={proteinsQuery.error}
-            scenarios={scenariosQuery.data?.scenarios ?? []}
-            doseUnits={scenariosQuery.data?.dose_units ?? []}
-            presets={presetsQuery.data}
-            chains={chains}
-            onDraftChange={(patch) => {
-              setDraft(patch)
-              // Any configuration change invalidates the previous estimate.
-              if (prediction.data || prediction.error) prediction.reset()
-            }}
-            onSelectApproved={(pdbId, chainId) => {
-              selectApprovedProtein(pdbId, chainId)
-              prediction.reset()
-              setSelectedResidue(null)
-            }}
-            onSelectUpload={handleUpload}
-            onClearUpload={() => {
-              selectApprovedProtein('1UBQ', 'A')
-              prediction.reset()
-            }}
-            onReset={() => {
-              resetDraft()
-              prediction.reset()
-              setSelectedResidue(null)
-            }}
-            onRetryProteins={() => void proteinsQuery.refetch()}
-            disabled={submitSimulation.isPending}
-          />
-        </section>
+        {leftPanelOpen && (
+          <section className="w-[21rem] shrink-0 min-h-0 overflow-y-auto border-r border-hairline p-3 transition-all duration-300">
+            <ScenarioForm
+              draft={draft}
+              proteins={proteinsQuery.data}
+              proteinsLoading={proteinsQuery.isLoading}
+              proteinsError={proteinsQuery.error}
+              scenarios={scenariosQuery.data?.scenarios ?? []}
+              doseUnits={scenariosQuery.data?.dose_units ?? []}
+              presets={presetsQuery.data}
+              chains={chains}
+              onDraftChange={(patch) => {
+                setDraft(patch)
+                if (prediction.data || prediction.error) prediction.reset()
+              }}
+              onSelectApproved={(pdbId, chainId) => {
+                selectApprovedProtein(pdbId, chainId)
+                prediction.reset()
+                setSelectedResidue(null)
+              }}
+              onSelectUpload={handleUpload}
+              onClearUpload={() => {
+                selectApprovedProtein('1UBQ', 'A')
+                prediction.reset()
+              }}
+              onReset={() => {
+                resetDraft()
+                prediction.reset()
+                setSelectedResidue(null)
+              }}
+              onRetryProteins={() => void proteinsQuery.refetch()}
+              disabled={submitSimulation.isPending}
+            />
+          </section>
+        )}
 
         {/* Centre: viewport */}
-        <section className="flex min-h-0 flex-col p-3">
+        <section className="flex min-h-0 flex-1 flex-col p-3 transition-all duration-300">
           {/* Viewer controls */}
-          <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2">
-            <ControlGroup
-              icon={Eye}
-              options={RENDER_MODES}
-              value={renderMode}
-              onChange={setRenderMode}
-            />
-            <ControlGroup
-              icon={Palette}
-              options={COLOUR_MODES}
-              value={colourMode}
-              onChange={setColourMode}
-            />
-            {highlights.length > 0 && (
-              <span className="badge border-accent/35 bg-accent/[0.08] text-accent">
-                <Layers className="h-3 w-3" aria-hidden />
-                {highlights.length} candidate residues
-              </span>
-            )}
+          <div className="mb-2 flex shrink-0 flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setLeftPanelOpen((prev) => !prev)}
+                title={leftPanelOpen ? 'Collapse Left Controls' : 'Expand Left Controls'}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-hairline bg-elevated text-ink hover:bg-raised transition-colors"
+              >
+                {leftPanelOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+              </button>
+
+              <ControlGroup
+                icon={Eye}
+                options={RENDER_MODES}
+                value={renderMode}
+                onChange={setRenderMode}
+              />
+              <ControlGroup
+                icon={Palette}
+                options={COLOUR_MODES}
+                value={colourMode}
+                onChange={setColourMode}
+              />
+              {highlights.length > 0 && (
+                <span className="badge border-accent/35 bg-accent/[0.08] text-accent">
+                  <Layers className="h-3 w-3" aria-hidden />
+                  {highlights.length} candidate residues
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/15 px-3 py-1.5 text-xs font-bold text-accent hover:bg-accent/25 transition-all shadow-sm"
+              >
+                <FileText className="h-4 w-4 text-accent" />
+                <span>Generate Scientific Report</span>
+              </button>
+
+              <button
+                onClick={() => setRightPanelOpen((prev) => !prev)}
+                title={rightPanelOpen ? 'Collapse Right Summary' : 'Expand Right Summary'}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-hairline bg-elevated text-ink hover:bg-raised transition-colors"
+              >
+                {rightPanelOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
 
           <div className="min-h-[18rem] flex-1">
@@ -324,68 +343,80 @@ export function ExperimentPage() {
         </section>
 
         {/* Right: prediction + summary */}
-        <section className="min-h-0 overflow-y-auto border-hairline p-3 lg:border-l">
-          <div className="space-y-4">
-            <PredictionCard
-              prediction={prediction.data}
-              model={modelQuery.data}
-              isPending={prediction.isPending}
-              error={prediction.error}
-              onPredict={runPrediction}
-              onRunSimulation={runSimulation}
-              canPredict={canPredict}
-              canSimulate={canSimulate}
-              predictBlockedReason={predictBlockedReason}
-              simulationBlockedReason={simulationBlockedReason}
-            />
-
-            {Boolean(submitSimulation.error) && (
-              <ErrorState
-                error={submitSimulation.error}
-                title="Could not start the simulation"
-                onRetry={runSimulation}
+        {rightPanelOpen && (
+          <section className="w-[23rem] shrink-0 min-h-0 overflow-y-auto border-l border-hairline p-3 transition-all duration-300">
+            <div className="space-y-4">
+              <PredictionCard
+                prediction={prediction.data}
+                model={modelQuery.data}
+                isPending={prediction.isPending}
+                error={prediction.error}
+                onPredict={runPrediction}
+                onRunSimulation={runSimulation}
+                canPredict={canPredict}
+                canSimulate={canSimulate}
+                predictBlockedReason={predictBlockedReason}
+                simulationBlockedReason={simulationBlockedReason}
               />
-            )}
 
-            <div className="hairline-divider" />
+              {Boolean(submitSimulation.error) && (
+                <ErrorState
+                  error={submitSimulation.error}
+                  title="Could not start the simulation"
+                  onRetry={runSimulation}
+                />
+              )}
 
-            <ExperimentSummary
-              draft={draft}
-              scenario={scenario}
-              preset={preset}
-              model={modelQuery.data}
-            />
+              <div className="hairline-divider" />
 
-            <div className="hairline-divider" />
+              <ExperimentSummary
+                draft={draft}
+                scenario={scenario}
+                preset={preset}
+                model={modelQuery.data}
+              />
 
-            {detailQuery.isLoading && <LoadingState compact label="Loading protein…" />}
-            {detailQuery.data && <ProteinSummary protein={detailQuery.data} />}
-            {draft.uploadId && (
-              <div className="flex items-start gap-2 rounded-lg border border-violet/30 bg-violet/[0.06] p-2.5">
-                <Boxes className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet" aria-hidden />
-                <p className="text-2xs leading-relaxed text-ink-muted">
-                  Custom structure <span className="font-mono">{draft.uploadFilename}</span>.
-                  Features are recomputed rather than read from the training reference
-                  table, so this estimate is less faithful than one for an approved
-                  protein.
-                </p>
-              </div>
-            )}
+              <div className="hairline-divider" />
 
-            <ScientificNotice
-              title="Before you read the number above"
-              variant="scientific"
-              compact
-              items={[
-                'The ML model is a mock public-data bootstrap model. Its labels are a synthetic proxy, not experimental measurements.',
-                'The model has no dose, duration, temperature or force input. Radiation reaches it only as a scenario category.',
-                'A protein-level percentage is aggregated by COSMORA from per-residue predictions over the most susceptible residues.',
-              ]}
-            />
-          </div>
-        </section>
+              {detailQuery.isLoading && <LoadingState compact label="Loading protein…" />}
+              {detailQuery.data && <ProteinSummary protein={detailQuery.data} />}
+              {draft.uploadId && (
+                <div className="flex items-start gap-2 rounded-lg border border-violet/30 bg-violet/[0.06] p-2.5">
+                  <Boxes className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet" aria-hidden />
+                  <p className="text-2xs leading-relaxed text-ink-muted">
+                    Custom structure <span className="font-mono">{draft.uploadFilename}</span>.
+                    Features are recomputed rather than read from the training reference
+                    table, so this estimate is less faithful than one for an approved
+                    protein.
+                  </p>
+                </div>
+              )}
+
+              <ScientificNotice
+                title="Before you read the number above"
+                variant="scientific"
+                compact
+                items={[
+                  'The ML model is a mock public-data bootstrap model. Its labels are a synthetic proxy, not experimental measurements.',
+                  'The model has no dose, duration, temperature or force input. Radiation reaches it only as a scenario category.',
+                  'A protein-level percentage is aggregated by COSMORA from per-residue predictions over the most susceptible residues.',
+                ]}
+              />
+            </div>
+          </section>
+        )}
       </div>
+
+      {/* Scientific Report Modal */}
+      <ScientificReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        protein={detailQuery.data}
+        prediction={prediction.data}
+        scenarioLabel={scenario?.label}
+        preset={preset}
+        temperatureK={draft.temperatureKelvin}
+      />
     </div>
   )
 }
-
