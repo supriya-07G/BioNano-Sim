@@ -1,5 +1,5 @@
 /**
- * BioNano-Sim design system.
+ * COSMORA design system.
  *
  * A space-research command centre, not a gaming dashboard: near-black navy
  * ground, fine borders, restrained cyan/violet illumination. Every surface

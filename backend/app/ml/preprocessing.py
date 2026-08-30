@@ -29,7 +29,7 @@ from app.core.exceptions import InvalidProteinError
 from app.core.logging import get_logger
 from app.ml.feature_schema import FeatureSchema
 
-logger = get_logger("bionano.ml.preprocessing")
+logger = get_logger("COSMORA.ml.preprocessing")
 
 CA_CONTACT_CUTOFF_ANGSTROM = 8.0
 SASA_PROBE_RADIUS = 1.40

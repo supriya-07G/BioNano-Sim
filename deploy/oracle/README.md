@@ -48,7 +48,7 @@ curl -fsSL https://get.docker.com | sudo sh && sudo usermod -aG docker $USER
 Log out and back in, then:
 
 ```bash
-git clone https://github.com/supriya-07G/BioNano-Sim.git && cd BioNano-Sim
+git clone https://github.com/supriya-07G/COSMORA.git && cd COSMORA
 docker compose -f deploy/oracle/docker-compose.yml up -d --build
 ```
 
@@ -77,7 +77,7 @@ default works. `uv` installs 3.11 without touching the system Python.
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh && exec $SHELL
-git clone https://github.com/supriya-07G/BioNano-Sim.git && cd BioNano-Sim
+git clone https://github.com/supriya-07G/COSMORA.git && cd COSMORA
 uv venv .venv311 --python 3.11
 uv pip install --python .venv311 -r backend/requirements.txt
 .venv311/bin/python scripts/setup_local.py
@@ -91,25 +91,25 @@ curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloud
 sudo install -m755 cloudflared /usr/local/bin/cloudflared
 ```
 
-Two systemd units. `/etc/systemd/system/bionano-api.service`:
+Two systemd units. `/etc/systemd/system/COSMORA-api.service`:
 
 ```ini
 [Unit]
-Description=BioNano-Sim API
+Description=COSMORA API
 After=network-online.target
 
 [Service]
 User=ubuntu
-WorkingDirectory=/home/ubuntu/BioNano-Sim
+WorkingDirectory=/home/ubuntu/COSMORA
 # --app-dir backend is required: every internal import is `from app.…` and
 # there is no backend/__init__.py, so `backend.app.main:app` fails with
 # ModuleNotFoundError.
-ExecStart=/home/ubuntu/BioNano-Sim/.venv311/bin/uvicorn app.main:app     --host 127.0.0.1 --port 8000 --app-dir backend
-Environment=BIONANO_CORS_ORIGINS=https://your-app.vercel.app
+ExecStart=/home/ubuntu/COSMORA/.venv311/bin/uvicorn app.main:app     --host 127.0.0.1 --port 8000 --app-dir backend
+Environment=COSMORA_CORS_ORIGINS=https://your-app.vercel.app
 Environment=OPENMM_CPU_THREADS=2
-Environment=BIONANO_MAX_CONCURRENT_JOBS=1
-Environment=BIONANO_MAX_PRODUCTION_STEPS=20000
-Environment=BIONANO_JOB_WALL_CLOCK_LIMIT_S=600
+Environment=COSMORA_MAX_CONCURRENT_JOBS=1
+Environment=COSMORA_MAX_PRODUCTION_STEPS=20000
+Environment=COSMORA_JOB_WALL_CLOCK_LIMIT_S=600
 Restart=always
 
 [Install]
@@ -119,13 +119,13 @@ WantedBy=multi-user.target
 Binding to `127.0.0.1` rather than `0.0.0.0` is deliberate: only the tunnel
 needs to reach it, so the API is never on the VM's public interface.
 
-`/etc/systemd/system/bionano-tunnel.service`:
+`/etc/systemd/system/COSMORA-tunnel.service`:
 
 ```ini
 [Unit]
-Description=Cloudflare tunnel for BioNano-Sim
-After=bionano-api.service
-Requires=bionano-api.service
+Description=Cloudflare tunnel for COSMORA
+After=COSMORA-api.service
+Requires=COSMORA-api.service
 
 [Service]
 User=ubuntu
@@ -138,8 +138,8 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now bionano-api bionano-tunnel
-sudo journalctl -u bionano-tunnel | grep trycloudflare   # your HTTPS URL
+sudo systemctl enable --now COSMORA-api COSMORA-tunnel
+sudo journalctl -u COSMORA-tunnel | grep trycloudflare   # your HTTPS URL
 ```
 
 ### Which one
@@ -242,13 +242,13 @@ Add under **Settings -> Secrets and variables -> Actions**:
 | Secret | `VM_SSH_KEY` | the VM's private key, whole file including the BEGIN/END lines |
 | Variable | `VM_HOST` | the VM's public IP |
 | Variable | `VM_USER` | `ubuntu` |
-| Variable | `VM_APP_DIR` | `/home/ubuntu/BioNano-Sim` |
+| Variable | `VM_APP_DIR` | `/home/ubuntu/COSMORA` |
 | Variable | `VM_DEPLOY_MODE` | `docker` or `systemd` (defaults to `systemd`) |
 
 The VM user needs to restart the service without a password prompt:
 
 ```bash
-echo "ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl restart bionano-api, /bin/systemctl is-active bionano-api, /usr/bin/journalctl -u bionano-api *" | sudo tee /etc/sudoers.d/bionano
+echo "ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl restart COSMORA-api, /bin/systemctl is-active COSMORA-api, /usr/bin/journalctl -u COSMORA-api *" | sudo tee /etc/sudoers.d/COSMORA
 ```
 
 What the workflow does, and why:
@@ -267,7 +267,7 @@ What the workflow does, and why:
   verification.
 
 Note this deploys the **backend only**. The tunnel is unaffected -- it keeps
-running and its URL does not change, because only `bionano-api` restarts.
+running and its URL does not change, because only `COSMORA-api` restarts.
 
 ## A fixed hostname instead of a random one
 
@@ -284,7 +284,7 @@ permanent hostname:
 ExecStart=/usr/local/bin/cloudflared tunnel --no-autoupdate run --token <TOKEN>
 ```
 
-in `bionano-tunnel.service`, then `sudo systemctl daemon-reload && sudo systemctl restart bionano-tunnel`.
+in `COSMORA-tunnel.service`, then `sudo systemctl daemon-reload && sudo systemctl restart COSMORA-tunnel`.
 
 4. Route the hostname to `http://127.0.0.1:8000` in the Cloudflare dashboard.
 
@@ -301,9 +301,9 @@ docker compose -f deploy/oracle/docker-compose.yml exec backend python scripts/c
 **systemd:**
 
 ```bash
-sudo journalctl -u bionano-api -f
-sudo systemctl restart bionano-api
-cd ~/BioNano-Sim && .venv311/bin/python scripts/cleanup_runtime.py
+sudo journalctl -u COSMORA-api -f
+sudo systemctl restart COSMORA-api
+cd ~/COSMORA && .venv311/bin/python scripts/cleanup_runtime.py
 ```
 
 Add `--apply` to the cleanup command to actually delete; it previews by
@@ -324,11 +324,11 @@ curl -s https://<your-host>/api/v1/system/diagnostics | python3 -m json.tool
 
 | Variable | Value | Why |
 |---|---|---|
-| `BIONANO_MAX_CONCURRENT_JOBS` | 1 | one OCPU is not four |
-| `BIONANO_MAX_PRODUCTION_STEPS` | 20,000 | bounds a single request's cost |
-| `BIONANO_JOB_WALL_CLOCK_LIMIT_S` | 600 | fail visibly rather than hang |
+| `COSMORA_MAX_CONCURRENT_JOBS` | 1 | one OCPU is not four |
+| `COSMORA_MAX_PRODUCTION_STEPS` | 20,000 | bounds a single request's cost |
+| `COSMORA_JOB_WALL_CLOCK_LIMIT_S` | 600 | fail visibly rather than hang |
 | `OPENMM_CPU_THREADS` | 2 | leaves headroom for the API to stay responsive |
-| `BIONANO_RUNTIME_QUOTA_BYTES` | 8 GiB | jobs are refused before the disk fills |
+| `COSMORA_RUNTIME_QUOTA_BYTES` | 8 GiB | jobs are refused before the disk fills |
 
 ## What was verified before writing this
 

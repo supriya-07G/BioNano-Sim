@@ -1,4 +1,4 @@
-# Development / test dependencies for the BioNano-Sim backend.
+# Development / test dependencies for the COSMORA backend.
 -r requirements.txt
 
 pytest==8.3.4

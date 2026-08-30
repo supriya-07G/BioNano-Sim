@@ -54,7 +54,7 @@ def readiness() -> ReadinessResponse:
             "remediation": (
                 None
                 if model["available"]
-                else "Confirm models/bionano_mock_model_bundle.pkl exists, then run "
+                else "Confirm models/COSMORA_mock_model_bundle.pkl exists, then run "
                      "python scripts/validate_model.py"
             ),
         }

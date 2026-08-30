@@ -1,4 +1,4 @@
-# Deploying BioNano-Sim
+# Deploying COSMORA
 
 Three ways to show this app, in increasing order of effort. Pick the cheapest
 one that meets the need.
@@ -140,16 +140,16 @@ The two things that silently break this setup are worth repeating here:
 
 ## Configuration
 
-Every setting is an environment variable with a `BIONANO_` prefix.
+Every setting is an environment variable with a `COSMORA_` prefix.
 
 | Variable | Default | Purpose |
 |---|---|---|
-| `BIONANO_CORS_ORIGINS` | localhost dev ports | comma-separated origins allowed to call the API |
-| `BIONANO_RUNTIME_DIR` | `<repo>/runtime` | where jobs, uploads and reports are written |
-| `BIONANO_MAX_CONCURRENT_JOBS` | 1 | simultaneous simulations |
-| `BIONANO_MAX_PRODUCTION_STEPS` | 50,000 | ceiling on a single run |
-| `BIONANO_JOB_WALL_CLOCK_LIMIT_S` | 900 | fail visibly rather than hang |
-| `BIONANO_RUNTIME_QUOTA_BYTES` | 8 GiB | storage ceiling before jobs are refused |
-| `BIONANO_MIN_FREE_DISK_BYTES` | 2 GiB | refuse to start below this |
+| `COSMORA_CORS_ORIGINS` | localhost dev ports | comma-separated origins allowed to call the API |
+| `COSMORA_RUNTIME_DIR` | `<repo>/runtime` | where jobs, uploads and reports are written |
+| `COSMORA_MAX_CONCURRENT_JOBS` | 1 | simultaneous simulations |
+| `COSMORA_MAX_PRODUCTION_STEPS` | 50,000 | ceiling on a single run |
+| `COSMORA_JOB_WALL_CLOCK_LIMIT_S` | 900 | fail visibly rather than hang |
+| `COSMORA_RUNTIME_QUOTA_BYTES` | 8 GiB | storage ceiling before jobs are refused |
+| `COSMORA_MIN_FREE_DISK_BYTES` | 2 GiB | refuse to start below this |
 | `VITE_API_BASE_URL` | empty (same origin) | backend origin for the frontend build |
 | `VITE_ALLOWED_HOSTS` | — | extra hostnames the dev server accepts |

@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=(REPO_ROOT / "backend" / ".env"),
-        env_prefix="BIONANO_",
+        env_prefix="COSMORA_",
         extra="ignore",
         # `model_` is a Pydantic-reserved prefix; we use model_* field names
         # deliberately (they describe the ML model, not the pydantic model).
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     )
 
     # --- Identity -----------------------------------------------------------
-    app_name: str = "BioNano-Sim"
+    app_name: str = "COSMORA"
     api_prefix: str = "/api/v1"
     version: str = "0.1.0"
 
@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     # file downloads and accepts uploads.
     # NoDecode is required, not cosmetic. pydantic-settings JSON-decodes any
     # complex-typed field from the environment *before* validators run, so
-    # BIONANO_CORS_ORIGINS="https://a.com,https://b.com" raised SettingsError
+    # COSMORA_CORS_ORIGINS="https://a.com,https://b.com" raised SettingsError
     # and the app failed to boot -- the _split_origins validator below never
     # got the chance to run. This matters for any deployment that serves the
     # frontend from a different origin than the API.
@@ -128,7 +128,7 @@ class Settings(BaseSettings):
 
     @property
     def model_bundle_path(self) -> Path:
-        return self.models_dir / "bionano_mock_model_bundle.pkl"
+        return self.models_dir / "COSMORA_mock_model_bundle.pkl"
 
     @property
     def model_metadata_path(self) -> Path:

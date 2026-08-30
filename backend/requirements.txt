@@ -1,7 +1,7 @@
-# BioNano-Sim backend runtime dependencies
+# COSMORA backend runtime dependencies
 #
 # Version pins are deliberate. The shipped ML bundle
-# (models/bionano_mock_model_bundle.pkl) was serialised by joblib under
+# (models/COSMORA_mock_model_bundle.pkl) was serialised by joblib under
 # scikit-learn 1.7.1 with a NumPy 2.x memory layout (the pickle references
 # `numpy._core.multiarray`, which only exists on NumPy >= 2.0).
 #

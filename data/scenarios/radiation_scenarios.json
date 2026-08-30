@@ -1,7 +1,7 @@
 {
   "_provenance": {
     "status": "CONFIGURABLE_DEMONSTRATION_PRESETS",
-    "statement": "These are configurable demonstration presets for the BioNano-Sim MVP. The dose, duration and temperature values are illustrative order-of-magnitude placeholders chosen so the interface has sensible defaults. They are NOT authoritative NASA, ESA or ICRP reference values and must not be cited as measured mission environments.",
+    "statement": "These are configurable demonstration presets for the COSMORA MVP. The dose, duration and temperature values are illustrative order-of-magnitude placeholders chosen so the interface has sensible defaults. They are NOT authoritative NASA, ESA or ICRP reference values and must not be cited as measured mission environments.",
     "ml_coupling": "The ML bundle consumes only the categorical fields scenario_id, radiation_class and environment. It has no dose, duration, temperature or force input, so changing the numeric values below does NOT change the ML degradation estimate. Numeric values drive the OpenMM simulation temperature and the radiation-damage parameterisation only.",
     "trained_scenarios": [
       "GCR_DEEP_SPACE_REFERENCE",

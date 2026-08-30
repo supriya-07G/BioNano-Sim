@@ -68,7 +68,7 @@ def main() -> int:
     import numpy as np
     import pandas as pd
 
-    print("BioNano-Sim model validation")
+    print("COSMORA model validation")
     print("=" * 74)
 
     # --- environment ----------------------------------------------------
@@ -93,7 +93,7 @@ def main() -> int:
 
     # --- integrity ------------------------------------------------------
     print("\n[2] Bundle integrity")
-    bundle_path = REPO / "models" / "bionano_mock_model_bundle.pkl"
+    bundle_path = REPO / "models" / "COSMORA_mock_model_bundle.pkl"
     if not check(bundle_path.exists(), "bundle file present", str(bundle_path)):
         return 1
     digest = hashlib.sha256(bundle_path.read_bytes()).hexdigest()

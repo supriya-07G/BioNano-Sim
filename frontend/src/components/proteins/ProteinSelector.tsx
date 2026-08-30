@@ -184,7 +184,7 @@ export function ProteinSelector({
         <Tooltip
           content={
             <span>
-              Uploaded structures are validated then featurised by BioNano-Sim&rsquo;s
+              Uploaded structures are validated then featurised by COSMORA&rsquo;s
               own extractor. One feature (<code>residue_sasa_norm</code>) correlates
               r&nbsp;=&nbsp;0.93&ndash;0.99 with the table the model was trained on but
               is not identical, so upload estimates are less faithful than those for

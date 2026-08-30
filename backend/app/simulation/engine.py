@@ -38,7 +38,7 @@ from app.simulation.pulling import (
 )
 from app.utils.files import write_csv
 
-logger = get_logger("bionano.simulation.engine")
+logger = get_logger("COSMORA.simulation.engine")
 
 # Steps per publish. Small enough that the UI updates ~10x/s at demo scale,
 # large enough that context switching does not dominate runtime.
@@ -140,7 +140,7 @@ def load_trajectory(
         return np.asarray(traj.xyz, dtype=float), f"mdtraj {mdtraj.__version__}"
     except Exception as exc:  # noqa: BLE001
         logger.info("MDTraj unavailable or failed (%s); using built-in DCD reader.", exc)
-        return read_dcd(dcd_path), "bionano-builtin-dcd"
+        return read_dcd(dcd_path), "COSMORA-builtin-dcd"
 
 
 # --------------------------------------------------------------------------- #

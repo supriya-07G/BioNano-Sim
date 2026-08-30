@@ -1,8 +1,8 @@
 {
-  "model_name": "BioNano-Sim Real Simulation Model",
+  "model_name": "COSMORA Real Simulation Model",
   "model_version": "1.0.0-real",
   "scientific_status": "REAL_PAIRED_SIMULATION_LABELS",
-  "label_source": "BIONANO_PAIRED_STEERED_MD",
+  "label_source": "COSMORA_PAIRED_STEERED_MD",
   "scientifically_validated": false,
   "validation_criteria": {
     "min_labels": 30,

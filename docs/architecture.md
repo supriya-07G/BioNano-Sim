@@ -139,7 +139,7 @@ In-memory state holds only the cancel flags for live jobs.
 
 Capped at one. This is a real constraint, not a placeholder: OpenMM runs are
 CPU- or GPU-bound, and two concurrent jobs on one device finish later than two
-run in sequence. Raising `BIONANO_MAX_CONCURRENT_JOBS` enlarges the thread pool
+run in sequence. Raising `COSMORA_MAX_CONCURRENT_JOBS` enlarges the thread pool
 but does not add a queue — a second submission is rejected with `409
 CONCURRENCY_LIMIT`. Supporting real concurrency means adding a queue with
 admission control, which is deliberately out of MVP scope.
@@ -213,7 +213,7 @@ One envelope for every failure:
 {"error": {"code": "...", "message": "...", "details": [], "request_id": "uuid"}}
 ```
 
-Four handlers in `main.py` cover `BioNanoError`, Starlette HTTP exceptions,
+Four handlers in `main.py` cover `COSMORAError`, Starlette HTTP exceptions,
 pydantic validation errors (flattened into `details` with field names) and a
 last-resort handler that logs the traceback and returns a generic message.
 

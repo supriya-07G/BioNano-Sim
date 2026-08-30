@@ -66,7 +66,7 @@ export function SimulationConsole({
           )}
           <a
             href={downloadUrl(`/simulations/${jobId}/log`)}
-            download={`bionano-${jobId.slice(0, 8)}.log`}
+            download={`COSMORA-${jobId.slice(0, 8)}.log`}
             className="btn-ghost !px-2 !py-1 !text-2xs"
           >
             <Download className="h-3 w-3" aria-hidden />

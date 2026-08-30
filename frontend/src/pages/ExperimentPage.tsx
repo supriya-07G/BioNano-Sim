@@ -285,7 +285,7 @@ export function ExperimentPage() {
               onResidueClick={(residue) =>
                 setSelectedResidue(`${residue.chainId}:${residue.seqNum}`)
               }
-              screenshotName={`bionano-${draft.pdbId ?? 'upload'}-${draft.chainId}`}
+              screenshotName={`COSMORA-${draft.pdbId ?? 'upload'}-${draft.chainId}`}
               onRetry={() => void structureQuery.refetch()}
             />
           </div>
@@ -357,7 +357,7 @@ export function ExperimentPage() {
               items={[
                 'The ML model is a mock public-data bootstrap model. Its labels are a synthetic proxy, not experimental measurements.',
                 'The model has no dose, duration, temperature or force input. Radiation reaches it only as a scenario category.',
-                'A protein-level percentage is aggregated by BioNano-Sim from per-residue predictions over the most susceptible residues.',
+                'A protein-level percentage is aggregated by COSMORA from per-residue predictions over the most susceptible residues.',
               ]}
             />
           </div>

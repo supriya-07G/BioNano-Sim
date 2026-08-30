@@ -437,7 +437,7 @@ function ViewerPanel({
           isLoading={isLoading}
           error={error}
           onRetry={onRetry}
-          screenshotName={`bionano-${name}`}
+          screenshotName={`COSMORA-${name}`}
           mode="cartoon"
           colourMode="chain"
         />

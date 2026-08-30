@@ -25,7 +25,7 @@ from app.ml.preprocessing import (
     rank_candidate_residues,
 )
 
-logger = get_logger("bionano.services.protein")
+logger = get_logger("COSMORA.services.protein")
 
 RAPID_DEMO_DEFAULT = "1UBQ"
 
@@ -396,7 +396,7 @@ def validate_and_store_upload(
             f"Non-standard HETATM groups present and ignored: {', '.join(hetero[:8])}."
         )
     warnings.append(
-        "Features for uploaded structures are recomputed by the BioNano-Sim "
+        "Features for uploaded structures are recomputed by the COSMORA "
         "extractor. 'residue_sasa_norm' correlates r = 0.93-0.99 with the table the "
         "model was trained on but is not identical, so estimates are less faithful "
         "than for the five approved proteins."

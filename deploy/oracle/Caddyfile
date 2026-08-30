@@ -25,11 +25,11 @@
 	encode zstd gzip
 
 	# CORS is handled by the application, which knows the allowed origins from
-	# BIONANO_CORS_ORIGINS. Setting the headers here as well would send them
+	# COSMORA_CORS_ORIGINS. Setting the headers here as well would send them
 	# twice and browsers reject a duplicated allow-origin.
 
 	log {
-		output file /var/log/caddy/bionano.log
+		output file /var/log/caddy/COSMORA.log
 		level INFO
 	}
 }

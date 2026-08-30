@@ -49,7 +49,7 @@ export function ConfidencePanel({
           </p>
           <p className="mt-1 text-2xs leading-relaxed text-ink-faint">
             This model has no <code>predict_proba</code>, no quantile heads and no
-            calibrated interval, so BioNano-Sim reports <code>null</code> rather than
+            calibrated interval, so COSMORA reports <code>null</code> rather than
             fabricating a figure.
           </p>
         </div>

@@ -15,7 +15,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
-class BioNanoError(Exception):
+class COSMORAError(Exception):
     """Base class for every deliberate application error.
 
     ``code`` is a stable machine-readable identifier the frontend switches on;
@@ -42,17 +42,17 @@ class BioNanoError(Exception):
             self.http_status = http_status
 
 
-class NotFoundError(BioNanoError):
+class NotFoundError(COSMORAError):
     code = "NOT_FOUND"
     http_status = status.HTTP_404_NOT_FOUND
 
 
-class ValidationFailedError(BioNanoError):
+class ValidationFailedError(COSMORAError):
     code = "VALIDATION_FAILED"
     http_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-class ModelUnavailableError(BioNanoError):
+class ModelUnavailableError(COSMORAError):
     """The ML bundle could not be loaded, so predictions cannot be served.
 
     Returned as 503 rather than 500: the rest of the API keeps working and the
@@ -63,41 +63,41 @@ class ModelUnavailableError(BioNanoError):
     http_status = status.HTTP_503_SERVICE_UNAVAILABLE
 
 
-class PredictionError(BioNanoError):
+class PredictionError(COSMORAError):
     code = "PREDICTION_FAILED"
     http_status = status.HTTP_400_BAD_REQUEST
 
 
-class InvalidProteinError(BioNanoError):
+class InvalidProteinError(COSMORAError):
     code = "INVALID_PROTEIN_FILE"
     http_status = status.HTTP_400_BAD_REQUEST
 
 
-class InvalidSimulationInputError(BioNanoError):
+class InvalidSimulationInputError(COSMORAError):
     code = "INVALID_SIMULATION_INPUT"
     http_status = status.HTTP_400_BAD_REQUEST
 
 
-class SimulationEngineUnavailableError(BioNanoError):
+class SimulationEngineUnavailableError(COSMORAError):
     """OpenMM is missing or unusable on this machine."""
 
     code = "SIMULATION_ENGINE_UNAVAILABLE"
     http_status = status.HTTP_503_SERVICE_UNAVAILABLE
 
 
-class JobConflictError(BioNanoError):
+class JobConflictError(COSMORAError):
     """Concurrency limit reached, or an illegal state transition was requested."""
 
     code = "JOB_CONFLICT"
     http_status = status.HTTP_409_CONFLICT
 
 
-class UnsafePathError(BioNanoError):
+class UnsafePathError(COSMORAError):
     code = "UNSAFE_PATH"
     http_status = status.HTTP_400_BAD_REQUEST
 
 
-class InsufficientStorageError(BioNanoError):
+class InsufficientStorageError(COSMORAError):
     """Not enough disk or quota headroom to start a job (issue #26).
 
     Raised at submission rather than mid-run: a rejected submission is an
@@ -132,7 +132,7 @@ def _request_id(request: Request) -> str:
     return getattr(request.state, "request_id", "unknown")
 
 
-async def bionano_exception_handler(request: Request, exc: BioNanoError) -> JSONResponse:
+async def COSMORA_exception_handler(request: Request, exc: COSMORAError) -> JSONResponse:
     return JSONResponse(
         status_code=exc.http_status,
         content=error_body(exc.code, exc.message, _request_id(request), exc.details),
@@ -180,7 +180,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     """Last resort. The message stays generic; the traceback goes to the log."""
     from app.core.logging import get_logger
 
-    get_logger("bionano.unhandled").exception(
+    get_logger("COSMORA.unhandled").exception(
         "Unhandled exception on %s %s", request.method, request.url.path
     )
     return JSONResponse(

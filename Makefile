@@ -1,4 +1,4 @@
-# BioNano-Sim developer commands.
+# COSMORA developer commands.
 #
 # Works on Windows (Git Bash / MSYS), Linux and macOS. On Windows the venv's
 # interpreter lives in Scripts/ rather than bin/, so PY is resolved per-OS.
@@ -18,7 +18,7 @@ endif
         typecheck build clean clean-all
 
 help: ## Show this help
-	@echo "BioNano-Sim — available commands"
+	@echo "COSMORA — available commands"
 	@echo
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'

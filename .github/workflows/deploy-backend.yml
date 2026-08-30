@@ -11,7 +11,7 @@ name: deploy-backend
 #   Secrets   -> VM_SSH_KEY    the private key for the VM (whole file, BEGIN..END)
 #   Variables -> VM_HOST       the VM's public IP or hostname
 #   Variables -> VM_USER       usually 'ubuntu'
-#   Variables -> VM_APP_DIR    e.g. /home/ubuntu/BioNano-Sim
+#   Variables -> VM_APP_DIR    e.g. /home/ubuntu/COSMORA
 #   Variables -> VM_DEPLOY_MODE  'docker' or 'systemd' (default: systemd)
 
 on:
@@ -102,11 +102,11 @@ jobs:
             .venv311/bin/python scripts/setup_local.py
             .venv311/bin/python scripts/validate_model.py
 
-            sudo systemctl restart bionano-api
+            sudo systemctl restart COSMORA-api
             sleep 5
-            systemctl is-active --quiet bionano-api || {
-              echo "::error::bionano-api failed to come back up"
-              sudo journalctl -u bionano-api -n 40 --no-pager
+            systemctl is-active --quiet COSMORA-api || {
+              echo "::error::COSMORA-api failed to come back up"
+              sudo journalctl -u COSMORA-api -n 40 --no-pager
               exit 1
             }
           fi

@@ -5,7 +5,7 @@
   "collected": false,
   "usage_rules": [
     "These values are PROVENANCE METADATA. They must not be used as model features.",
-    "Nothing in the BioNano-Sim simulation consumes dose, LET or fluence. The damage proxy is a structural side-chain truncation whose severity is a count of removed side chains, not a function of exposure. Two scenarios therefore produce byte-identical physics and differ only by this label.",
+    "Nothing in the COSMORA simulation consumes dose, LET or fluence. The damage proxy is a structural side-chain truncation whose severity is a count of removed side chains, not a function of exposure. Two scenarios therefore produce byte-identical physics and differ only by this label.",
     "Joining these values onto training rows as features would be harmful, not merely useless: within a scenario the value is constant (zero variance), and across scenarios the target does not respond, so a model would fit a spurious mapping from a constant-per-group label onto label noise and report misleading feature importance.",
     "A dose value may only become a feature once a documented, citable dose -> side-chain-damage-yield relationship exists (dataset source 4, peer-reviewed literature). That mapping must be recorded in 'damage_coupling' below, with citations, before any scenario field is used in training.",
     "Leave a field null until it is verified against a named reference. Do not substitute the demonstration presets in radiation_scenarios.json: those are marked CONFIGURABLE_DEMONSTRATION_PRESETS and are explicitly not NASA, ESA or ICRP values (see docs/scientific-scope.md)."

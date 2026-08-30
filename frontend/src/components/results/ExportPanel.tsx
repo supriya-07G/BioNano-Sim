@@ -25,7 +25,7 @@ export function ExportPanel({
       icon: Braces,
       label: 'Experiment report (JSON)',
       href: `/reports/${jobId}.json`,
-      filename: `bionano-sim-${short}.json`,
+      filename: `COSMORA-${short}.json`,
       help:
         'The complete record: scientific notice, protein and scenario provenance, ' +
         'ML prediction with its caveats, every simulation metric, all time series, ' +
@@ -35,7 +35,7 @@ export function ExportPanel({
       icon: FileSpreadsheet,
       label: 'Experiment report (CSV)',
       href: `/reports/${jobId}.csv`,
-      filename: `bionano-sim-${short}.csv`,
+      filename: `COSMORA-${short}.csv`,
       help:
         'The same content flattened to section/key/value rows, so it opens cleanly ' +
         'in a spreadsheet. A UTF-8 byte-order mark is included so Excel on Windows ' +

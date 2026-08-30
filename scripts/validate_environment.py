@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Check that this machine can run BioNano-Sim, and say precisely what is missing.
+"""Check that this machine can run COSMORA, and say precisely what is missing.
 
     python scripts/validate_environment.py
 """
@@ -35,7 +35,7 @@ REQUIRED = [
 OPTIONAL = [("mdtraj", "trajectory analysis (a built-in reader is used if absent)")]
 
 DATA_FILES = [
-    "models/bionano_mock_model_bundle.pkl",
+    "models/COSMORA_mock_model_bundle.pkl",
     "models/model_metadata.json",
     "models/feature_schema.json",
     "models/release_manifest.json",
@@ -51,7 +51,7 @@ notes: list[str] = []
 
 
 def main() -> int:
-    print("BioNano-Sim environment check")
+    print("COSMORA environment check")
     print("=" * 70)
 
     print(f"\nPython {sys.version.split()[0]}  ({sys.executable})")

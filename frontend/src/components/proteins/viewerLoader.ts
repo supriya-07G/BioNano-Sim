@@ -62,7 +62,7 @@ declare global {
   }
 }
 
-const SCRIPT_ID = 'bionano-3dmol'
+const SCRIPT_ID = 'COSMORA-3dmol'
 const SCRIPT_SRC = '/vendor/3Dmol-min.js'
 const FALLBACK_SCRIPT_SRC = 'https://3dmol.org/build/3Dmol-min.js'
 

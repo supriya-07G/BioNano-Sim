@@ -1,6 +1,6 @@
 # Scientific claims checklist
 
-Every claim BioNano-Sim makes — in the README, the dashboard, or a presentation
+Every claim COSMORA makes — in the README, the dashboard, or a presentation
 — against the artifact that supports it and the limitation that qualifies it.
 Run this before any tagged demo release (issue #27).
 
@@ -21,7 +21,7 @@ not stated where the claim appears does not ship either.
 | Measures stiffness in pN/nm | `force_extension.csv`, contract enforces `stiffness_unit` | An apparent stiffness from a non-equilibrium pull, not an equilibrium elastic modulus. |
 | Discriminates load-bearing folds | [RESULTS.md §2](RESULTS.md) — 4 of 13 register, r² 0.52–0.82, others 0% QC | 13 proteins. 1TEN is a known false negative. |
 | Damage is a structural proxy | `app/simulation/damage.py`, `PROXY_TYPE = SIDE_CHAIN_LOSS`, 17 tests | Side-chain truncation to ALA. Not radiation chemistry. |
-| ML model trained on real simulation labels | `models/bionano_real_model_bundle.pkl`, `scripts/rebuild_real_bundle.py` | `scientifically_validated: false`. R² −0.004, does not beat the mean. Three unmet criteria recorded in the bundle. |
+| ML model trained on real simulation labels | `models/COSMORA_real_model_bundle.pkl`, `scripts/rebuild_real_bundle.py` | `scientifically_validated: false`. R² −0.004, does not beat the mean. Three unmet criteria recorded in the bundle. |
 | Dataset is validated | `scripts/validate_dataset.py`, run in CI; 520 rows | Two provenance columns absent (documented producer gap). |
 | Reproducible | `sim_config_hash`, seeded, `deterministic` mode pins CPU to 1 thread | Bit-reproducibility verified on CPU only, not across platforms. |
 

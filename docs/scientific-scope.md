@@ -1,6 +1,6 @@
 # Scientific scope
 
-## 1. The question BioNano-Sim addresses
+## 1. The question COSMORA addresses
 
 Deep-space missions expose hardware to galactic cosmic rays and solar energetic
 particles for months at a time. If protein-based components are ever to serve as
@@ -8,18 +8,18 @@ nanoscale mechanical elements out there — molecular springs, switches, sensors
 structural members — someone has to be able to ask *which candidate domains hold
 up, and under what conditions*, long before a wet-lab campaign is affordable.
 
-BioNano-Sim is a computational triage bench for that question. It pairs a fast
+COSMORA is a computational triage bench for that question. It pairs a fast
 machine-learning estimate with a real physics simulation, keeps the two
 rigorously labelled, and exports a reproducible record of both.
 
 The value is not that either number is authoritative — neither is — but that the
 pipeline is honest enough to build on.
 
-## 2. What BioNano-Sim is not about
+## 2. What COSMORA is not about
 
 **Proteins are not a silicon replacement.** Proteins and silicon are separate
 technologies with different failure modes, operating envelopes and fabrication
-routes. BioNano-Sim makes no claim about protein-based computation, logic or
+routes. COSMORA makes no claim about protein-based computation, logic or
 electronics.
 
 The scope is narrower and more defensible: whether selected proteins could act
@@ -129,8 +129,8 @@ where a number is read:
 | --- | --- | --- |
 | PDB coordinates | RCSB PDB (`files.rcsb.org`) | CC0 1.0 Universal |
 | `public_residue_features.csv` | Shipped with the model release | Derived from public structural data |
-| `bionano_mock_experiments_v1.csv` | Shipped with the model release | `SYNTHETIC_PUBLIC_DATA_PROXY` labels |
-| `bionano_mock_model_bundle.pkl` | Shipped with the model release | `MOCK_PUBLIC_DATA_BOOTSTRAP` |
+| `COSMORA_mock_experiments_v1.csv` | Shipped with the model release | `SYNTHETIC_PUBLIC_DATA_PROXY` labels |
+| `COSMORA_mock_model_bundle.pkl` | Shipped with the model release | `MOCK_PUBLIC_DATA_BOOTSTRAP` |
 
 The training CSVs, splits and evaluation reports are committed deliberately: they
 are what makes the model's predictions reproducible and auditable.

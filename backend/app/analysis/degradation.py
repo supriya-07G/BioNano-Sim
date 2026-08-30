@@ -50,7 +50,7 @@ PROXY_FORMULA = (
 PROXY_LABEL = "Simulation-derived degradation proxy"
 
 PROXY_CAVEATS = [
-    "This is a structural-drift score computed by BioNano-Sim from the "
+    "This is a structural-drift score computed by COSMORA from the "
     "trajectory. It is NOT experimentally measured degradation and NOT a "
     "radiation-damage yield.",
     "The reference scales (RMSD 0.60 nm, ΔRg 25 %, RMSF 0.35 nm) are engineering "

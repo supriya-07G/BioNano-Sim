@@ -2,7 +2,7 @@
 
 | File | Purpose |
 | --- | --- |
-| `bionano_mock_model_bundle.pkl` | The ML bundle. joblib + zlib, 56,267 bytes. |
+| `COSMORA_mock_model_bundle.pkl` | The ML bundle. joblib + zlib, 56,267 bytes. |
 | `model_metadata.json` | Shipped metadata: version, status, features, metrics, splits. |
 | `release_manifest.json` | SHA-256 of the bundle, checked at load time. |
 | `feature_schema.json` | **Generated.** Do not hand-edit. |

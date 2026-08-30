@@ -20,7 +20,7 @@ import { usePresets } from '@/hooks/useSimulation'
 import { fmtNumber } from '@/utils/formatters'
 
 const NOT_CLAIMED = [
-  'That proteins replace silicon electronics. Proteins and silicon are separate technologies; BioNano-Sim examines proteins as candidate nanoscale mechanical components only.',
+  'That proteins replace silicon electronics. Proteins and silicon are separate technologies; COSMORA examines proteins as candidate nanoscale mechanical components only.',
   'That the ML degradation estimate is a validated prediction. Its training labels are a synthetic public-data proxy, not experimental measurements.',
   'That the simulation models ionising radiation. Standard OpenMM has no particle-track transport, no energy deposition, no radical chemistry and no bond scission.',
   'That the simulation reaches degradation timescales. Runs are picoseconds; real degradation acts over seconds to years.',
@@ -39,7 +39,7 @@ export function MethodologyPage() {
     <div className="mx-auto max-w-5xl space-y-5 p-4 pb-16">
       <PageHeader
         title="Methodology and limitations"
-        description="What BioNano-Sim computes, how each number is produced, and what it deliberately does not claim."
+        description="What COSMORA computes, how each number is produced, and what it deliberately does not claim."
         badges={
           <span className="badge border-violet/40 bg-violet/10 text-violet">
             <BookOpen className="h-3 w-3" aria-hidden />
@@ -51,7 +51,7 @@ export function MethodologyPage() {
       {/* --- Problem --------------------------------------------------- */}
       <Section
         icon={Rocket}
-        title="What BioNano-Sim addresses"
+        title="What COSMORA addresses"
         defaultOpen
       >
         <p>
@@ -63,7 +63,7 @@ export function MethodologyPage() {
           before a wet-lab campaign is affordable.
         </p>
         <p>
-          BioNano-Sim is a computational triage bench for that question. It pairs a
+          COSMORA is a computational triage bench for that question. It pairs a
           fast machine-learning estimate with a real physics simulation, keeps the two
           rigorously labelled, and exports a reproducible record of both. The value is
           not that either number is authoritative — neither is — but that the pipeline
@@ -128,7 +128,7 @@ export function MethodologyPage() {
             <strong>The target is per residue, not per protein.</strong> The model
             predicts side-chain-loss degradation for one ranked candidate residue.
             Every protein-level percentage in this application is an aggregation
-            BioNano-Sim performs (the mean over the top candidates) and is labelled as
+            COSMORA performs (the mean over the top candidates) and is labelled as
             such. Because those candidates are the <em>most</em> susceptible residues,
             that mean leans high relative to the whole chain.
           </li>
@@ -153,7 +153,7 @@ export function MethodologyPage() {
             so an unseen category becomes an all-zero block and the model still returns
             a confident-looking number. The <code>residue_type</code> vocabulary covers
             only 14 of 20 amino acids, so even approved proteins trip this — 1UBQ&rsquo;s
-            rank-2 candidate is GLY and 1TEN has a PHE. BioNano-Sim detects unknown
+            rank-2 candidate is GLY and 1TEN has a PHE. COSMORA detects unknown
             categories <em>before</em> predicting, flags the affected residues in the
             table, and excludes them from the headline mean.
           </li>
@@ -284,7 +284,7 @@ export function MethodologyPage() {
           <p className="mt-2">
             The dose and particle class you set are recorded as provenance and appear in
             the job warnings, but the trajectory reflects thermal dynamics at the
-            requested temperature and nothing more. Any radiation effect in BioNano-Sim
+            requested temperature and nothing more. Any radiation effect in COSMORA
             enters through the <em>ML model&rsquo;s scenario category</em>, which was
             itself fitted on synthetic proxy labels. Genuine radiation-damage modelling —
             coupling a transport code to reactive dynamics — is future scope.
@@ -325,7 +325,7 @@ export function MethodologyPage() {
 
         <h4>The degradation proxy</h4>
         <p>
-          To place both on one axis, BioNano-Sim computes a bounded structural-drift
+          To place both on one axis, COSMORA computes a bounded structural-drift
           score from the trajectory: a weighted combination of final RMSD (0.50),
           relative change in radius of gyration (0.20) and mean per-residue RMSF (0.30),
           each normalised against a reference scale. The formula and every component
@@ -441,7 +441,7 @@ function Section({
         />
       </button>
       {open && (
-        <div className="prose-bionano border-t border-hairline px-4 py-3.5">
+        <div className="prose-COSMORA border-t border-hairline px-4 py-3.5">
           {children}
         </div>
       )}

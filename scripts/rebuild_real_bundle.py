@@ -8,7 +8,7 @@ invalidate the mock bundle and its CI check -- this refits the same pipeline on
 the same rows under the pinned environment.
 
 The aggregation, feature list, model hyperparameters and validation criteria are
-copied from notebooks/bionano_kaggle_pipeline.ipynb, so the metrics reproduce.
+copied from notebooks/COSMORA_kaggle_pipeline.ipynb, so the metrics reproduce.
 
 Usage:
     .venv311/Scripts/python.exe scripts/rebuild_real_bundle.py
@@ -143,10 +143,10 @@ def main() -> int:
                       f"baseline {base_r2:.3f}")
 
     metadata = {
-        "model_name": "BioNano-Sim Real Simulation Model",
+        "model_name": "COSMORA Real Simulation Model",
         "model_version": "1.0.0-real",
         "scientific_status": "REAL_PAIRED_SIMULATION_LABELS",
-        "label_source": "BIONANO_PAIRED_STEERED_MD",
+        "label_source": "COSMORA_PAIRED_STEERED_MD",
         "scientifically_validated": not failed,
         "validation_criteria": VALIDATION_CRITERIA,
         "validation_failures": failed,
@@ -202,7 +202,7 @@ def main() -> int:
     }
 
     args.out.mkdir(parents=True, exist_ok=True)
-    bundle_path = args.out / "bionano_real_model_bundle.pkl"
+    bundle_path = args.out / "COSMORA_real_model_bundle.pkl"
     joblib.dump(bundle, bundle_path, compress=3)
     digest = hashlib.sha256(bundle_path.read_bytes()).hexdigest()
     (args.out / "real_model_metadata.json").write_text(

@@ -13,7 +13,7 @@ from app.core.exceptions import ValidationFailedError
 from app.core.logging import get_logger
 from app.services import simulation_service
 
-logger = get_logger("bionano.services.analysis")
+logger = get_logger("COSMORA.services.analysis")
 
 
 def _brief(results: dict[str, Any]) -> dict[str, Any]:

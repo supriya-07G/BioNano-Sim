@@ -27,7 +27,7 @@ from app.config import settings
 from app.core.logging import get_logger
 from app.ml.feature_schema import FeatureSchema, load_feature_schema
 
-logger = get_logger("bionano.ml.loader")
+logger = get_logger("COSMORA.ml.loader")
 
 _lock = threading.Lock()
 _state: ModelState | None = None

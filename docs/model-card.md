@@ -1,15 +1,15 @@
-# Model card — BioNano-Sim Public Bootstrap Model
+# Model card — COSMORA Public Bootstrap Model
 
 | Field | Value |
 | --- | --- |
-| Name | BioNano-Sim Public Bootstrap Model |
+| Name | COSMORA Public Bootstrap Model |
 | Version | `0.2.0-mock` |
 | Scientific status | `MOCK_PUBLIC_DATA_BOOTSTRAP` |
 | Label source | `SYNTHETIC_PUBLIC_DATA_PROXY` |
 | Scientifically validated | **No** |
 | Approved use | `DASHBOARD_AND_API_INTEGRATION_TESTING_ONLY` |
 | Created | 2026-08-26T18:59:01Z |
-| Artifact | `models/bionano_mock_model_bundle.pkl` (56,267 bytes) |
+| Artifact | `models/COSMORA_mock_model_bundle.pkl` (56,267 bytes) |
 | SHA-256 | `00828fda47e2550c834b2c2d9e6b6a4786ee62721cbda759b15462e39353b6ba` |
 | Target | `mechanical_degradation_pct` — **per candidate residue** |
 
@@ -33,7 +33,7 @@ Pipeline
 └── model        : XGBRegressor
 ```
 
-33 transformed features. Because preprocessing is bundled, BioNano-Sim calls
+33 transformed features. Because preprocessing is bundled, COSMORA calls
 `pipeline.predict(DataFrame[feature_columns])` directly and never
 re-implements the transforms.
 
@@ -104,7 +104,7 @@ Residue-level structural features matter much less.
 | --- | --- | --- |
 | `data/ml/data/public_residue_features.csv` | 417 | Per-residue static features for the 5 proteins |
 | `data/ml/data/ranked_candidate_residues.csv` | 50 | Top-10 candidate residues per protein |
-| `data/ml/data/bionano_mock_experiments_v1.csv` | 450 | 5 proteins × 10 residues × 3 scenarios × 3 seeds |
+| `data/ml/data/COSMORA_mock_experiments_v1.csv` | 450 | 5 proteins × 10 residues × 3 scenarios × 3 seeds |
 | `data/ml/splits/train.csv` | 270 | 1PGA, 1TIT, 2SPC |
 | `data/ml/splits/validation.csv` | 90 | 1UBQ |
 | `data/ml/splits/test.csv` | 90 | 1TEN |
@@ -143,7 +143,7 @@ learned the proxy's generating process; it says nothing about physical reality.
 ## 5. Uncertainty
 
 The bundle exposes no `predict_proba`, no quantile heads and no calibrated
-interval. BioNano-Sim reports `confidence: null` rather than fabricating a
+interval. COSMORA reports `confidence: null` rather than fabricating a
 figure.
 
 The held-out MAE values above are offered instead, clearly separated in the UI
@@ -166,7 +166,7 @@ directly:
 | `residue_type='LYS'` (in vocabulary) | 60.5277 % |
 | `residue_type='XXX'` (unknown) | 60.5295 % |
 
-A 0.0018 pp difference — undetectable from the output alone. BioNano-Sim
+A 0.0018 pp difference — undetectable from the output alone. COSMORA
 therefore compares every categorical value against the encoder's vocabulary
 *before* predicting, warns explicitly, flags the affected residues in the
 inspector, and excludes them from the protein-level mean.
@@ -193,7 +193,7 @@ mechanical-only condition. Requesting an estimate for the
 
 ### 6.4 Per-residue target, protein-level display
 
-The model scores one residue at a time. BioNano-Sim's protein-level percentage
+The model scores one residue at a time. COSMORA's protein-level percentage
 is the arithmetic mean over the ranked candidates, computed by the application
 and labelled as such in `aggregation.method`. Because those candidates are the
 *most* susceptible residues in the chain, the mean is an upper-leaning

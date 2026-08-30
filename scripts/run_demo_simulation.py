@@ -60,7 +60,7 @@ def main() -> int:
 
     configure_logging()
 
-    print("BioNano-Sim demo run")
+    print("COSMORA demo run")
     print("=" * 74)
     print(
         f"protein={args.pdb_id} chain={args.chain_id} scenario={args.scenario_id} "

@@ -132,7 +132,7 @@ Fixed by documenting the no-`make` path in the README quick start.
 ## Reproducing this record
 
 ```bash
-git clone <repo> bionano-check && cd bionano-check
+git clone <repo> COSMORA-check && cd COSMORA-check
 make setup && make validate && make test && make test-backend-all
 make backend    # then POST one rapid_demo job as above
 ```

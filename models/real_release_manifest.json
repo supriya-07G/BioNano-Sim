@@ -1,5 +1,5 @@
 {
-  "model_file": "bionano_real_model_bundle.pkl",
+  "model_file": "COSMORA_real_model_bundle.pkl",
   "model_sha256": "b29bbe771d82385670aae4f1fada84bb83940a816314f6afeb4d75277542bd23",
   "metadata_file": "real_model_metadata.json",
   "scientific_status": "REAL_PAIRED_SIMULATION_LABELS",

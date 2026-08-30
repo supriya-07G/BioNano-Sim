@@ -1,6 +1,6 @@
-# Contributing to BioNano-Sim
+# Contributing to COSMORA
 
-Thank you for contributing. BioNano-Sim combines molecular simulation, mechanical analysis, machine learning, and a scientific dashboard. A small undocumented change can invalidate results across several parts of the system, so all contributors must follow the rules below.
+Thank you for contributing. COSMORA combines molecular simulation, mechanical analysis, machine learning, and a scientific dashboard. A small undocumented change can invalidate results across several parts of the system, so all contributors must follow the rules below.
 
 ## 1. Non-negotiable rules
 
@@ -17,7 +17,7 @@ If you are unsure whether a change affects scientific meaning, open or comment o
 
 ## 2. Project boundaries
 
-BioNano-Sim contains three distinct evidence sources:
+COSMORA contains three distinct evidence sources:
 
 | Source | Meaning | Allowed wording |
 | --- | --- | --- |

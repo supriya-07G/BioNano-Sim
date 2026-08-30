@@ -8,7 +8,7 @@ shipped metrics would misrepresent where those numbers came from.
 | Directory | Intended contents |
 | --- | --- |
 | `data_preparation/` | Feature extraction from structures, SASA computation, candidate ranking |
-| `training/` | Hyperparameter search and fitting, replacing `bionano_mock_model_bundle.pkl` |
+| `training/` | Hyperparameter search and fitting, replacing `COSMORA_mock_model_bundle.pkl` |
 | `evaluation/` | Held-out analysis, error decomposition, calibration |
 | `simulation_validation/` | Comparing simulation metrics against experimental force-spectroscopy data |
 

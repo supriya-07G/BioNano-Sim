@@ -1,5 +1,5 @@
 {
-  "name": "BioNano-Sim",
+  "name": "COSMORA",
   "image": "mcr.microsoft.com/devcontainers/python:3.11-bookworm",
 
   "features": {
@@ -11,7 +11,7 @@
   "forwardPorts": [5173, 8000],
   "portsAttributes": {
     "5173": {
-      "label": "BioNano-Sim (app)",
+      "label": "COSMORA (app)",
       "onAutoForward": "notify"
     },
     "8000": {

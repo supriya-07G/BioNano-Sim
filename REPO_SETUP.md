@@ -1,8 +1,8 @@
-# Repository setup for BioNano-Sim
+# Repository setup for COSMORA
 
 ## Recommended repository name
 
-BioNano-Sim
+COSMORA
 
 ## Recommended GitHub description
 
@@ -28,17 +28,17 @@ Deep-space protein resilience screening with OpenMM + explainable ML.
 
 ## Recommended GitHub repo URL pattern
 
-https://github.com/<your-username>/BioNano-Sim
+https://github.com/<your-username>/COSMORA
 
 ## Suggested README title
 
-# BioNano-Sim
+# COSMORA
 
 AI-assisted stress testing for protein nanomachines in deep space.
 
 ## Why this name works
 
-- BioNano-Sim is short, memorable, and technical.
+- COSMORA is short, memorable, and technical.
 - It sounds like a real scientific software project.
 - It clearly communicates a combined biology + nanotechnology + simulation theme.
 - It is easy to search on GitHub and in presentations.
@@ -66,15 +66,15 @@ Use release tags like:
 
 ## Suggested first public commit message
 
-feat: initialize BioNano-Sim prototype for deep-space protein resilience screening
+feat: initialize COSMORA prototype for deep-space protein resilience screening
 
 ## Suggested GitHub push commands
 
 ```bash
 git branch -M main
 git add .
-git commit -m "feat: initialize BioNano-Sim prototype"
-git remote add origin https://github.com/<your-username>/BioNano-Sim.git
+git commit -m "feat: initialize COSMORA prototype"
+git remote add origin https://github.com/<your-username>/COSMORA.git
 git push -u origin main
 ```
 
@@ -95,4 +95,4 @@ This keeps the claims honest while still highlighting the technical value.
 
 ## Suggested repo homepage text
 
-BioNano-Sim explores whether selected protein domains could serve as nanoscale mechanical components in deep-space environments. It combines short OpenMM simulations, structural analysis, and explainable ML to estimate resilience-related risk under controlled proxy conditions.
+COSMORA explores whether selected protein domains could serve as nanoscale mechanical components in deep-space environments. It combines short OpenMM simulations, structural analysis, and explainable ML to estimate resilience-related risk under controlled proxy conditions.

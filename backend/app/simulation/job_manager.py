@@ -39,7 +39,7 @@ from app.simulation.presets import SAFE_RETRY_PRESET_ID, get_preset
 from app.utils.files import atomic_write_json, read_json, tail_lines
 from app.utils.serialization import to_jsonable, utc_now_iso
 
-logger = get_logger("bionano.simulation.jobs")
+logger = get_logger("COSMORA.simulation.jobs")
 
 # Progress weights per stage. They sum to 1.0 and are used only for the overall
 # progress bar; the underlying step counts remain exact in the payload.
@@ -66,7 +66,7 @@ class JobManager:
     def __init__(self) -> None:
         self._executor = ThreadPoolExecutor(
             max_workers=settings.max_concurrent_jobs,
-            thread_name_prefix="bionano-sim",
+            thread_name_prefix="COSMORA",
         )
         self._live: dict[str, _LiveJob] = {}
         self._lock = threading.Lock()

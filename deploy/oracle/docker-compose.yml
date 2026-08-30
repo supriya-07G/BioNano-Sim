@@ -21,12 +21,12 @@ services:
       # The Vercel origin(s) allowed to call this API. Comma-separated, no
       # trailing slash. Parsing this from the environment used to crash the
       # app at startup; fixed in dced506.
-      BIONANO_CORS_ORIGINS: "${VERCEL_ORIGINS:-https://bionano-sim.vercel.app}"
+      COSMORA_CORS_ORIGINS: "${VERCEL_ORIGINS:-https://COSMORA.vercel.app}"
     volumes:
       # Job results survive a container restart. data/ and models/ are baked
       # into the image and deliberately not mounted: they are evidence, and a
       # volume would let them drift from the commit that produced them.
-      - bionano-runtime:/srv/runtime
+      - COSMORA-runtime:/srv/runtime
     # Not published to the host. The tunnel reaches it over the compose
     # network, so the API is never exposed on the VM's public interface.
     expose:
@@ -51,4 +51,4 @@ services:
     command: tunnel --no-autoupdate --url http://backend:8000
 
 volumes:
-  bionano-runtime:
+  COSMORA-runtime:

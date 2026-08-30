@@ -13,7 +13,7 @@ from typing import Any
 from app.core.exceptions import InvalidSimulationInputError
 from app.core.logging import get_logger
 
-logger = get_logger("bionano.simulation.validators")
+logger = get_logger("COSMORA.simulation.validators")
 
 MIN_RESIDUES = 4
 MAX_RESIDUES_RAPID = 400
@@ -62,7 +62,7 @@ def mdtraj_availability() -> dict[str, Any]:
             "available": False,
             "version": None,
             "detail": f"MDTraj unavailable ({type(exc).__name__}). "
-            "BioNano-Sim falls back to its own NumPy DCD reader, which supplies "
+            "COSMORA falls back to its own NumPy DCD reader, which supplies "
             "every metric the dashboard shows.",
         }
 

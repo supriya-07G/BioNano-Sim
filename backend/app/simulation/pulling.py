@@ -46,7 +46,7 @@ import numpy as np
 from app.core.logging import get_logger
 from app.schemas.simulation import JobStage
 
-logger = get_logger("bionano.simulation.pulling")
+logger = get_logger("COSMORA.simulation.pulling")
 
 # 1 kJ/mol/nm = 1000 / (N_A * 1e-9) newtons = 1.6605390667 pN.
 # N_A = 6.02214076e23 /mol exactly (SI 2019), so this constant is exact.

@@ -131,7 +131,7 @@ export function ScopeNotice({ className }: { className?: string }) {
   return (
     <ScientificNotice title="Scientific scope" variant="scientific" className={className}>
       <p className="mb-2">
-        BioNano-Sim does not claim that proteins replace silicon electronics.
+        COSMORA does not claim that proteins replace silicon electronics.
         Proteins and silicon are separate technologies. This platform investigates
         whether selected proteins could act as nanoscale <em>mechanical</em>{' '}
         components — molecular springs, switches, sensors or structural elements —

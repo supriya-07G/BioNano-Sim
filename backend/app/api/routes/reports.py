@@ -18,7 +18,7 @@ def report_json(job_id: str) -> JSONResponse:
     return JSONResponse(
         content=payload,
         headers={
-            "Content-Disposition": f'attachment; filename="bionano-sim-{job_id}.json"'
+            "Content-Disposition": f'attachment; filename="COSMORA-{job_id}.json"'
         },
     )
 
@@ -37,6 +37,6 @@ def report_csv(job_id: str) -> PlainTextResponse:
         content=body,
         media_type="text/csv",
         headers={
-            "Content-Disposition": f'attachment; filename="bionano-sim-{job_id}.csv"'
+            "Content-Disposition": f'attachment; filename="COSMORA-{job_id}.csv"'
         },
     )

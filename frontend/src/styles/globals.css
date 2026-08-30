@@ -190,42 +190,42 @@
   }
 
   /* --- Long-form prose (methodology page) ----------------------------- */
-  .prose-bionano {
+  .prose-COSMORA {
     @apply text-xs leading-relaxed text-ink-muted;
   }
-  .prose-bionano p + p,
-  .prose-bionano p + ul,
-  .prose-bionano p + ol,
-  .prose-bionano ul + p,
-  .prose-bionano ol + p {
+  .prose-COSMORA p + p,
+  .prose-COSMORA p + ul,
+  .prose-COSMORA p + ol,
+  .prose-COSMORA ul + p,
+  .prose-COSMORA ol + p {
     @apply mt-2.5;
   }
-  .prose-bionano h4 {
+  .prose-COSMORA h4 {
     @apply mb-1.5 mt-4 text-xs font-semibold text-ink;
   }
-  .prose-bionano strong {
+  .prose-COSMORA strong {
     @apply font-medium text-ink;
   }
-  .prose-bionano em {
+  .prose-COSMORA em {
     @apply italic text-ink;
   }
-  .prose-bionano code {
+  .prose-COSMORA code {
     @apply rounded border border-hairline bg-void px-1 py-0.5 font-mono text-2xs text-accent;
   }
-  .prose-bionano ul,
-  .prose-bionano ol {
+  .prose-COSMORA ul,
+  .prose-COSMORA ol {
     @apply space-y-1.5 pl-4;
   }
-  .prose-bionano ul {
+  .prose-COSMORA ul {
     @apply list-disc;
   }
-  .prose-bionano ol {
+  .prose-COSMORA ol {
     @apply list-decimal;
   }
-  .prose-bionano li::marker {
+  .prose-COSMORA li::marker {
     @apply text-ink-faint;
   }
-  .prose-bionano table {
+  .prose-COSMORA table {
     @apply text-2xs;
   }
 
