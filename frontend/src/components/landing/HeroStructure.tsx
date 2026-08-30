@@ -31,7 +31,7 @@ const FEATURED = [
     pdbId: '1TEN',
     name: 'Fibronectin III',
     stiffness: 'not resolved',
-    note: 'Experimentally load-bearing, but this protocol did not register it — a known false negative, reported rather than hidden.',
+    note: 'Experimentally load-bearing, but this protocol did not register it. A known false negative, reported rather than hidden.',
   },
 ] as const
 

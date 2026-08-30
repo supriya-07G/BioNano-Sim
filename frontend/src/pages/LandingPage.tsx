@@ -113,7 +113,7 @@ export function LandingPage() {
 
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink-muted">
               Proteins are being engineered into the machinery of long-duration
-              missions — springs, switches, sensors, structural members. In deep
+              missions: springs, switches, sensors, structural members. In deep
               space that machinery is bombarded for months, and there is{' '}
               <strong className="text-ink">
                 no repair, no replacement and no resupply
@@ -123,12 +123,12 @@ export function LandingPage() {
             </p>
 
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-muted">
-              COSMORA answers the question that follows —{' '}
+              COSMORA answers the question that follows.{' '}
               <strong className="text-ink">
-                which domains still carry load once damage has occurred
+                Which domains still carry load once damage has occurred?
               </strong>{' '}
-              — by measuring it rather than estimating it. A residue is removed,
-              the domain is pulled apart by{' '}
+              It measures the answer rather than estimating it. A residue is
+              removed, the domain is pulled apart by{' '}
               <strong className="text-ink">steered molecular dynamics</strong>,
               and the change in stiffness is recorded in piconewtons per
               nanometre. Real physics, on real coordinates, before launch.
@@ -138,8 +138,8 @@ export function LandingPage() {
               Across{' '}
               <strong className="text-ink">520 paired simulations</strong> of 13
               domains it separated the four that bear load from the nine that do
-              not, with no overlap — and ranked{' '}
-              <strong className="text-ink">titin I27</strong> first, the protein
+              not, with no overlap, and ranked{' '}
+              <strong className="text-ink">titin I27</strong> first: the protein
               that has served as the experimental benchmark for mechanical
               stability for twenty-five years. It was never told which answer to
               give.
@@ -209,7 +209,7 @@ export function LandingPage() {
             tone="accent"
             label="Steered MD Force-Extension"
             title="Stiffness, measured in pN/nm"
-            body="A moving harmonic restraint pulls the domain apart by its termini and records the force it carries against extension. The slope is an apparent stiffness — the primary measurement, and the one the results rest on."
+            body="A moving harmonic restraint pulls the domain apart by its termini and records the force it carries against extension. The slope is an apparent stiffness: the primary measurement, and the one the results rest on."
             facts={[
               '520 paired pristine-vs-damaged experiments',
               'Ranked titin I27 first, the AFM benchmark',
@@ -221,7 +221,7 @@ export function LandingPage() {
             tone="ok"
             label="Rapid OpenMM Simulation"
             title="Real molecular dynamics, honestly scoped"
-            body="Amber14 with GBn2 implicit solvent, a Langevin integrator and a fixed seed. The trajectory, energies and temperatures are genuine OpenMM output — over picoseconds, not the seconds-to-years of real degradation."
+            body="Amber14 with GBn2 implicit solvent, a Langevin integrator and a fixed seed. The trajectory, energies and temperatures are genuine OpenMM output, though over picoseconds rather than the seconds-to-years of real degradation."
             facts={[
               'Progress driven by the integrator step counter',
               'Standard OpenMM models no ionising radiation',
