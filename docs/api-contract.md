@@ -498,6 +498,36 @@ Complete experiment record with manifests, features, and paired structural analy
 
 ---
 
+## Parameter Sweeps
+
+Exposes batch parameter sweeps across damage severities, candidate ranks, and random seeds.
+
+### `POST /sweeps/preview`
+
+Validates bounds (max 50 experiments per batch) and estimates compute time, storage usage, and expanded combinations.
+
+### `POST /sweeps` → `202 Accepted`
+
+Submits a sweep batch for sequential execution.
+
+### `GET /sweeps`
+
+Lists all historical parameter sweep runs.
+
+### `GET /sweeps/{sweep_id}`
+
+Retrieves detailed status, progress, item list, and aggregated severity-response curves.
+
+### `POST /sweeps/{sweep_id}/cancel`
+
+Cancels an in-flight sweep batch without discarding completed valid experiment pairs.
+
+### `GET /sweeps/{sweep_id}/export/{format}`
+
+Downloads sweep results table as CSV (`format=csv`) or JSON manifest (`format=json`).
+
+---
+
 ## CORS
 
 Restricted to the local frontend dev origins (5173 and 4173 on `localhost` and
