@@ -14,7 +14,7 @@ from app.schemas.simulation import (
     SimulationRequest,
     SimulationResults,
 )
-from app.services import analysis_service, simulation_service
+from app.services import analysis_service, replay_service, simulation_service
 
 router = APIRouter(tags=["simulations"])
 
@@ -132,6 +132,34 @@ def job_log(job_id: str) -> FileResponse:
 @router.get("/simulations/compare/{job_id_a}/{job_id_b}", summary="Compare two jobs")
 def compare(job_id_a: str, job_id_b: str) -> dict[str, Any]:
     return analysis_service.compare_jobs(job_id_a, job_id_b)
+
+
+@router.get(
+    "/simulations/{job_id}/replay",
+    summary="Draft a new run reproducing an earlier configuration",
+)
+def replay(job_id: str) -> dict[str, Any]:
+    """Returns a draft only. The original experiment is never overwritten.
+
+    Starting the replay is a separate POST /simulations with this draft, so
+    replaying an expensive run is a deliberate confirmation rather than a side
+    effect of opening a page.
+    """
+    return replay_service.replay_draft(job_id)
+
+
+@router.get(
+    "/simulations/diff/{job_id_a}/{job_id_b}",
+    summary="Configuration diff, saying whether the runs are comparable",
+)
+def configuration_diff(job_id_a: str, job_id_b: str) -> dict[str, Any]:
+    """Every setting that differs, classified by whether it invalidates the pair.
+
+    A different seed and a different force field are both differences, but one
+    is the experiment and the other means the results should never have been
+    put side by side.
+    """
+    return replay_service.configuration_diff(job_id_a, job_id_b)
 
 
 # --------------------------------------------------------------------------- #
