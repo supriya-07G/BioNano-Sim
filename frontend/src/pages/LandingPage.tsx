@@ -113,22 +113,37 @@ export function LandingPage() {
             </h1>
 
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink-muted">
-              Deep-space radiation degrades protein-based components, and on a
-              long mission there is no repair, replacement or resupply. COSMORA
-              answers the question that follows:{' '}
+              Proteins are being engineered into the machinery of long-duration
+              missions — springs, switches, sensors, structural members. In deep
+              space that machinery is bombarded for months, and there is{' '}
               <strong className="text-ink">
-                which domains still carry load once damage has occurred
-              </strong>{' '}
-              — measured before launch, not discovered in transit.
+                no repair, no replacement and no resupply
+              </strong>
+              . A component that quietly loses its load-bearing capacity in
+              transit is a component that fails when it is needed.
             </p>
 
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-muted">
-              A residue is removed, the domain is pulled apart by{' '}
+              COSMORA answers the question that follows —{' '}
+              <strong className="text-ink">
+                which domains still carry load once damage has occurred
+              </strong>{' '}
+              — by measuring it rather than estimating it. A residue is removed,
+              the domain is pulled apart by{' '}
               <strong className="text-ink">steered molecular dynamics</strong>,
-              and the change in stiffness is measured in pN/nm. Run blind across
-              13 domains, it ranked{' '}
-              <strong className="text-ink">titin I27</strong> first — the
-              standard experimental benchmark for mechanical stability.
+              and the change in stiffness is recorded in piconewtons per
+              nanometre. Real physics, on real coordinates, before launch.
+            </p>
+
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-muted">
+              Across{' '}
+              <strong className="text-ink">520 paired simulations</strong> of 13
+              domains it separated the four that bear load from the nine that do
+              not, with no overlap — and ranked{' '}
+              <strong className="text-ink">titin I27</strong> first, the protein
+              that has served as the experimental benchmark for mechanical
+              stability for twenty-five years. It was never told which answer to
+              give.
             </p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
