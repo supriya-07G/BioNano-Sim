@@ -66,9 +66,13 @@ export function LandingPage() {
       {/* --- Header ------------------------------------------------------ */}
       <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
         <div className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-lg border border-accent/30 bg-accent/10">
-            <Boxes className="h-4.5 w-4.5 text-accent" aria-hidden />
-          </span>
+          <img
+            src="/logo-mark.png"
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0 object-contain"
+          />
           <span className="text-sm font-semibold tracking-tight text-ink">
             COSMORA
           </span>

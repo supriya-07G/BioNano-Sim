@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Activity, BookOpen, Boxes, Cpu, ExternalLink } from 'lucide-react'
+import { Activity, BookOpen, Cpu, ExternalLink } from 'lucide-react'
 
 import { ReadinessBadge } from '@/components/common/StatusBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -23,9 +23,13 @@ export function Topbar({ className }: { className?: string }) {
       )}
     >
       <Link to="/" className="flex items-center gap-2.5">
-        <span className="relative grid h-8 w-8 place-items-center rounded-lg border border-accent/25 bg-accent/[0.08] shadow-[0_0_0_1px_rgba(204,194,255,0.12)]">
-          <Boxes className="h-4 w-4 text-accent" aria-hidden />
-        </span>
+        <img
+          src="/logo-mark.png"
+          alt=""
+          width={32}
+          height={32}
+          className="h-8 w-8 shrink-0 object-contain"
+        />
         <span className="leading-tight">
           <span className="block text-sm font-semibold tracking-[0.14em] text-ink">
             COSMORA
