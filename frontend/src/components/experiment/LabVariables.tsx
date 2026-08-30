@@ -1,9 +1,12 @@
-import { FlaskConical, Thermometer, Waves } from 'lucide-react'
+import { Eye, FlaskConical, Layers, Palette, Thermometer, Waves } from 'lucide-react'
 
+import { ControlGroup } from '@/components/ui/ControlGroup'
 import { cn } from '@/components/ui/cn'
 import type { ExperimentDraft } from '@/stores/experimentStore'
 import type { Scenario } from '@/types/prediction'
 import type { SimulationPreset } from '@/types/simulation'
+
+import type { ColourMode, RenderMode } from '@/components/proteins/ProteinViewer'
 
 /**
  * The variables of the run, editable beside the structure in full screen.
@@ -85,6 +88,13 @@ export function LabVariables({
   scenario,
   preset,
   onChange,
+  renderModes,
+  colourModes,
+  renderMode,
+  colourMode,
+  onRenderMode,
+  onColourMode,
+  highlightCount,
 }: {
   draft: ExperimentDraft
   scenarios: Scenario[]
@@ -92,9 +102,48 @@ export function LabVariables({
   scenario: Scenario | undefined
   preset: SimulationPreset | undefined
   onChange: (patch: Partial<ExperimentDraft>) => void
+  renderModes: { value: RenderMode; label: string }[]
+  colourModes: { value: ColourMode; label: string }[]
+  renderMode: RenderMode
+  colourMode: ColourMode
+  onRenderMode: (value: RenderMode) => void
+  onColourMode: (value: ColourMode) => void
+  highlightCount: number
 }) {
   return (
     <>
+      {/*
+        The render and colour toggles live above the viewport in the workspace,
+        which puts them behind this overlay in full screen -- exactly where a
+        large structure makes them most useful.
+      */}
+      <Group icon={Eye} title="View">
+        <div className="space-y-2 py-2">
+          <ControlGroup
+            icon={Eye}
+            label="Render mode"
+            options={renderModes}
+            value={renderMode}
+            onChange={onRenderMode}
+            className="w-full justify-start"
+          />
+          <ControlGroup
+            icon={Palette}
+            label="Colour mode"
+            options={colourModes}
+            value={colourMode}
+            onChange={onColourMode}
+            className="w-full justify-start"
+          />
+          {highlightCount > 0 && (
+            <span className="badge border-accent/35 bg-accent/[0.08] text-accent">
+              <Layers className="h-3 w-3" aria-hidden />
+              {highlightCount} candidate residues
+            </span>
+          )}
+        </div>
+      </Group>
+
       <Group icon={Waves} title="Environment">
         <Field label="Scenario" coupling="ml">
           <select

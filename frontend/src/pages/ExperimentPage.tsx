@@ -9,12 +9,12 @@ import { ScientificNotice } from '@/components/common/ScientificNotice'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { ExperimentSummary } from '@/components/experiment/ExperimentSummary'
 import { LabVariables } from '@/components/experiment/LabVariables'
+import { ControlGroup } from '@/components/ui/ControlGroup'
 import { ScenarioForm } from '@/components/experiment/ScenarioForm'
 import { PredictionCard } from '@/components/prediction/PredictionCard'
 import { ProteinSummary } from '@/components/proteins/ProteinSummary'
 import { ProteinViewer, type ColourMode, type RenderMode } from '@/components/proteins/ProteinViewer'
 import { ResidueInspector } from '@/components/proteins/ResidueInspector'
-import { cn } from '@/components/ui/cn'
 import { usePrediction, useModelInfo, useScenarios } from '@/hooks/usePrediction'
 import { useStructure } from '@/hooks/useStructure'
 import { useHasActiveJob, usePresets, useSubmitSimulation } from '@/hooks/useSimulation'
@@ -300,6 +300,13 @@ export function ExperimentPage() {
                     setDraft(patch)
                     if (prediction.data || prediction.error) prediction.reset()
                   }}
+                  renderModes={RENDER_MODES}
+                  colourModes={COLOUR_MODES}
+                  renderMode={renderMode}
+                  colourMode={colourMode}
+                  onRenderMode={setRenderMode}
+                  onColourMode={setColourMode}
+                  highlightCount={highlights.length}
                 />
               }
             />
@@ -382,35 +389,3 @@ export function ExperimentPage() {
   )
 }
 
-function ControlGroup<T extends string>({
-  icon: Icon,
-  options,
-  value,
-  onChange,
-}: {
-  icon: typeof Eye
-  options: { value: T; label: string }[]
-  value: T
-  onChange: (value: T) => void
-}) {
-  return (
-    <div className="flex items-center gap-1 rounded-lg border border-hairline bg-elevated p-0.5">
-      <Icon className="ml-1.5 h-3 w-3 shrink-0 text-ink-faint" aria-hidden />
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          onClick={() => onChange(option.value)}
-          className={cn(
-            'rounded-md px-2 py-1 text-2xs transition-colors',
-            value === option.value
-              ? 'bg-accent/15 text-accent'
-              : 'text-ink-muted hover:bg-raised hover:text-ink',
-          )}
-        >
-          {option.label}
-        </button>
-      ))}
-    </div>
-  )
-}
