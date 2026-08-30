@@ -16,7 +16,12 @@ import { useTheme } from '@/hooks/useTheme'
 import { load3Dmol, type Mol3DAtom, type Mol3DViewer } from './viewerLoader'
 
 export type RenderMode = 'cartoon' | 'surface' | 'stick' | 'sphere'
-export type ColourMode = 'chain' | 'spectrum' | 'element' | 'susceptibility'
+export type ColourMode =
+  | 'chain'
+  | 'spectrum'
+  | 'element'
+  | 'susceptibility'
+  | 'displacement'
 
 export interface HighlightResidue {
   chainId: string
