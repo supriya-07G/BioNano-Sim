@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Orbit } from 'lucide-react'
 
 import { ProteinViewer } from '@/components/proteins/ProteinViewer'
 import { cn } from '@/components/ui/cn'
@@ -36,6 +37,9 @@ const FEATURED = [
 
 export function HeroStructure({ className }: { className?: string }) {
   const [selected, setSelected] = useState<(typeof FEATURED)[number]>(FEATURED[0])
+  // Off until asked. A rotation running from page load is a render loop
+  // that never idles, which is what made this page block its own thread.
+  const [spinning, setSpinning] = useState(false)
   const structure = useStructure({ kind: 'approved', pdbId: selected.pdbId })
 
   return (
@@ -60,7 +64,21 @@ export function HeroStructure({ className }: { className?: string }) {
             </button>
           )
         })}
-        <span className="ml-auto text-2xs text-ink-faint">drag to rotate</span>
+        <button
+          type="button"
+          onClick={() => setSpinning((value) => !value)}
+          aria-pressed={spinning}
+          title={spinning ? 'Stop rotation' : 'Rotate automatically'}
+          className={cn(
+            'ml-auto flex items-center gap-1 rounded-md border px-2 py-1 text-2xs transition-colors',
+            spinning
+              ? 'border-accent/50 bg-accent/10 text-accent'
+              : 'border-hairline bg-raised text-ink-faint hover:border-accent/30 hover:text-ink-muted',
+          )}
+        >
+          <Orbit className="h-3 w-3" aria-hidden />
+          {spinning ? 'Rotating' : 'Rotate'}
+        </button>
       </div>
 
       {/*
@@ -84,6 +102,7 @@ export function HeroStructure({ className }: { className?: string }) {
           error={structure.error}
           mode="cartoon"
           colourMode="chain"
+          autoSpin={spinning}
           transparent
           showControls={false}
           screenshotName={`COSMORA-${selected.pdbId}`}

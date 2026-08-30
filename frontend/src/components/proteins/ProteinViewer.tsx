@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import {
   Camera,
   Maximize2,
+  Orbit,
   Minimize2,
   Palette,
   RotateCw,
@@ -48,7 +49,11 @@ interface ProteinViewerProps {
   /** Filename stem for the screenshot download. */
   screenshotName?: string
   showControls?: boolean
-  /** Slow autorotation, off by default so the structure stays readable. */
+  /**
+   * Slow autorotation. Off by default so the structure stays readable, and so
+   * no render loop runs until someone asks for one. Controlled: a caller that
+   * changes this drives the viewer, and the viewer's own toggle stays in sync.
+   */
   autoSpin?: boolean
   /**
    * Draw on a transparent canvas so whatever is behind the viewer shows
@@ -109,6 +114,13 @@ export function ProteinViewer({
   const [engineError, setEngineError] = useState<Error | null>(null)
   const [engineReady, setEngineReady] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
+  const [spinning, setSpinning] = useState(autoSpin)
+
+  // Follow the prop when a caller drives it, without losing the viewer's own
+  // toggle when it does not.
+  useEffect(() => {
+    setSpinning(autoSpin)
+  }, [autoSpin])
   const [hovered, setHovered] = useState<string | null>(null)
 
   // --- create the viewer once ------------------------------------------
@@ -282,8 +294,17 @@ export function ProteinViewer({
   useEffect(() => {
     const viewer = viewerRef.current
     if (!engineReady || !viewer) return
-    viewer.spin(autoSpin ? 'y' : false)
-  }, [autoSpin, engineReady])
+    viewer.spin(spinning ? 'y' : false)
+    // Stop on unmount as well: a spin left running holds a rAF loop alive
+    // behind whatever the user navigated to.
+    return () => {
+      try {
+        viewer.spin(false)
+      } catch {
+        // The context may already be gone; nothing to stop.
+      }
+    }
+  }, [spinning, engineReady])
 
   // Keep the canvas sized to its container (panel resize, fullscreen toggle).
   useEffect(() => {
@@ -439,6 +460,13 @@ export function ProteinViewer({
           >
             <RotateCw className="h-3.5 w-3.5" aria-hidden />
           </ViewerButton>
+          <ViewerButton
+            onClick={() => setSpinning((value) => !value)}
+            title={spinning ? 'Stop rotation' : 'Rotate automatically'}
+            active={spinning}
+          >
+            <Orbit className="h-3.5 w-3.5" aria-hidden />
+          </ViewerButton>
           <ViewerButton onClick={screenshot} title="Download screenshot (PNG)">
             <Camera className="h-3.5 w-3.5" aria-hidden />
           </ViewerButton>
@@ -497,10 +525,13 @@ function ViewerButton({
   onClick,
   title,
   children,
+  active = false,
 }: {
   onClick: () => void
   title: string
   children: React.ReactNode
+  /** Toggles read as pressed; one-shot actions never do. */
+  active?: boolean
 }) {
   return (
     <button
@@ -508,7 +539,13 @@ function ViewerButton({
       onClick={onClick}
       title={title}
       aria-label={title}
-      className="rounded-md border border-hairline bg-surface/90 p-1.5 text-ink-muted backdrop-blur transition-colors hover:border-accent/45 hover:text-accent"
+      aria-pressed={active || undefined}
+      className={cn(
+        'rounded-md border p-1.5 backdrop-blur transition-colors',
+        active
+          ? 'border-accent/50 bg-accent/15 text-accent'
+          : 'border-hairline bg-surface/90 text-ink-muted hover:border-accent/45 hover:text-accent',
+      )}
     >
       {children}
     </button>
