@@ -101,11 +101,10 @@ export function LandingPage() {
             </span>
 
             <h1 className="text-balance mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-ink lg:text-5xl">
-              Mechanical Stress Testing for{' '}
+              Engineering Proteins That{' '}
               <span className="bg-gradient-to-r from-accent via-accent-soft to-violet bg-clip-text text-transparent">
-                Protein Nanomachines
-              </span>{' '}
-              in Deep Space
+                Survive Deep Space
+              </span>
             </h1>
 
             <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink-muted">

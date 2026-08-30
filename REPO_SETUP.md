@@ -6,7 +6,7 @@ COSMORA
 
 ## Recommended GitHub description
 
-Mechanical stress testing for protein nanomachines in deep space.
+Engineering proteins that survive deep space.
 
 ## Recommended short tagline
 
@@ -34,7 +34,7 @@ https://github.com/<your-username>/COSMORA
 
 # COSMORA
 
-Mechanical stress testing for protein nanomachines in deep space.
+Engineering proteins that survive deep space.
 
 ## Why this name works
 
