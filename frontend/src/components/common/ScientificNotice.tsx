@@ -135,7 +135,13 @@ export function ScopeNotice({ className }: { className?: string }) {
         Proteins and silicon are separate technologies. This platform investigates
         whether selected proteins could act as nanoscale <em>mechanical</em>{' '}
         components — molecular springs, switches, sensors or structural elements —
-        in radiation-exposed environments.
+        by measuring how their stiffness changes when residues lose side chains.
+      </p>
+      <p className="mb-2">
+        <strong>Radiation is not simulated.</strong> No dose, particle track or
+        energy deposition enters the model. Which residues are damaged is chosen
+        using literature radiosensitivity; the damage itself is applied as a
+        structural lesion and the mechanical consequence is measured.
       </p>
       <p>
         The ML degradation estimate comes from an MVP bootstrap model trained on a
