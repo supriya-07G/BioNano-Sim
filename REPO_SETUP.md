@@ -6,7 +6,7 @@ COSMORA
 
 ## Recommended GitHub description
 
-AI-assisted stress testing for protein nanomachines in deep space.
+Mechanical stress testing for protein nanomachines in deep space.
 
 ## Recommended short tagline
 
@@ -34,7 +34,7 @@ https://github.com/<your-username>/COSMORA
 
 # COSMORA
 
-AI-assisted stress testing for protein nanomachines in deep space.
+Mechanical stress testing for protein nanomachines in deep space.
 
 ## Why this name works
 

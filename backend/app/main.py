@@ -34,7 +34,7 @@ from app.core.logging import configure_logging, get_logger
 logger = get_logger("COSMORA.main")
 
 DESCRIPTION = """
-**COSMORA** — AI-assisted stress testing for protein nanomachines in deep space.
+**COSMORA** — mechanical stress testing for protein nanomachines in deep space.
 
 This API combines three clearly separated capabilities:
 

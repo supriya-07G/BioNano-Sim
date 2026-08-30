@@ -105,7 +105,7 @@ export function LandingPage() {
             </span>
 
             <h1 className="text-balance mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-ink lg:text-5xl">
-              AI-Assisted Stress Testing for{' '}
+              Mechanical Stress Testing for{' '}
               <span className="bg-gradient-to-r from-accent via-accent-soft to-violet bg-clip-text text-transparent">
                 Protein Nanomachines
               </span>{' '}
