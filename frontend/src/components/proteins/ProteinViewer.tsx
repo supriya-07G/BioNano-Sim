@@ -378,11 +378,21 @@ export function ProteinViewer({
           className="absolute inset-y-0 right-0 z-10 hidden w-[22rem] overflow-y-auto border-l border-hairline bg-surface/95 backdrop-blur lg:block"
           aria-label="Experiment variables"
         >
-          <div className="border-b border-hairline px-4 py-3">
-            <p className="label">Lab variables</p>
-            {fullscreenTitle && (
-              <p className="mt-0.5 font-mono text-xs text-ink">{fullscreenTitle}</p>
-            )}
+          <div className="flex items-start justify-between gap-2 border-b border-hairline px-4 py-3">
+            <div className="min-w-0">
+              <p className="label">Lab variables</p>
+              {fullscreenTitle && (
+                <p className="mt-0.5 font-mono text-xs text-ink">{fullscreenTitle}</p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setFullscreen(false)}
+              className="btn-ghost shrink-0 !px-2 !py-1 !text-2xs"
+            >
+              <Minimize2 className="h-3 w-3" aria-hidden />
+              Exit
+            </button>
           </div>
           <div className="space-y-4 p-4">{fullscreenPanel}</div>
         </aside>
@@ -408,7 +418,12 @@ export function ProteinViewer({
 
       {/* Controls */}
       {showControls && data && (
-        <div className="absolute right-2 top-2 flex flex-col gap-1">
+        <div
+          className={cn(
+            'absolute top-2 z-20 flex flex-col gap-1 transition-[right] duration-200',
+            panelOpen ? 'right-2 lg:right-[23rem]' : 'right-2',
+          )}
+        >
           <ViewerButton onClick={() => viewerRef.current?.zoom(1.2, 260)} title="Zoom in">
             <ZoomIn className="h-3.5 w-3.5" aria-hidden />
           </ViewerButton>

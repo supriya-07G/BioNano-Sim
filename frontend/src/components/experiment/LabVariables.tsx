@@ -6,14 +6,13 @@ import type { Scenario } from '@/types/prediction'
 import type { SimulationPreset } from '@/types/simulation'
 
 /**
- * The variables of the run, shown beside the structure in full screen.
+ * The variables of the run, editable beside the structure in full screen.
  *
- * Read-only on purpose. Full screen is for looking at the molecule, and a form
- * that can be edited from two places is a form whose two copies drift. The
- * coupling badges are repeated from the workspace so the distinction between
- * what drives physics and what is only recorded survives the context switch --
- * that distinction is easiest to forget exactly when the structure is filling
- * the screen.
+ * Every control writes to the same draft the workspace edits, so there is one
+ * source of truth and no second copy to drift. The coupling badges are
+ * repeated from the workspace because the distinction between what drives
+ * physics and what is only recorded is easiest to forget exactly when the
+ * structure is filling the screen.
  */
 
 type Coupling = 'physics' | 'ml' | 'provenance'
@@ -30,25 +29,28 @@ const COUPLING_LABEL: Record<Coupling, string> = {
   provenance: 'provenance only',
 }
 
-function Row({
+function Field({
   label,
-  value,
   coupling,
+  children,
+  hint,
 }: {
   label: string
-  value: string
   coupling: Coupling
+  children: React.ReactNode
+  hint?: string
 }) {
   return (
-    <div className="flex items-start justify-between gap-3 py-1.5">
-      <div className="min-w-0">
-        <p className="text-2xs text-ink-faint">{label}</p>
-        <p className="tabular break-words font-mono text-xs text-ink">{value}</p>
-      </div>
-      <span className={cn('badge shrink-0', COUPLING_STYLE[coupling])}>
-        {COUPLING_LABEL[coupling]}
+    <label className="block py-2">
+      <span className="mb-1 flex items-center justify-between gap-2">
+        <span className="text-2xs text-ink-faint">{label}</span>
+        <span className={cn('badge shrink-0', COUPLING_STYLE[coupling])}>
+          {COUPLING_LABEL[coupling]}
+        </span>
       </span>
-    </div>
+      {children}
+      {hint && <span className="mt-1 block text-2xs text-ink-faint">{hint}</span>}
+    </label>
   )
 }
 
@@ -72,69 +74,153 @@ function Group({
   )
 }
 
+/** Wheel over a focused number input silently changes the value. */
+const blurOnWheel = (event: React.WheelEvent<HTMLInputElement>) =>
+  event.currentTarget.blur()
+
 export function LabVariables({
   draft,
+  scenarios,
+  presets,
   scenario,
   preset,
+  onChange,
 }: {
   draft: ExperimentDraft
+  scenarios: Scenario[]
+  presets: SimulationPreset[] | undefined
   scenario: Scenario | undefined
   preset: SimulationPreset | undefined
+  onChange: (patch: Partial<ExperimentDraft>) => void
 }) {
   return (
     <>
       <Group icon={Waves} title="Environment">
-        <Row
-          label="Scenario"
-          value={scenario?.label ?? draft.scenarioId ?? '—'}
-          coupling="ml"
-        />
-        <Row
-          label="Dose"
-          value={`${draft.dose} ${draft.doseUnit}`}
+        <Field label="Scenario" coupling="ml">
+          <select
+            className="input !text-xs"
+            value={draft.scenarioId}
+            onChange={(event) => onChange({ scenarioId: event.target.value })}
+          >
+            {scenarios.map((item) => (
+              <option key={item.scenario_id} value={item.scenario_id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <Field
+          label={`Dose (${draft.doseUnit})`}
           coupling="provenance"
-        />
-        <Row
-          label="Exposure"
-          value={`${draft.exposureDurationDays} days`}
-          coupling="provenance"
-        />
+          hint={scenario ? undefined : 'Recorded with the run; it enters no calculation.'}
+        >
+          <input
+            type="number"
+            className="input tabular font-mono !text-xs"
+            min={0}
+            step={0.1}
+            value={draft.dose}
+            onWheel={blurOnWheel}
+            onChange={(event) => onChange({ dose: Number(event.target.value) })}
+          />
+        </Field>
+
+        <Field label="Exposure (days)" coupling="provenance">
+          <input
+            type="number"
+            className="input tabular font-mono !text-xs"
+            min={0}
+            step={1}
+            value={draft.exposureDurationDays}
+            onWheel={blurOnWheel}
+            onChange={(event) =>
+              onChange({ exposureDurationDays: Number(event.target.value) })
+            }
+          />
+        </Field>
       </Group>
 
       <Group icon={Thermometer} title="Conditions">
-        <Row
-          label="Temperature"
-          value={`${draft.temperatureKelvin} K`}
+        <Field label="Temperature (K)" coupling="physics">
+          <input
+            type="number"
+            className="input tabular font-mono !text-xs"
+            min={0}
+            step={5}
+            value={draft.temperatureKelvin}
+            onWheel={blurOnWheel}
+            onChange={(event) =>
+              onChange({ temperatureKelvin: Number(event.target.value) })
+            }
+          />
+        </Field>
+
+        <Field
+          label="Random seed"
           coupling="physics"
-        />
-        <Row label="Random seed" value={`${draft.randomSeed}`} coupling="physics" />
+          hint="Same seed and preset reproduce the trajectory exactly on CPU."
+        >
+          <input
+            type="number"
+            className="input tabular font-mono !text-xs"
+            min={0}
+            step={1}
+            value={draft.randomSeed}
+            onWheel={blurOnWheel}
+            onChange={(event) => onChange({ randomSeed: Number(event.target.value) })}
+          />
+        </Field>
       </Group>
 
       <Group icon={FlaskConical} title="Protocol">
-        <Row
-          label="Preset"
-          value={preset?.label ?? draft.presetId}
-          coupling="physics"
-        />
-        <Row
-          label="Simulated time"
-          value={preset ? `${preset.simulated_time_ps} ps` : '—'}
-          coupling="physics"
-        />
-        <Row
-          label="Mechanical load"
-          value={
-            preset?.pulling
+        <Field label="Preset" coupling="physics">
+          <select
+            className="input !text-xs"
+            value={draft.presetId}
+            onChange={(event) => onChange({ presetId: event.target.value })}
+          >
+            {(presets ?? []).map((item) => (
+              <option key={item.preset_id} value={item.preset_id}>
+                {item.label} — {item.simulated_time_ps} ps
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        {/*
+          Not an input. The load is a property of the preset, and offering a
+          box here would imply otherwise -- which is the misreading the
+          coupling badges exist to prevent.
+        */}
+        <div className="py-2">
+          <p className="mb-1 flex items-center justify-between gap-2">
+            <span className="text-2xs text-ink-faint">Mechanical load</span>
+            <span
+              className={cn(
+                'badge shrink-0',
+                COUPLING_STYLE[preset?.pulling ? 'physics' : 'provenance'],
+              )}
+            >
+              {COUPLING_LABEL[preset?.pulling ? 'physics' : 'provenance']}
+            </span>
+          </p>
+          <p className="tabular font-mono text-xs text-ink">
+            {preset?.pulling
               ? `${preset.pulling.spring_constant_kj_mol_nm2} kJ/mol/nm² @ ${preset.pulling.pull_velocity_nm_per_ps} nm/ps`
-              : 'none for this preset'
-          }
-          coupling={preset?.pulling ? 'physics' : 'provenance'}
-        />
+              : 'none for this preset'}
+          </p>
+          <p className="mt-1 text-2xs text-ink-faint">
+            Set by the preset, not by hand. Choose Mechanical Pull to apply a
+            real load.
+          </p>
+        </div>
       </Group>
 
       <p className="border-t border-hairline pt-3 text-2xs leading-relaxed text-ink-faint">
-        Values are read-only here. Edit them in the workspace behind this view;
-        press <kbd className="font-mono text-ink-muted">Esc</kbd> to return.
+        Changes apply to the run you are about to start and are shared with the
+        workspace behind this view. Press{' '}
+        <kbd className="font-mono text-ink-muted">Esc</kbd> to return.
       </p>
     </>
   )

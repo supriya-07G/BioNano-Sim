@@ -290,7 +290,17 @@ export function ExperimentPage() {
               onRetry={() => void structureQuery.refetch()}
               fullscreenTitle={`${draft.pdbId ?? 'upload'} · chain ${draft.chainId}`}
               fullscreenPanel={
-                <LabVariables draft={draft} scenario={scenario} preset={preset} />
+                <LabVariables
+                  draft={draft}
+                  scenarios={scenariosQuery.data?.scenarios ?? []}
+                  presets={presetsQuery.data}
+                  scenario={scenario}
+                  preset={preset}
+                  onChange={(patch) => {
+                    setDraft(patch)
+                    if (prediction.data || prediction.error) prediction.reset()
+                  }}
+                />
               }
             />
           </div>
