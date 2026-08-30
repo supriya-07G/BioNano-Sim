@@ -20,18 +20,37 @@ functions (250 MB limit, short timeouts). A free CPU Space gives 2 vCPU and
    - **Hardware:** CPU basic (free)
    - **Visibility:** Public (free tier requires it)
 
-2. Push this repository to it. From the repo root:
+2. Create a Hugging Face access token with **write** scope:
+   Hugging Face → Settings → Access Tokens → *New token*.
 
-   ```bash
-   git remote add space https://huggingface.co/spaces/<your-username>/BioNano-Sim
-   git push space main
-   ```
+3. Wire GitHub up to deploy for you. In the GitHub repo, under
+   **Settings → Secrets and variables → Actions**:
 
-   You will be asked for your Hugging Face username and an access token
-   (Settings → Access Tokens → *write*). Use the token as the password.
+   | Kind | Name | Value |
+   |---|---|---|
+   | Secret | `HF_TOKEN` | the write token from step 2 |
+   | Variable | `HF_USERNAME` | your Hugging Face username |
+   | Variable | `HF_SPACE` | the Space name, e.g. `BioNano-Sim` |
 
-3. Watch the **Logs** tab. The first build takes 10–15 minutes, most of it
-   installing OpenMM. Later pushes reuse the layer cache and take 2–3 minutes.
+4. Push to `main`. The `deploy-space` workflow mirrors the repository to the
+   Space on every push, so GitHub stays the only place you push to. You can
+   also trigger it by hand from **Actions → deploy-space → Run workflow**.
+
+5. Watch the Space's **Logs** tab. The first build takes 10–15 minutes, most of
+   it installing OpenMM. Later pushes reuse the layer cache and take 2–3
+   minutes.
+
+### Pushing to the Space by hand
+
+The Action is just a `git push`, so you can do the same thing locally if you
+would rather not wait for CI:
+
+```bash
+git remote add space https://huggingface.co/spaces/<your-username>/BioNano-Sim
+git push space main
+```
+
+Use your Hugging Face username and the write token as the password.
 
 The Space configuration lives in the YAML frontmatter at the top of
 `README.md` (`sdk: docker`, `app_port: 7860`). Do not delete that block — the

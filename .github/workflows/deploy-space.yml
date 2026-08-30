@@ -1,0 +1,50 @@
+name: deploy-space
+
+# Mirrors this repository to a Hugging Face Space on every push to main, so
+# GitHub stays the single place you push to. The Space itself must be created
+# once in the Hugging Face UI (Docker SDK); see docs/DEPLOYMENT.md.
+#
+# Required repository settings:
+#   Secrets   -> HF_TOKEN      a Hugging Face access token with *write* scope
+#   Variables -> HF_USERNAME   your Hugging Face username
+#   Variables -> HF_SPACE      the Space name, e.g. BioNano-Sim
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The Space is a git repo of its own; a shallow clone cannot be
+          # pushed to it.
+          fetch-depth: 0
+          lfs: true
+
+      - name: Check the deployment secrets are configured
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          if [ -z "$HF_TOKEN" ]; then
+            echo "::error::HF_TOKEN is not set. Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          if [ -z "${{ vars.HF_USERNAME }}" ] || [ -z "${{ vars.HF_SPACE }}" ]; then
+            echo "::error::HF_USERNAME and HF_SPACE must be set as repository variables."
+            exit 1
+          fi
+
+      - name: Push to the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          # --force because the Space is created with its own initial commit,
+          # which is not an ancestor of this history. GitHub stays the source
+          # of truth; the Space is a deployment target only.
+          git push --force \
+            "https://${{ vars.HF_USERNAME }}:$HF_TOKEN@huggingface.co/spaces/${{ vars.HF_USERNAME }}/${{ vars.HF_SPACE }}" \
+            HEAD:main
