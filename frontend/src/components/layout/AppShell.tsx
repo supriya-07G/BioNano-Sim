@@ -44,7 +44,7 @@ export function AppShell() {
       <div className="relative z-10 flex h-full flex-col">
         <Topbar />
         <div className="flex min-h-0 flex-1">
-          <Sidebar className="w-48 lg:w-56" />
+          <Sidebar />
           <main
             id="main-content"
             tabIndex={-1}
