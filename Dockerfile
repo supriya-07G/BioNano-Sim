@@ -14,6 +14,14 @@ WORKDIR /build
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 COPY frontend/ ./
+
+# The 3Dmol bundle is vendored, not an npm dependency, and is gitignored -- so
+# it is absent from a clean checkout and the structure viewer would silently
+# render nothing. Fetch it here, and fail the build if it cannot be had rather
+# than shipping an image whose 3D panels are blank.
+ADD https://3dmol.org/build/3Dmol-min.js /build/public/vendor/3Dmol-min.js
+RUN test -s /build/public/vendor/3Dmol-min.js     && echo "3Dmol bundle: $(wc -c < /build/public/vendor/3Dmol-min.js) bytes"
+
 RUN npm run build
 
 # --- Stage 2: runtime ---------------------------------------------------------

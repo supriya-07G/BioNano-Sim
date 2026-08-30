@@ -69,6 +69,18 @@ The Space configuration lives in the YAML frontmatter at the top of
 `README.md` (`sdk: docker`, `app_port: 7860`). Do not delete that block — the
 Space repo's README *is* this file, and without it the Space will not start.
 
+## Assets the image fetches
+
+`frontend/public/vendor/3Dmol-min.js` is vendored rather than an npm
+dependency, and is gitignored, so it is **not** in a clean checkout. The
+Dockerfile downloads it during the frontend stage and fails the build if it
+cannot -- without that step the image builds cleanly and the 3D structure
+viewer renders nothing, which is the kind of fault that only shows up in front
+of an audience.
+
+Everything else the container needs is committed: the five approved PDB
+structures, the protein registry, the feature schema and both model bundles.
+
 ## What the hosted build changes
 
 The Dockerfile sets three environment overrides. No code differs between local
