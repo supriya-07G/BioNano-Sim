@@ -1,0 +1,101 @@
+name: deploy-backend
+
+# Pushes the backend to the Oracle VM over SSH and restarts it, so GitHub is
+# the single source of truth for both halves: Vercel redeploys the frontend on
+# its own, this does the same for the API.
+#
+# Unlike a server-in-a-workflow hack, this is deployment -- the use Actions
+# exists for. It runs for a few seconds and holds no long-lived process.
+#
+# Required repository settings (Settings -> Secrets and variables -> Actions):
+#   Secrets   -> VM_SSH_KEY    the private key for the VM (whole file, BEGIN..END)
+#   Variables -> VM_HOST       the VM's public IP or hostname
+#   Variables -> VM_USER       usually 'ubuntu'
+#   Variables -> VM_APP_DIR    e.g. /home/ubuntu/BioNano-Sim
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - 'data/**'
+      - 'models/**'
+      - 'scripts/**'
+      - 'deploy/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+concurrency:
+  # Two deploys racing on one VM leaves it in an undefined state.
+  group: deploy-backend
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check whether deployment is configured
+        id: check
+        env:
+          VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+        run: |
+          missing=""
+          [ -z "$VM_SSH_KEY" ] && missing="$missing VM_SSH_KEY(secret)"
+          [ -z "${{ vars.VM_HOST }}" ] && missing="$missing VM_HOST(variable)"
+          [ -z "${{ vars.VM_USER }}" ] && missing="$missing VM_USER(variable)"
+          [ -z "${{ vars.VM_APP_DIR }}" ] && missing="$missing VM_APP_DIR(variable)"
+          if [ -n "$missing" ]; then
+            echo "::notice::Backend deploy skipped. Not configured:$missing. See deploy/oracle/README.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install the SSH key
+        if: steps.check.outputs.ready == 'true'
+        env:
+          VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$VM_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          # Pin the host key on first contact rather than disabling the check.
+          ssh-keyscan -H "${{ vars.VM_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Pull and restart
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          ssh -i ~/.ssh/id_deploy -o BatchMode=yes \
+            "${{ vars.VM_USER }}@${{ vars.VM_HOST }}" bash -se <<'REMOTE'
+          set -euo pipefail
+          cd "${{ vars.VM_APP_DIR }}"
+
+          before=$(sha256sum backend/requirements.txt | cut -d' ' -f1)
+          git fetch --quiet origin main
+          git reset --hard origin/main
+          after=$(sha256sum backend/requirements.txt | cut -d' ' -f1)
+
+          # Reinstalling the scientific stack takes minutes. Only do it when the
+          # pins actually moved, so a code-only change redeploys in seconds.
+          if [ "$before" != "$after" ]; then
+            echo "requirements changed -- reinstalling"
+            uv pip install --python .venv311 -r backend/requirements.txt
+          else
+            echo "requirements unchanged -- skipping install"
+          fi
+
+          # Regenerate derived data, then refuse to restart onto a bundle that
+          # no longer reproduces its published metrics.
+          .venv311/bin/python scripts/setup_local.py
+          .venv311/bin/python scripts/validate_model.py
+
+          sudo systemctl restart bionano-api
+          sleep 5
+          systemctl is-active --quiet bionano-api || {
+            echo "::error::bionano-api failed to come back up"
+            sudo journalctl -u bionano-api -n 40 --no-pager
+            exit 1
+          }
+          curl -fsS http://127.0.0.1:8000/api/v1/health > /dev/null
+          echo "backend healthy at $(git rev-parse --short HEAD)"
+          REMOTE

@@ -191,6 +191,45 @@ On a 1 GB `E2.1.Micro` the systemd route is the better trade -- the Docker
 daemon's overhead is a real fraction of that box. On a 24 GB Ampere it makes
 no practical difference, and compose is fewer moving parts to get wrong.
 
+## Auto-deploy from GitHub
+
+With the systemd setup above, `.github/workflows/deploy-backend.yml` makes
+GitHub the source of truth for both halves: Vercel rebuilds the frontend on
+every push, this pulls and restarts the API.
+
+Add under **Settings -> Secrets and variables -> Actions**:
+
+| Kind | Name | Value |
+|---|---|---|
+| Secret | `VM_SSH_KEY` | the VM's private key, whole file including the BEGIN/END lines |
+| Variable | `VM_HOST` | the VM's public IP |
+| Variable | `VM_USER` | `ubuntu` |
+| Variable | `VM_APP_DIR` | `/home/ubuntu/BioNano-Sim` |
+
+The VM user needs to restart the service without a password prompt:
+
+```bash
+echo "ubuntu ALL=(ALL) NOPASSWD: /bin/systemctl restart bionano-api, /bin/systemctl is-active bionano-api, /usr/bin/journalctl -u bionano-api *" | sudo tee /etc/sudoers.d/bionano
+```
+
+What the workflow does, and why:
+
+- **Skips with a notice** when the four settings are absent, rather than
+  failing -- an unconfigured repo should not show a permanent red X.
+- **Reinstalls dependencies only when `requirements.txt` changed.**
+  Reinstalling the scientific stack takes minutes; a code-only change should
+  redeploy in seconds.
+- **Runs `validate_model.py` before restarting**, so the service is never
+  restarted onto a bundle that no longer reproduces its published metrics.
+- **Verifies the service came back** and dumps the last 40 journal lines if it
+  did not. A deploy that silently leaves the API down is worse than one that
+  fails loudly.
+- **Pins the host key** with `ssh-keyscan` instead of disabling host
+  verification.
+
+Note this deploys the **backend only**. The tunnel is unaffected -- it keeps
+running and its URL does not change, because only `bionano-api` restarts.
+
 ## A fixed hostname instead of a random one
 
 The quick tunnel's URL changes whenever the `tunnel` container restarts, and
