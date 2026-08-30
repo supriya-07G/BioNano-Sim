@@ -1,5 +1,18 @@
 # Deploying BioNano-Sim
 
+There are three ways to show this app, in increasing order of effort. Pick the
+cheapest one that meets the need.
+
+| | Setup | Public URL | Survives your laptop closing | Use when |
+|---|---|---|---|---|
+| **localhost** | already done | no | no | presenting in person |
+| **Cloudflare tunnel** | ~2 min | yes, temporary | no | someone remote needs to look now |
+| **Hugging Face Space** | ~15 min build | yes, permanent | yes | a link that outlives the demo |
+
+Hugging Face's Docker SDK is **free** on CPU basic (2 vCPU, 16 GB RAM, no
+payment method). Paid plans buy upgraded hardware, persistent storage and Dev
+Mode -- none of which this app needs.
+
 The whole app ships as one Docker image: FastAPI serves the API *and* the built
 Vite frontend from the same origin. That is why `VITE_API_BASE_URL` is left
 empty — the frontend calls a relative `/api/v1`, so there is no CORS
@@ -91,3 +104,43 @@ docs at `/docs`, and `/api/v1/system/readiness` should report OpenMM available.
 If sleeping is unacceptable, Railway (~$5 credit) and Fly.io both run this
 image without changes. Render works from its $7/month instance; the free tier
 does not have the memory.
+
+## Sharing localhost through a Cloudflare tunnel
+
+The fastest way to give someone a working link without building or deploying
+anything. No account required.
+
+Install `cloudflared`, then run the backend and frontend as usual and point a
+tunnel at the **frontend** port:
+
+```bash
+cloudflared tunnel --url http://localhost:5173
+```
+
+It prints a `https://<random>.trycloudflare.com` URL. Tunnelling 5173 rather
+than 8000 is deliberate: the Vite dev server proxies `/api` to the backend on
+8000, so one tunnel serves the whole app.
+
+**Vite will reject the tunnel URL** unless its hostname is allowed -- you get a
+bare "Blocked request" page. Set it before starting the frontend:
+
+```bash
+VITE_ALLOWED_HOSTS=<random>.trycloudflare.com npm run dev
+```
+
+On PowerShell:
+
+```bash
+$env:VITE_ALLOWED_HOSTS="<random>.trycloudflare.com"; npm run dev
+```
+
+### What a tunnel is and is not
+
+- It exposes **your machine**. It stops the moment you close the terminal, and
+  the app is only as available as your laptop.
+- The URL is unguessable but **not authenticated**. Anyone holding it can start
+  simulations on your hardware. Share it narrowly and stop the tunnel after.
+- It serves the **dev build**, so it is slower than the production image and
+  shows dev warnings in the console.
+
+For anything that needs to outlive the demo, use the Space.
