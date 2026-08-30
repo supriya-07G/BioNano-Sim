@@ -306,6 +306,18 @@ def test_minimisation_only_run_completes_and_reports_no_trajectory(
     assert "degradation_proxy" not in metrics or not metrics.get("degradation_proxy")
     assert results["result_label"] == "Energy Minimisation Only (no dynamics)"
 
+    # stability_summary must be shaped, never a bare {}. Every consumer reads
+    # .verdict off it; returning {} made each one responsible for guarding a
+    # field the contract says is always present, and the results page did not
+    # -- it crashed the whole page instead of omitting one panel. The absence
+    # of an assessment is itself an assessment.
+    stability = results["stability_summary"]
+    assert stability, "stability_summary must never be an empty object"
+    assert stability["verdict"] == "not_assessed"
+    assert stability["dynamics_run"] is False
+    assert "no trajectory" in stability["explanation"]
+    assert stability["threshold_note"]
+
     # Reports must still generate for a dynamics-free run.
     assert client.get(f"{api}/reports/{job_id}.json").status_code == 200
     assert client.get(f"{api}/reports/{job_id}.csv").status_code == 200

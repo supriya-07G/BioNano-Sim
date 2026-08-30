@@ -248,6 +248,28 @@ def run_simulation(
                 "simulated_time_ps": 0.0,
             },
             topology=topology,
+            # A shaped summary, not an empty dict. Every consumer -- the
+            # results page, the report writer, the comparison view -- reads
+            # stability_summary and expects a verdict. Returning {} here made
+            # each of them responsible for guarding a field the contract says
+            # is always present, and the results page did not: reading
+            # .verdict off {} crashed the entire page rather than omitting one
+            # panel. The absence of an assessment is itself an assessment, and
+            # it is stated here once.
+            stability_summary={
+                "verdict": "not_assessed",
+                "explanation": (
+                    "No dynamics were run, so there is no trajectory to assess "
+                    "stability from. This is the expected outcome for a "
+                    "minimisation-only preset, not a failure."
+                ),
+                "threshold_note": (
+                    "Stability verdicts are derived from a trajectory. A "
+                    "minimisation-only run produces none, so no threshold "
+                    "applies."
+                ),
+                "dynamics_run": False,
+            },
             notes=[
                 *notes,
                 "Minimisation-only preset: no dynamics were run, so RMSD, RMSF, Rg "
