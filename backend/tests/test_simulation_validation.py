@@ -18,7 +18,9 @@ import pytest
 def test_presets_declare_their_scientific_label_and_limits(client, api):
     presets = client.get(f"{api}/simulation/presets").json()
     ids = {p["preset_id"] for p in presets}
-    assert ids == {"rapid_demo", "extended_demo", "minimisation_only"}
+    assert ids == {
+        "rapid_demo", "extended_demo", "minimisation_only", "mechanical_pull",
+    }
 
     for preset in presets:
         assert preset["scientific_label"], "every preset must state its result label"
@@ -32,6 +34,15 @@ def test_presets_declare_their_scientific_label_and_limits(client, api):
     assert rapid["scientific_label"] == "Rapid OpenMM Simulation"
     assert rapid["solvent"] == "implicit_gbn2"
     assert rapid["nonbonded_cutoff_nm"] == 1.2
+
+    # Only the pulling preset applies an external force, and it must publish the
+    # protocol it applies rather than leaving it implicit.
+    for preset in presets:
+        if preset["preset_id"] == "mechanical_pull":
+            assert preset["pulling"]["spring_constant_kj_mol_nm2"] > 0
+            assert preset["pulling"]["pull_velocity_nm_per_ps"] > 0
+        else:
+            assert preset["pulling"] is None
 
 
 def test_rapid_demo_stays_within_configured_safety_limits(client, api):

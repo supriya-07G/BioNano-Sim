@@ -77,6 +77,12 @@ class SimulationPreset(BaseModel):
         description="How results from this preset must be labelled in the UI."
     )
     limitations: list[str] = Field(default_factory=list)
+    pulling: dict[str, Any] | None = Field(
+        default=None,
+        description="Steered-MD pulling protocol, when this preset applies one. "
+                    "None means the production stage runs free dynamics and no "
+                    "external force is applied.",
+    )
 
 
 class SimulationRequest(BaseModel):
