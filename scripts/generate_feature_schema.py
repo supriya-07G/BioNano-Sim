@@ -12,9 +12,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 import warnings
 from pathlib import Path
-import sys
 
 # scripts/ is not a package, so the shared console helper is imported by
 # path. init_console() must run before any output is written.
@@ -126,10 +126,10 @@ def main() -> int:
             ),
         },
         "categorical_vocabulary": {
-            c: [str(v) for v in cats] for c, cats in zip(cat_cols, encoder.categories_)
+            c: [str(v) for v in cats] for c, cats in zip(cat_cols, encoder.categories_, strict=False)
         },
         "numeric_imputer_medians": {
-            c: float(v) for c, v in zip(num_cols, imputer.statistics_)
+            c: float(v) for c, v in zip(num_cols, imputer.statistics_, strict=False)
         },
         "numeric_train_envelope": {
             c: {"min": float(train[c].min()), "max": float(train[c].max())}

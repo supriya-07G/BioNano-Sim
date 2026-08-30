@@ -4,15 +4,22 @@
 
 BioNano-Sim is a locally runnable platform for computationally triaging
 protein domains as candidate *nanoscale mechanical components* — molecular
-springs, switches, sensors, structural members — under radiation and mechanical
-conditions relevant to deep-space missions.
+springs, switches, sensors, structural members — by measuring how their
+mechanical stiffness changes when residues lose their side chains.
 
-It combines three capabilities and keeps them rigorously separated:
+Radiation is **not simulated**. Which residues are damaged is chosen using
+literature radiosensitivity; the damage itself is applied as a structural
+lesion, and the platform measures the mechanical consequence. The question it
+answers is *"if this residue is lost, how much load-bearing capacity goes with
+it?"*, not *"what does a cosmic ray do to this protein?"*
+
+It combines four capabilities and keeps them rigorously separated:
 
 | Capability | What it is | Label used throughout |
 | --- | --- | --- |
 | Degradation estimate | Gradient-boosted regression on per-residue structural features | **ML Prediction** |
 | Molecular dynamics | Real OpenMM run, Amber14 + GBn2 implicit solvent, picosecond scale | **Rapid OpenMM Simulation** |
+| Mechanical pulling | Constant-velocity steered MD on the terminal Cα distance, giving a force-extension curve and an apparent stiffness in pN/nm | **Steered MD Force-Extension (non-equilibrium)** |
 | Structural analysis | RMSD, RMSF, radius of gyration, energies from the real trajectory | **Simulation-derived degradation proxy** |
 
 ---
@@ -250,7 +257,8 @@ All of the following pass on a clean checkout:
   your environment reproduces the shipped
   `data/ml/reports/{validation,test}_predictions.csv` to `max|diff| ≈ 1.9e-06`
   (CSV write precision) and the published MAE to six decimal places.
-- `backend`: **100 tests pass**, including two that execute real OpenMM runs.
+- `backend`: **147 tests** — 138 fast plus 9 marked `slow` that execute real
+  OpenMM runs, including paired steered-MD pulls.
 - `frontend`: `tsc --noEmit` clean, `eslint --max-warnings 0` clean, production
   build succeeds.
 - End-to-end: verified in-browser at 1366×768 with zero console errors or

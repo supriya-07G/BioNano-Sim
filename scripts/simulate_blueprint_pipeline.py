@@ -15,7 +15,6 @@ Usage:
 from __future__ import annotations
 
 import json
-import math
 import random
 import sys
 from pathlib import Path
@@ -112,8 +111,16 @@ def build_damage_proxy(pdb_path: Path, dose_label: str = "DEEP_SPACE") -> tuple[
 def run_openmm_damaged_pull(damaged_pdb: Path, *, steps: int = 10) -> dict[str, float]:
     """Run a brief real OpenMM MD on the damaged structure with a light pulling restraint."""
     from openmm import CustomExternalForce, LangevinMiddleIntegrator, Platform
-    from openmm.app import CutoffNonPeriodic, ForceField, HBonds, Modeller, PDBFile, Simulation, StateDataReporter
-    from openmm.unit import femtoseconds, kilojoule_per_mole, kelvin, nanometer, picosecond
+    from openmm.app import (
+        CutoffNonPeriodic,
+        ForceField,
+        HBonds,
+        Modeller,
+        PDBFile,
+        Simulation,
+        StateDataReporter,
+    )
+    from openmm.unit import femtoseconds, kelvin, kilojoule_per_mole, nanometer, picosecond
 
     pdb = PDBFile(str(damaged_pdb))
     forcefield = ForceField("amber14-all.xml", "implicit/gbn2.xml")
@@ -199,7 +206,7 @@ def train_xgboost_surrogate(df: pd.DataFrame) -> tuple[xgb.XGBRegressor, pd.Data
     """Train an XGBoost surrogate from the derived before/after dataset and summarise SHAP."""
     feature_cols = ["num_nodes", "num_edges", "avg_degree", "density", "node_retention", "edge_retention"]
     target_col = "damage_label"
-    X = df[feature_cols].astype(float)
+    X = df[feature_cols].astype(float)  # noqa: N806 - sklearn convention
     y = df[target_col].astype(float)
 
     model = xgb.XGBRegressor(n_estimators=60, max_depth=3, learning_rate=0.12, random_state=42)

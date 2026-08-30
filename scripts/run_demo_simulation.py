@@ -18,10 +18,10 @@ from __future__ import annotations
 import argparse
 import json
 import shutil
+import sys
 import time
 import warnings
 from pathlib import Path
-import sys
 
 # scripts/ is not a package, so the shared console helper is imported by
 # path. init_console() must run before any output is written.
