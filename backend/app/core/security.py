@@ -20,7 +20,7 @@ _UUID4_HEX = re.compile(r"^[0-9a-f]{32}$")
 
 
 def sanitise_filename(raw: str, *, default_stem: str = "upload") -> str:
-    """Reduce a user filename to a flat, safe basename.
+    r"""Reduce a user filename to a flat, safe basename.
 
     Strips directory components (including Windows ``\`` separators, which
     ``PurePosixPath`` would keep), normalises Unicode, and collapses anything
