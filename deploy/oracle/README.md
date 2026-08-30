@@ -191,6 +191,76 @@ On a 1 GB `E2.1.Micro` the systemd route is the better trade -- the Docker
 daemon's overhead is a real fraction of that box. On a 24 GB Ampere it makes
 no practical difference, and compose is fewer moving parts to get wrong.
 
+## Without Cloudflare: Caddy + nip.io
+
+Cloudflare is not required, but **something** must provide HTTPS. Vercel serves
+the frontend over HTTPS and a browser hard-blocks an HTTPS page calling an HTTP
+API -- mixed content, with no override. So `http://<ip>:8000` cannot work from
+Vercel however the firewall is configured.
+
+`nip.io` resolves `<ip>.nip.io` to that IP, and Let's Encrypt issues for it, so
+Caddy gets a real certificate with no domain purchased.
+
+**1. Open 80 and 443 -- in both firewalls.** This is the step that catches
+people: Oracle images ship their own `iptables` rules on top of the OCI
+security list, and opening only one leaves the port silently unreachable.
+
+OCI console → your VM → Subnet → Security List → Add Ingress Rules:
+`0.0.0.0/0` to TCP 80 and 443.
+
+Then on the VM:
+
+```bash
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+sudo netfilter-persistent save
+```
+
+**2. Install Caddy:**
+
+```bash
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update && sudo apt install -y caddy
+```
+
+**3. Install the Caddyfile**, replacing the host with your VM's public IP:
+
+```bash
+sudo cp deploy/oracle/Caddyfile /etc/caddy/Caddyfile
+sudo sed -i "s/129-146-1-23/$(curl -s ifconfig.me | tr '.' '-')/" /etc/caddy/Caddyfile
+sudo systemctl restart caddy
+```
+
+**4. Check it:**
+
+```bash
+curl https://$(curl -s ifconfig.me | tr '.' '-').nip.io/api/v1/health
+```
+
+Certificate issuance takes a few seconds on first request. Then set
+`VITE_API_BASE_URL` in Vercel to `https://<ip-with-dashes>.nip.io`.
+
+### Which front door
+
+| | Cloudflare tunnel | Caddy + nip.io |
+|---|---|---|
+| Firewall changes | **none** | 80 + 443 in *two* firewalls |
+| Public listeners on the VM | none | Caddy on 80/443 |
+| URL stability | **changes** on tunnel restart | **stable**, derived from the IP |
+| Set `VITE_API_BASE_URL` | on every tunnel restart | once |
+| Extra moving part | `cloudflared` | `caddy` |
+
+For a Vercel pairing the stable hostname usually wins: a quick tunnel's URL
+changing means editing the Vercel variable and redeploying the frontend each
+time. If you would rather open no ports at all, keep the tunnel and accept
+that cost -- or use a named tunnel, which is stable but needs a domain on
+Cloudflare.
+
+> `nip.io` has occasionally hit Let's Encrypt rate limits during outages.
+> `sslip.io` works identically as a fallback: `<ip>.sslip.io`.
+
 ## Auto-deploy from GitHub
 
 With the systemd setup above, `.github/workflows/deploy-backend.yml` makes

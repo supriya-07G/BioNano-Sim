@@ -1,0 +1,35 @@
+# TLS for the backend without buying a domain, and without Cloudflare.
+#
+# nip.io resolves any <ip>.nip.io to that IP, and Let's Encrypt will issue for
+# it, so Caddy obtains and renews a real certificate on its own. Replace the
+# host below with your VM's public IP, dashes or dots both work:
+#
+#   129-146-1-23.nip.io      or      129.146.1.23.nip.io
+#
+# Unlike a Cloudflare quick tunnel, this hostname is stable -- it is derived
+# from the IP -- so VITE_API_BASE_URL is set in Vercel once and never touched
+# again.
+
+129-146-1-23.nip.io {
+	# The API listens on loopback only; Caddy is the sole public entry point.
+	reverse_proxy 127.0.0.1:8000
+
+	# A steered-MD pull can take minutes. The default proxy timeout would cut
+	# a long request off mid-flight, which surfaces as a 502 that looks like a
+	# crash rather than a timeout.
+	transport http {
+		read_timeout 10m
+		write_timeout 10m
+	}
+
+	encode zstd gzip
+
+	# CORS is handled by the application, which knows the allowed origins from
+	# BIONANO_CORS_ORIGINS. Setting the headers here as well would send them
+	# twice and browsers reject a duplicated allow-origin.
+
+	log {
+		output file /var/log/caddy/bionano.log
+		level INFO
+	}
+}
