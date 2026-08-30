@@ -112,6 +112,8 @@ class ExperimentDetail(BaseModel):
     baseline_hbond_mean: float | None = None
     damaged_rmsd_mean: float | None = None
 
+    structural_analysis: dict[str, Any] | None = None
+
     qc_failures: list[str] = Field(default_factory=list)
     quality_status: str = "valid"
     artifacts: dict[str, bool] = Field(default_factory=dict)

@@ -480,7 +480,9 @@ Lists available paired experiments (`?limit=100`, 1–500).
 
 ### `GET /experiments/{experiment_id}`
 
-Full metadata, stiffness metrics, linear fit parameters, quality status, and available artifacts.
+Full metadata, stiffness metrics, linear fit parameters, structural damage analysis beyond RMSD/RMSF (contact maps, SASA, hydrogen bonds, secondary structure, local RMSF), quality status, and available artifacts. Includes explicit non-causation scientific caveats.
+
+Artifacts include downloadable `structural_analysis.json` and `structural_analysis.csv`.
 
 ### `GET /experiments/{experiment_id}/force-extension`
 
@@ -492,7 +494,7 @@ Serves raw PDB coordinates (`chemical/x-pdb`). Condition options: `baseline`, `p
 
 ### `GET /experiments/{experiment_id}/report`
 
-Complete experiment record with manifests and features as a downloadable JSON file.
+Complete experiment record with manifests, features, and paired structural analysis as a downloadable JSON file.
 
 ---
 

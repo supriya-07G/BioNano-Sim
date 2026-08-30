@@ -46,6 +46,7 @@ from app.simulation.damage import (  # noqa: E402
 from app.simulation.engine import load_trajectory, run_simulation  # noqa: E402
 from app.simulation.presets import MECHANICAL_PULL  # noqa: E402
 from app.simulation.pulling import PullConfig  # noqa: E402
+from app.analysis.structural_damage import analyze_structural_damage  # noqa: E402
 
 SCHEMA_VERSION = "1.0"
 SCENARIO_VERSION = "1.0"
@@ -524,8 +525,48 @@ def main() -> int:
         json.dumps(manifest.as_dict(), indent=2) + "\n", encoding="utf-8"
     )
 
+    base_pdb = baseline_dir / "prepared.pdb"
+    if not base_pdb.exists():
+        base_pdb = baseline_dir / "final.pdb"
+    dmg_pdb = damaged_dir / "prepared.pdb"
+    if not dmg_pdb.exists():
+        dmg_pdb = damaged_dir / "final.pdb"
+
+    struct_analysis = analyze_structural_damage(
+        baseline_pdb=base_pdb,
+        damaged_pdb=dmg_pdb,
+        damage_residue_ids=manifest.damage_residue_ids,
+        baseline_rmsf=baseline.rmsf,
+        damaged_rmsf=damaged.rmsf,
+    )
+
+    (out / "structural_analysis.json").write_text(
+        json.dumps(struct_analysis, indent=2) + "\n", encoding="utf-8"
+    )
+
+    csv_rows = [
+        ("metric", "value", "unit_or_info"),
+        ("retention_pct", struct_analysis["contact_map"]["retention_pct"], "%"),
+        ("retained_contacts", struct_analysis["contact_map"]["retained_contacts"], "count"),
+        ("lost_contacts", struct_analysis["contact_map"]["lost_contacts"], "count"),
+        ("gained_contacts", struct_analysis["contact_map"]["gained_contacts"], "count"),
+        ("baseline_hbond_count", struct_analysis["hydrogen_bonds"]["baseline_hbond_count"], "count"),
+        ("damaged_hbond_count", struct_analysis["hydrogen_bonds"]["damaged_hbond_count"], "count"),
+        ("hbond_count_change", struct_analysis["hydrogen_bonds"]["hbond_count_change"], "count"),
+        ("global_sasa_change_nm2", struct_analysis["sasa"]["global_sasa_change_nm2"], "nm^2"),
+        ("local_sasa_change_nm2", struct_analysis["sasa"]["local_sasa_change_nm2"], "nm^2"),
+        ("helix_change_pct", struct_analysis["secondary_structure"]["helix_change_pct"], "%"),
+        ("sheet_change_pct", struct_analysis["secondary_structure"]["sheet_change_pct"], "%"),
+        ("coil_change_pct", struct_analysis["secondary_structure"]["coil_change_pct"], "%"),
+        ("caveat", struct_analysis["caveat"], "scientific_disclaimer"),
+    ]
+    with (out / "structural_analysis.csv").open("w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerows(csv_rows)
+
     result_json: dict[str, Any] = {
         "experiment_id": experiment_id,
+        "structural_analysis": struct_analysis,
         "job_id": f"{experiment_id}",
         "baseline_job_id": baseline_dir.name,
         "damaged_job_id": damaged_dir.name,

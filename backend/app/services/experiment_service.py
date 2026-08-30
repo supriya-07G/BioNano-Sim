@@ -77,6 +77,8 @@ def _check_artifacts(exp_dir: Path) -> dict[str, bool]:
         "damaged_topology_pdb": (exp_dir / "damaged_job" / "topology.pdb").is_file(),
         "baseline_final_pdb": (exp_dir / "baseline_job" / "final.pdb").is_file(),
         "damaged_final_pdb": (exp_dir / "damaged_job" / "final.pdb").is_file(),
+        "structural_analysis_json": (exp_dir / "structural_analysis.json").is_file(),
+        "structural_analysis_csv": (exp_dir / "structural_analysis.csv").is_file(),
     }
 
 
@@ -184,6 +186,13 @@ def get_experiment_detail(experiment_id: str) -> dict[str, Any]:
     artifacts = _check_artifacts(exp_dir)
 
     detail = dict(payload)
+    sa_file = exp_dir / "structural_analysis.json"
+    if sa_file.is_file() and not detail.get("structural_analysis"):
+        try:
+            detail["structural_analysis"] = json.loads(sa_file.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            pass
+
     detail["quality_status"] = gate_report.status
     detail["artifacts"] = artifacts
     return detail
