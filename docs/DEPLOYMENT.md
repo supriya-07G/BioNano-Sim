@@ -66,26 +66,47 @@ using Actions for activity unrelated to building, testing or deploying the
 project. Accounts are suspended for it. GitHub Pages is static-only: it could
 host the frontend build, but not OpenMM.
 
-## Sharing localhost through a Cloudflare tunnel
+## Sharing the app through a Cloudflare tunnel
 
-The fastest way to give someone a working link. No account required.
+One public HTTPS URL for the whole app, from your own machine. No account, no
+card, no build.
+
+Install once:
 
 ```bash
 winget install --id Cloudflare.cloudflared
 ```
 
-With both servers running, point a tunnel at the **frontend** port:
+Then two terminals. First the backend:
+
+```bash
+cd backend; ..\.venv311\Scripts\python.exe -m uvicorn app.main:app --port 8000
+```
+
+Then the tunnel and frontend together:
+
+```bash
+.\scripts\share_demo.ps1
+```
+
+It starts the tunnel, waits for its hostname, launches Vite already configured
+for it, and prints the public URL. Closing the window stops both.
+
+Tunnelling port **5173, not 8000**, is deliberate: Vite proxies `/api` to the
+backend, so one tunnel serves the whole app and there is no CORS to configure.
+
+### Doing it by hand
+
+The script exists because the hostname is not known until the tunnel is
+already running, so the manual version is a three-step dance:
 
 ```bash
 cloudflared tunnel --url http://localhost:5173
 ```
 
-It prints a `https://<random>.trycloudflare.com` URL. Tunnelling 5173 rather
-than 8000 is deliberate: Vite proxies `/api` to the backend, so one tunnel
-serves the whole app.
-
-**Vite will reject the tunnel URL** unless its hostname is allowed — you get a
-bare "Blocked request" page. Restart the frontend with it:
+Read the `https://<random>.trycloudflare.com` URL out of its output, then
+restart the frontend with that hostname — Vite rejects a `Host` header it does
+not recognise and otherwise shows a bare "Blocked request" page:
 
 ```bash
 $env:VITE_ALLOWED_HOSTS="<random>.trycloudflare.com"; npm run dev
@@ -99,6 +120,8 @@ Hostname only: no `https://`, no trailing slash.
 - The URL is unguessable but **not authenticated**. Anyone holding it can start
   simulations on your hardware. Share it narrowly and stop the tunnel after.
 - It serves the **dev build**, so it is slower than a production build.
+- **The URL changes every time you start a new tunnel.** Start it once before
+  a demo and leave it running.
 
 ## Permanent: Vercel frontend + Oracle backend
 
