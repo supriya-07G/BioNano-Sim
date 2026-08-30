@@ -4,6 +4,7 @@ import { Activity, BookOpen, Boxes, Cpu, ExternalLink } from 'lucide-react'
 import { ReadinessBadge } from '@/components/common/StatusBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { cn } from '@/components/ui/cn'
+import { ThemeSwitcher } from './ThemeSwitcher'
 import { useReadiness } from '@/hooks/useSimulation'
 import { API_BASE } from '@/services/api'
 
@@ -98,6 +99,8 @@ export function Topbar({ className }: { className?: string }) {
             <ReadinessBadge status={data.status} />
           </>
         )}
+
+        <ThemeSwitcher />
 
         <Link to="/methodology" className="btn-ghost !px-2.5 !py-1.5 !text-xs">
           <BookOpen className="h-3.5 w-3.5" aria-hidden />

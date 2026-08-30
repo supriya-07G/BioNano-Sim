@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useId, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import {
   Area,
@@ -22,13 +22,13 @@ import type { SeriesPoint } from '@/types/simulation'
 
 /** Shared axis/grid styling so every chart in the app reads as one system. */
 export const CHART_COLOURS = {
-  primary: '#38BDF8',
-  secondary: '#8B5CF6',
-  tertiary: '#22C55E',
-  warn: '#F59E0B',
-  danger: '#EF4444',
-  grid: '#1E2A4A',
-  axis: '#64748B',
+  primary: 'rgb(var(--color-accent))',
+  secondary: 'rgb(var(--color-violet))',
+  tertiary: 'rgb(var(--color-ok))',
+  warn: 'rgb(var(--color-warn))',
+  danger: 'rgb(var(--color-danger))',
+  grid: 'rgb(var(--color-hairline))',
+  axis: 'rgb(var(--color-ink-faint))',
 } as const
 
 const AXIS_PROPS = {
@@ -139,14 +139,14 @@ export function ChartTooltip({
   return (
     <RechartsTooltip
       contentStyle={{
-        backgroundColor: '#111936',
-        border: '1px solid #1E2A4A',
+        backgroundColor: 'rgb(var(--color-elevated))',
+        border: '1px solid rgb(var(--color-hairline))',
         borderRadius: 8,
         fontSize: 11,
         padding: '6px 10px',
       }}
-      labelStyle={{ color: '#94A3B8', fontSize: 10 }}
-      itemStyle={{ color: '#F8FAFC' }}
+      labelStyle={{ color: 'rgb(var(--color-ink-muted))', fontSize: 10 }}
+      itemStyle={{ color: 'rgb(var(--color-ink))' }}
       labelFormatter={(value) =>
         xLabel ? `${xLabel}: ${Number(value).toFixed(2)}` : String(value)
       }
@@ -179,7 +179,8 @@ export function TimeSeriesChart({
   area?: boolean
 }) {
   const Chart = area ? AreaChart : LineChart
-  const gradientId = `grad-${colour.replace('#', '')}`
+  const chartId = useId()
+  const gradientId = `grad-${chartId.replace(/:/g, '')}`
 
   return (
     <Chart
@@ -271,14 +272,14 @@ export function ResidueBarChart({
       <YAxis {...AXIS_PROPS} width={52} />
       <RechartsTooltip
         contentStyle={{
-          backgroundColor: '#111936',
-          border: '1px solid #1E2A4A',
+          backgroundColor: 'rgb(var(--color-elevated))',
+          border: '1px solid rgb(var(--color-hairline))',
           borderRadius: 8,
           fontSize: 11,
           padding: '6px 10px',
         }}
-        labelStyle={{ color: '#94A3B8', fontSize: 10 }}
-        itemStyle={{ color: '#F8FAFC' }}
+        labelStyle={{ color: 'rgb(var(--color-ink-muted))', fontSize: 10 }}
+        itemStyle={{ color: 'rgb(var(--color-ink))' }}
         formatter={(value: unknown) => [
           `${Number(value).toFixed(4)}${unit ? ` ${unit}` : ''}`,
           'RMSF',
@@ -348,13 +349,13 @@ export function DualSeriesChart({
       <YAxis {...AXIS_PROPS} width={52} />
       <RechartsTooltip
         contentStyle={{
-          backgroundColor: '#111936',
-          border: '1px solid #1E2A4A',
+          backgroundColor: 'rgb(var(--color-elevated))',
+          border: '1px solid rgb(var(--color-hairline))',
           borderRadius: 8,
           fontSize: 11,
           padding: '6px 10px',
         }}
-        labelStyle={{ color: '#94A3B8', fontSize: 10 }}
+        labelStyle={{ color: 'rgb(var(--color-ink-muted))', fontSize: 10 }}
         labelFormatter={(value) => `${xLabel}: ${Number(value).toFixed(2)}`}
         formatter={(value: unknown, name: unknown) => [
           `${Number(value).toFixed(4)}${unit ? ` ${unit}` : ''}`,

@@ -3,6 +3,7 @@ import { MotionConfig } from 'framer-motion'
 import { RouterProvider } from 'react-router-dom'
 
 import { router } from './routes/router'
+import { ThemeProvider } from './hooks/useTheme'
 
 /**
  * Query defaults.
@@ -30,8 +31,9 @@ const queryClient = new QueryClient({
 
 export function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      {/*
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        {/*
         reducedMotion="user" makes every Framer animation respect the OS
         setting. The global CSS rule in globals.css cannot do this on its own:
         Framer animates via JavaScript, so an !important transition-duration
@@ -39,7 +41,8 @@ export function App() {
       */}
       <MotionConfig reducedMotion="user">
         <RouterProvider router={router} />
-      </MotionConfig>
-    </QueryClientProvider>
+        </MotionConfig>
+      </QueryClientProvider>
+    </ThemeProvider>
   )
 }
