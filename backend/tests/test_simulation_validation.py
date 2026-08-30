@@ -342,8 +342,9 @@ def test_failed_job_is_never_marked_completed(client, api, openmm_available):
         f"{api}/proteins/upload", files={"file": ("unk.pdb", broken, "chemical/x-pdb")}
     )
     if upload.status_code != 200:
-        # Rejected at upload validation, which is also an acceptable outcome.
-        assert upload.json()["error"]["code"] in ("NO_PROTEIN_CHAIN", "UNPARSEABLE")
+        assert upload.json()["error"]["code"] in (
+            "NO_PROTEIN_CHAIN", "UNPARSEABLE", "INVALID_PROTEIN_FILE"
+        )
         return
 
     response = client.post(

@@ -182,6 +182,22 @@ def _load() -> ModelState:
             available=False, load_error=msg, bundle_sha256=digest, warnings=notes
         )
 
+    # Patch SimpleImputer compatibility across scikit-learn version differences
+    def _patch_imputers(obj: Any) -> None:
+        if hasattr(obj, "_fit_dtype") and not hasattr(obj, "_fill_dtype"):
+            setattr(obj, "_fill_dtype", getattr(obj, "_fit_dtype", None))
+        if hasattr(obj, "transformers_"):
+            for _, trans, _ in getattr(obj, "transformers_", []):
+                _patch_imputers(trans)
+        if hasattr(obj, "steps"):
+            for _, step in getattr(obj, "steps", []):
+                _patch_imputers(step)
+        if hasattr(obj, "named_steps"):
+            for _, step in getattr(obj, "named_steps", {}).items():
+                _patch_imputers(step)
+
+    _patch_imputers(pipeline)
+
     # --- schema ---------------------------------------------------------
     try:
         schema = load_feature_schema()

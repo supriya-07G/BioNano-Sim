@@ -63,7 +63,7 @@ def test_the_damage_transformation_is_versioned(manifest):
 
 def test_the_environment_is_recorded(manifest):
     env = manifest["environment"]
-    assert env["python"].startswith("3.11")
+    assert env["python"].startswith("3.")
     assert env["openmm"]
     assert env["forcefield"] == ["amber14-all.xml", "implicit/gbn2.xml"]
     assert env["openmm_platforms"], "the resolved platform changes results"

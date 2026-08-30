@@ -109,35 +109,100 @@ def structure_path(pdb_id: str) -> Path:
     return path
 
 
-def describe_chains(pdb_path: Path) -> tuple[list[ChainInfo], int]:
-    """Per-chain residue/atom counts from the first model. Returns (chains, n_models)."""
-    from Bio.PDB import PDBParser
-    from Bio.PDB.Polypeptide import is_aa
+_STANDARD_AA_3 = {
+    "ALA", "CYS", "ASP", "GLU", "PHE", "GLY", "HIS", "ILE", "LYS", "LEU",
+    "MET", "ASN", "PRO", "GLN", "ARG", "SER", "THR", "VAL", "TRP", "TYR",
+}
 
-    structure = PDBParser(QUIET=True).get_structure("s", str(pdb_path))
-    models = list(structure)
-    if not models:
-        raise InvalidProteinError("Structure contains no models.")
+
+def _describe_chains_pure_python(pdb_path: Path) -> tuple[list[ChainInfo], int]:
+    lines = pdb_path.read_text(encoding="utf-8", errors="ignore").splitlines()
+    n_models = max(1, sum(1 for line in lines if line.startswith("MODEL")))
+
+    model_lines: list[str] = []
+    for line in lines:
+        if line.startswith("ENDMDL"):
+            break
+        model_lines.append(line)
+
+    chain_residues: dict[str, dict[int, int]] = {}
+    chain_has_ca: dict[str, set[int]] = {}
+
+    for line in model_lines:
+        if not line.startswith("ATOM"):
+            continue
+        atom_name = line[12:16].strip()
+        res_name = line[17:20].strip()
+        chain_id = line[21:22].strip() or "A"
+        raw_seq = line[22:26].strip()
+        if not raw_seq.isdigit():
+            continue
+        res_seq = int(raw_seq)
+
+        if res_name not in _STANDARD_AA_3:
+            continue
+
+        chain_residues.setdefault(chain_id, {}).setdefault(res_seq, 0)
+        chain_residues[chain_id][res_seq] += 1
+
+        if atom_name == "CA":
+            chain_has_ca.setdefault(chain_id, set()).add(res_seq)
 
     chains: list[ChainInfo] = []
-    for chain in models[0]:
-        residues = [
-            r for r in chain
-            if r.id[0] == " " and is_aa(r, standard=True) and r.has_id("CA")
-        ]
-        if not residues:
+    for chain_id, res_map in chain_residues.items():
+        ca_seqs = [seq for seq in res_map if seq in chain_has_ca.get(chain_id, set())]
+        if not ca_seqs:
             continue
-        nums = [int(r.id[1]) for r in residues]
+        n_res = len(ca_seqs)
+        n_atoms = sum(res_map[seq] for seq in ca_seqs)
         chains.append(
             ChainInfo(
-                chain_id=chain.id,
-                n_residues=len(residues),
-                n_atoms=sum(len(list(r)) for r in residues),
-                first_residue=min(nums),
-                last_residue=max(nums),
+                chain_id=chain_id,
+                n_residues=n_res,
+                n_atoms=n_atoms,
+                first_residue=min(ca_seqs),
+                last_residue=max(ca_seqs),
             )
         )
-    return chains, len(models)
+
+    if not chains:
+        raise InvalidProteinError("Structure contains no valid protein chain.")
+
+    return chains, n_models
+
+
+def describe_chains(pdb_path: Path) -> tuple[list[ChainInfo], int]:
+    """Per-chain residue/atom counts from the first model. Returns (chains, n_models)."""
+    try:
+        from Bio.PDB import PDBParser
+        from Bio.PDB.Polypeptide import is_aa
+
+        structure = PDBParser(QUIET=True).get_structure("s", str(pdb_path))
+        models = list(structure)
+        if not models:
+            raise InvalidProteinError("Structure contains no models.")
+
+        chains: list[ChainInfo] = []
+        for chain in models[0]:
+            residues = [
+                r for r in chain
+                if r.id[0] == " " and is_aa(r, standard=True) and r.has_id("CA")
+            ]
+            if not residues:
+                continue
+            nums = [int(r.id[1]) for r in residues]
+            chains.append(
+                ChainInfo(
+                    chain_id=chain.id,
+                    n_residues=len(residues),
+                    n_atoms=sum(len(list(r)) for r in residues),
+                    first_residue=min(nums),
+                    last_residue=max(nums),
+                )
+            )
+        return chains, len(models)
+    except ImportError:
+        return _describe_chains_pure_python(pdb_path)
 
 
 # --------------------------------------------------------------------------- #

@@ -41,6 +41,108 @@ class PreparedStructure:
     notes: list[str] = field(default_factory=list)
 
 
+def _extract_chain_pure_python(
+    source: Path, destination: Path, chain_id: str
+) -> PreparedStructure:
+    lines = source.read_text(encoding="utf-8", errors="ignore").splitlines()
+    model_lines: list[str] = []
+    n_models = 0
+    for line in lines:
+        if line.startswith("MODEL"):
+            n_models += 1
+        if line.startswith("ENDMDL"):
+            break
+        model_lines.append(line)
+
+    n_models = max(1, n_models)
+    available_chains: set[str] = set()
+    for line in model_lines:
+        if line.startswith("ATOM"):
+            available_chains.add(line[21:22].strip() or "A")
+
+    if chain_id not in available_chains:
+        raise InvalidSimulationInputError(
+            f"Chain '{chain_id}' not found in the structure.", code="CHAIN_NOT_FOUND"
+        )
+
+    notes: list[str] = []
+    if n_models > 1:
+        notes.append(f"Used model 1 of {n_models}.")
+
+    res_atoms: dict[int, list[str]] = {}
+    res_names: dict[int, str] = {}
+    has_ca: set[int] = set()
+
+    for line in model_lines:
+        if not line.startswith("ATOM"):
+            continue
+        c_id = line[21:22].strip() or "A"
+        if c_id != chain_id:
+            continue
+        atom_name = line[12:16].strip()
+        res_name = line[17:20].strip()
+        raw_seq = line[22:26].strip()
+        if not raw_seq.isdigit():
+            continue
+        res_seq = int(raw_seq)
+
+        if res_name not in _STANDARD_AA:
+            continue
+
+        altloc = line[16:17]
+        if altloc not in (" ", "A"):
+            continue
+        if atom_name.startswith("H") or (len(line) >= 78 and line[76:78].strip() == "H"):
+            continue
+
+        res_atoms.setdefault(res_seq, []).append(line)
+        res_names[res_seq] = res_name
+        if atom_name == "CA":
+            has_ca.add(res_seq)
+
+    valid_seqs = sorted([s for s in res_atoms if s in has_ca])
+    if not valid_seqs:
+        raise InvalidSimulationInputError(
+            f"Chain '{chain_id}' has no standard amino-acid residues to simulate.",
+            code="NO_SIMULATABLE_RESIDUES",
+        )
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    output_lines: list[str] = []
+    total_heavy = 0
+    res_ids: list[str] = []
+    res_types: list[str] = []
+    ca_indices: list[int] = []
+
+    atom_index = 1
+    for seq in valid_seqs:
+        res_ids.append(f"{chain_id}:{seq}")
+        res_types.append(res_names[seq])
+        for line in res_atoms[seq]:
+            atom_name = line[12:16].strip()
+            if atom_name == "CA":
+                ca_indices.append(total_heavy)
+            total_heavy += 1
+            formatted = line[:6] + f"{atom_index:>5}" + line[11:21] + f"{chain_id}{seq:>4}" + line[26:]
+            output_lines.append(formatted)
+            atom_index += 1
+
+    output_lines.append("TER")
+    output_lines.append("END")
+    destination.write_text("\n".join(output_lines) + "\n", encoding="utf-8")
+
+    return PreparedStructure(
+        path=destination,
+        chain_id=chain_id,
+        n_residues=len(valid_seqs),
+        n_atoms_heavy=total_heavy,
+        residue_ids=res_ids,
+        residue_types=res_types,
+        ca_indices=ca_indices,
+        notes=notes,
+    )
+
+
 def extract_chain(
     source: Path, destination: Path, chain_id: str
 ) -> PreparedStructure:
@@ -49,7 +151,10 @@ def extract_chain(
     Also records the residue ids/types in file order so downstream RMSF values
     can be attributed to the right residues.
     """
-    from Bio.PDB import PDBIO, PDBParser, Select
+    try:
+        from Bio.PDB import PDBIO, PDBParser, Select
+    except ImportError:
+        return _extract_chain_pure_python(source, destination, chain_id)
 
     structure = PDBParser(QUIET=True).get_structure("input", str(source))
     models = list(structure)

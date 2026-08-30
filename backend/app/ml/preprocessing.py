@@ -150,6 +150,81 @@ def _min_max(values: np.ndarray) -> np.ndarray:
     return (values - lo) / (hi - lo)
 
 
+def _featurise_structure_pure_python(
+    pdb_path: Path,
+    chain_id: str,
+    schema: FeatureSchema,
+    *,
+    pdb_id: str = "UPLOAD",
+) -> ChainFeatures:
+    from app.analysis.structural_damage import parse_pdb_atoms, compute_sasa
+
+    atoms = parse_pdb_atoms(pdb_path)
+    chain_atoms = [a for a in atoms if a.chain_id == chain_id and a.res_name in _THREE_TO_ONE]
+
+    if not chain_atoms:
+        raise InvalidProteinError(f"Chain '{chain_id}' not found or contains no standard protein residues.")
+
+    res_ca: dict[int, np.ndarray] = {}
+    res_type: dict[int, str] = {}
+    for a in chain_atoms:
+        if a.name == "CA":
+            res_ca[a.res_seq] = a.coord
+            res_type[a.res_seq] = a.res_name
+
+    valid_seqs = sorted(res_ca.keys())
+    if not valid_seqs:
+        raise InvalidProteinError(f"Chain '{chain_id}' contains no standard amino-acid residues with a Cα atom.")
+
+    n = len(valid_seqs)
+    seq = "".join(_THREE_TO_ONE[res_type[s]] for s in valid_seqs)
+
+    sasa_res = compute_sasa(chain_atoms, damage_res_seqs=valid_seqs)["per_residue_sasa"]
+    raw_sasa = np.array([sasa_res.get(f"{chain_id}:{s}", 0.0) for s in valid_seqs], dtype=float)
+    sasa_norm = _min_max(raw_sasa)
+
+    ca_coords = np.array([res_ca[s] * 10.0 for s in valid_seqs], dtype=float)
+    contacts = compute_contact_counts(ca_coords)
+    susceptibility = schema.susceptibility_by_residue
+
+    records = [
+        ResidueRecord(
+            residue_id=f"{chain_id}:{seq_num}",
+            chain_id=chain_id,
+            seq_num=seq_num,
+            residue_type=res_type[seq_num],
+            residue_index_norm=(i / (n - 1)) if n > 1 else 0.0,
+            residue_sasa_norm=float(sasa_norm[i]),
+            residue_contact_count=float(contacts[i]),
+            qualitative_susceptibility=susceptibility.get(
+                res_type[seq_num], "medium"
+            ),
+        )
+        for i, seq_num in enumerate(valid_seqs)
+    ]
+
+    mw = sum(_RESIDUE_MASS[c] for c in seq) + _WATER_MASS
+    hydro = schema.hydrophobic_set
+    charged = schema.charged_set
+
+    return ChainFeatures(
+        pdb_id=pdb_id,
+        chain_id=chain_id,
+        protein_length=n,
+        molecular_weight=round(mw, 4),
+        hydrophobic_fraction=sum(c in hydro for c in seq) / n,
+        charged_fraction=sum(c in charged for c in seq) / n,
+        residues=records,
+        source="recomputed",
+        warnings=[
+            "Features were recomputed from the uploaded structure. "
+            "'residue_sasa_norm' uses pure Python Shrake-Rupley which correlates "
+            "with the reference table the model was trained on but is not identical, "
+            "so this estimate is less faithful than one for an approved protein."
+        ],
+    )
+
+
 def featurise_structure(
     pdb_path: Path,
     chain_id: str,
@@ -161,8 +236,10 @@ def featurise_structure(
     try:
         from Bio.PDB import PDBParser
         from Bio.PDB.SASA import ShrakeRupley
-    except ImportError as exc:  # pragma: no cover - dependency is pinned
-        raise InvalidProteinError(f"BioPython is unavailable: {exc}") from exc
+    except ImportError:
+        return _featurise_structure_pure_python(
+            pdb_path, chain_id, schema, pdb_id=pdb_id
+        )
 
     structure = PDBParser(QUIET=True).get_structure(pdb_id, str(pdb_path))
     try:
