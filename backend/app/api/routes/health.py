@@ -10,6 +10,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from app.config import settings
+from app.core import diagnostics, storage
 from app.schemas.report import HealthResponse, ReadinessResponse
 from app.services import prediction_service, protein_service, simulation_service
 from app.utils.serialization import utc_now_iso
@@ -184,3 +185,52 @@ def readiness() -> ReadinessResponse:
         components=components,
         counts=counts,
     )
+
+
+@router.get(
+    "/system/storage",
+    summary="Runtime storage usage, quota and cleanup pressure",
+)
+def system_storage() -> dict:
+    """Where runtime/ space has gone, and whether cleanup is needed."""
+    return storage.storage_report().as_dict()
+
+
+@router.get(
+    "/system/diagnostics",
+    summary="One-shot diagnostics for a failed demo",
+)
+def system_diagnostics() -> dict:
+    """Job outcomes, stage timings, engine platform, storage and logs.
+
+    Everything a teammate needs to diagnose a failed run without opening four
+    runtime directories. Uploaded structures and absolute paths are redacted,
+    so the output is safe to paste into an issue.
+    """
+    return diagnostics.collect()
+
+
+@router.get(
+    "/system/support-bundle",
+    summary="Diagnostics packaged for sharing, with omissions stated",
+)
+def system_support_bundle(include_uploads: bool = False) -> dict:
+    """``include_uploads`` counts uploaded structures; it never embeds them."""
+    return diagnostics.support_bundle(include_uploads=include_uploads)
+
+
+@router.get(
+    "/system/cleanup/preview",
+    summary="What cleanup would delete, without deleting it",
+)
+def system_cleanup_preview() -> dict:
+    """Always a dry run. Deletion is not exposed over the API on purpose.
+
+    Removing a teammate's results should take a deliberate command on the
+    machine that holds them, not an HTTP GET that a browser could prefetch.
+    Use ``python scripts/cleanup_runtime.py --apply``.
+    """
+    candidates = storage.cleanup_candidates()
+    result = storage.run_cleanup(candidates, dry_run=True)
+    result["how_to_apply"] = "python scripts/cleanup_runtime.py --apply"
+    return result

@@ -25,12 +25,14 @@ from typing import Any
 
 from app.config import settings
 from app.core.exceptions import (
+    InsufficientStorageError,
     InvalidSimulationInputError,
     JobConflictError,
     NotFoundError,
 )
 from app.core.logging import get_logger
 from app.core.security import new_job_id, resolve_within, validate_job_id
+from app.core.storage import admission_check
 from app.schemas.simulation import STAGE_LABELS, STAGE_ORDER, JobStage, JobStatus
 from app.simulation.engine import _CancelledError, run_simulation
 from app.simulation.presets import SAFE_RETRY_PRESET_ID, get_preset
@@ -121,6 +123,12 @@ class JobManager:
         validation_warnings: list[str],
     ) -> str:
         preset = get_preset(request.preset_id)
+
+        # Storage admission (issue #26). Checked before the job is accepted so
+        # a full disk is an error message, not a run lost at step 18,000.
+        allowed, refusal = admission_check()
+        if not allowed:
+            raise InsufficientStorageError(refusal, code="INSUFFICIENT_STORAGE")
 
         with self._lock:
             if len(self._live) >= settings.max_concurrent_jobs:

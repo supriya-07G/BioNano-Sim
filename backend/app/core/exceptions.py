@@ -97,6 +97,18 @@ class UnsafePathError(BioNanoError):
     http_status = status.HTTP_400_BAD_REQUEST
 
 
+class InsufficientStorageError(BioNanoError):
+    """Not enough disk or quota headroom to start a job (issue #26).
+
+    Raised at submission rather than mid-run: a rejected submission is an
+    error message the user can act on, while a job that dies at step 18,000
+    because the disk filled is lost work.
+    """
+
+    code = "INSUFFICIENT_STORAGE"
+    http_status = status.HTTP_507_INSUFFICIENT_STORAGE
+
+
 # --------------------------------------------------------------------------- #
 # Envelope helpers
 # --------------------------------------------------------------------------- #

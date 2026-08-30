@@ -117,6 +117,12 @@ precomputed: ## Regenerate the labelled precomputed fallback result for 1UBQ
 # --------------------------------------------------------------------------- #
 # Clean
 # --------------------------------------------------------------------------- #
+diagnostics: ## Print runtime diagnostics (redacted, safe to share)
+	@$(PY) -c "import sys,json; sys.path.insert(0,'backend'); from app.core import diagnostics; print(json.dumps(diagnostics.collect(), indent=2, default=str))"
+
+cleanup: ## Preview runtime cleanup (add APPLY=1 to actually delete)
+	@$(PY) scripts/cleanup_runtime.py $(if $(APPLY),--apply)
+
 clean: ## Delete generated jobs, uploads, reports and logs
 	@$(PY) scripts/clean_runtime.py --yes
 

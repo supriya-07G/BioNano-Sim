@@ -57,6 +57,21 @@ class Settings(BaseSettings):
     max_upload_atoms: int = 100_000
     max_upload_residues: int = 2_000
 
+    # --- Storage quotas and retention (issues #23, #26) ---------------------
+    # A single paired experiment writes hundreds of MB of trajectory, so
+    # repeated team use fills a disk quietly. These are checked before a job
+    # starts: a rejected submission is an error message, a job that dies at
+    # step 18,000 because the disk filled is lost work.
+    runtime_quota_bytes: int = 8 * 1024**3        # 8 GiB under runtime/
+    min_free_disk_bytes: int = 2 * 1024**3        # refuse to start below 2 GiB
+
+    # Days to keep a finished job before it becomes a cleanup candidate.
+    # Failed and cancelled jobs go sooner: their artifacts are rarely wanted
+    # once the failure has been read, and they are the bulk of the churn.
+    retention_days_completed: int = 30
+    retention_days_failed: int = 7
+    retention_days_cancelled: int = 3
+
     # --- Simulation safety limits ------------------------------------------
     # One job at a time for the MVP (spec 8). Raising this needs a real queue.
     max_concurrent_jobs: int = 1
