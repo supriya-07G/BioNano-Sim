@@ -62,3 +62,29 @@ def test_unknown_route_uses_the_error_envelope(client, api):
     assert error["code"] == "NOT_FOUND"
     assert "request_id" in error
     assert isinstance(error["details"], list)
+
+
+def test_cors_origins_accept_a_comma_separated_env_value(monkeypatch):
+    """A split frontend/backend deployment sets this, and it used to crash boot.
+
+    pydantic-settings JSON-decodes complex-typed fields from the environment
+    before validators run, so a comma-separated value raised SettingsError and
+    the app never started. NoDecode on the field is what lets the validator see
+    the raw string.
+    """
+    from app.config import Settings
+
+    monkeypatch.setenv(
+        "BIONANO_CORS_ORIGINS", "https://a.example.com, https://b.example.com"
+    )
+    assert Settings().cors_origins == [
+        "https://a.example.com",
+        "https://b.example.com",
+    ]
+
+
+def test_cors_origins_default_to_local_dev(monkeypatch):
+    from app.config import Settings
+
+    monkeypatch.delenv("BIONANO_CORS_ORIGINS", raising=False)
+    assert "http://localhost:5173" in Settings().cors_origins

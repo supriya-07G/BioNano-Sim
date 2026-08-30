@@ -9,9 +9,10 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated
 
 from pydantic import Field, field_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 # backend/app/config.py -> backend/app -> backend -> <repo root>
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -43,7 +44,13 @@ class Settings(BaseSettings):
     # --- CORS ---------------------------------------------------------------
     # Local frontend dev origins only. Deliberately not "*": the API serves
     # file downloads and accepts uploads.
-    cors_origins: list[str] = Field(
+    # NoDecode is required, not cosmetic. pydantic-settings JSON-decodes any
+    # complex-typed field from the environment *before* validators run, so
+    # BIONANO_CORS_ORIGINS="https://a.com,https://b.com" raised SettingsError
+    # and the app failed to boot -- the _split_origins validator below never
+    # got the chance to run. This matters for any deployment that serves the
+    # frontend from a different origin than the API.
+    cors_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=lambda: [
             "http://localhost:5173",
             "http://127.0.0.1:5173",
