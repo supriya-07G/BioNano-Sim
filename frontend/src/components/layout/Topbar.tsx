@@ -4,7 +4,6 @@ import { Activity, BookOpen, Boxes, Cpu, ExternalLink } from 'lucide-react'
 import { ReadinessBadge } from '@/components/common/StatusBadge'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { cn } from '@/components/ui/cn'
-import { ThemeSwitcher } from './ThemeSwitcher'
 import { useReadiness } from '@/hooks/useSimulation'
 import { API_BASE } from '@/services/api'
 
@@ -19,16 +18,16 @@ export function Topbar({ className }: { className?: string }) {
   return (
     <header
       className={cn(
-        'flex h-14 shrink-0 items-center gap-4 border-b border-hairline bg-surface/80 px-4 backdrop-blur',
+        'flex h-14 shrink-0 items-center gap-4 border-b border-hairline bg-surface/80 px-4 shadow-[inset_0_-1px_0_rgba(255,255,255,0.02)] backdrop-blur-md',
         className,
       )}
     >
       <Link to="/" className="flex items-center gap-2.5">
-        <span className="relative grid h-8 w-8 place-items-center rounded-lg border border-accent/30 bg-accent/10">
+        <span className="relative grid h-8 w-8 place-items-center rounded-lg border border-accent/25 bg-accent/[0.08] shadow-[0_0_0_1px_rgba(204,194,255,0.12)]">
           <Boxes className="h-4 w-4 text-accent" aria-hidden />
         </span>
         <span className="leading-tight">
-          <span className="block text-sm font-semibold tracking-tight text-ink">
+          <span className="block text-sm font-semibold tracking-[0.14em] text-ink">
             COSMORA
           </span>
           <span className="block text-2xs text-ink-faint">
@@ -99,8 +98,6 @@ export function Topbar({ className }: { className?: string }) {
             <ReadinessBadge status={data.status} />
           </>
         )}
-
-        <ThemeSwitcher />
 
         <Link to="/methodology" className="btn-ghost !px-2.5 !py-1.5 !text-xs">
           <BookOpen className="h-3.5 w-3.5" aria-hidden />

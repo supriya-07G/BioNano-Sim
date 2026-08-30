@@ -1,6 +1,9 @@
 import { Outlet } from 'react-router-dom'
 
+import { useTheme } from '@/hooks/useTheme'
+
 import { Sidebar } from './Sidebar'
+import { Starfield } from './Starfield'
 import { Topbar } from './Topbar'
 
 /**
@@ -12,8 +15,13 @@ import { Topbar } from './Topbar'
  * layout free of scrollbars around the viewer.
  */
 export function AppShell() {
+  const { resolvedTheme } = useTheme()
+
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-void">
+    <div
+      data-theme={resolvedTheme}
+      className="internal-app-theme flex h-screen flex-col overflow-hidden bg-void"
+    >
       {/*
         First focusable element on the page, visually hidden until focused.
         Without it a keyboard user tabs through the whole sidebar on every
@@ -27,11 +35,11 @@ export function AppShell() {
       </a>
 
       {/* Fixed decorative ground; all content sits above it. */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 bg-grid-fine opacity-50"
-      />
-      <div aria-hidden className="pointer-events-none fixed inset-0 bg-orbit-glow" />
+      <div aria-hidden className="pointer-events-none fixed inset-0">
+        <div className="absolute inset-0 bg-grid-fine opacity-40" />
+        <div className="absolute inset-0 bg-orbit-glow opacity-75" />
+        <Starfield density={0.00016} className="opacity-75" />
+      </div>
 
       <div className="relative z-10 flex h-full flex-col">
         <Topbar />

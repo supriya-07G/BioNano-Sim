@@ -25,7 +25,7 @@ export function Sidebar({ className }: { className?: string }) {
   return (
     <nav
       className={cn(
-        'flex shrink-0 flex-col border-r border-hairline bg-surface/80 backdrop-blur',
+        'flex shrink-0 flex-col border-r border-hairline bg-surface/80 shadow-[inset_-1px_0_0_rgba(255,255,255,0.02)] backdrop-blur-md',
         className,
       )}
       aria-label="Primary"
@@ -37,9 +37,9 @@ export function Sidebar({ className }: { className?: string }) {
               to={to}
               className={({ isActive }) =>
                 cn(
-                  'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors duration-150',
+                  'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 ease-crisp',
                   isActive
-                    ? 'bg-accent/[0.12] text-accent shadow-[inset_0_0_0_1px_rgba(56,189,248,0.22)]'
+                    ? 'bg-accent/[0.10] text-accent shadow-[inset_0_0_0_1px_rgba(204,194,255,0.18)]'
                     : 'text-ink-muted hover:bg-raised hover:text-ink',
                 )
               }
@@ -63,7 +63,7 @@ export function Sidebar({ className }: { className?: string }) {
         ))}
       </ul>
 
-      <div className="border-t border-hairline p-3">
+      <div className="border-t border-hairline bg-void/40 p-3">
         <p className="text-2xs leading-relaxed text-ink-faint">
           MVP build. ML estimates are not experimentally validated; simulations are
           picosecond-scale.
