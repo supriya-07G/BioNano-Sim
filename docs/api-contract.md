@@ -428,6 +428,74 @@ correctly; pandas, R and text editors ignore it.
 
 ---
 
+## Paired Mechanical Experiments
+
+Exposes paired pristine-vs-damaged steered-MD mechanical pulling experiments.
+
+### `POST /experiments/import`
+
+Imports and validates an experiment artifact directory into the repository runtime.
+
+```json
+{
+  "source_path": "path/to/experiment_directory",
+  "experiment_id": "optional_override_id"
+}
+```
+
+Response (`201 Created`):
+```json
+{
+  "experiment_id": "1UBQ_MILD_74_seed1",
+  "status": "imported",
+  "message": "Successfully imported experiment '1UBQ_MILD_74_seed1'",
+  "detail": { ... }
+}
+```
+
+### `GET /experiments`
+
+Lists available paired experiments (`?limit=100`, 1–500).
+
+```json
+[{
+  "experiment_id": "1UBQ_MILD_74_seed1",
+  "protein_id": "1UBQ",
+  "pdb_id": "1UBQ",
+  "chain_id": "A",
+  "scenario_id": "GCR_DEEP_SPACE_REFERENCE",
+  "status": "COMPLETED",
+  "severity_label": "MILD",
+  "damage_residue_id": "A:74",
+  "residue_type": "ARG",
+  "baseline_stiffness": 603.0,
+  "damaged_stiffness": 504.0,
+  "stiffness_unit": "pN/nm",
+  "mechanical_degradation_pct": 16.4179,
+  "random_seed": 1,
+  "is_synthetic": false,
+  "qc_failures": []
+}]
+```
+
+### `GET /experiments/{experiment_id}`
+
+Full metadata, stiffness metrics, linear fit parameters, quality status, and available artifacts.
+
+### `GET /experiments/{experiment_id}/force-extension`
+
+Paired time series data points (`time_ps`, `restraint_center_nm`, `end_to_end_nm`, `extension_nm`, `force_pn`, `work_kj_mol`, `potential_energy_kj_mol`) for both pristine baseline and damaged runs.
+
+### `GET /experiments/{experiment_id}/structures/{condition}`
+
+Serves raw PDB coordinates (`chemical/x-pdb`). Condition options: `baseline`, `pristine`, `damaged`, `baseline_prepared`, `damaged_prepared`, `baseline_topology`, `damaged_topology`.
+
+### `GET /experiments/{experiment_id}/report`
+
+Complete experiment record with manifests and features as a downloadable JSON file.
+
+---
+
 ## CORS
 
 Restricted to the local frontend dev origins (5173 and 4173 on `localhost` and
