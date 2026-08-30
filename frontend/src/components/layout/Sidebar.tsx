@@ -54,7 +54,12 @@ export function Sidebar({ className }: SidebarProps) {
     <aside
       aria-label="Primary Navigation"
       className={cn(
-        'relative flex shrink-0 flex-col border-r border-hairline bg-surface/80 shadow-[inset_-1px_0_0_rgba(255,255,255,0.02)] backdrop-blur-md transition-[width] duration-300 ease-crisp',
+        // min-w-0 is what makes the collapse actually work. This aside is a
+        // flex item, and a flex item's automatic minimum size is its content's
+        // min-content width -- roughly 192px here -- which silently overrode
+        // `width: 4rem`. The class flipped and the state persisted; only the
+        // width never moved.
+        'relative flex min-w-0 shrink-0 flex-col overflow-x-hidden border-r border-hairline bg-surface/80 shadow-[inset_-1px_0_0_rgba(255,255,255,0.02)] backdrop-blur-md transition-[width] duration-300 ease-crisp',
         collapsed ? 'w-16' : 'w-48 lg:w-56',
         className,
       )}
