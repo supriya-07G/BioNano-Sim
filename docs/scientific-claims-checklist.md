@@ -7,7 +7,7 @@ Run this before any tagged demo release (issue #27).
 A claim with no supporting artifact does not ship. A claim whose limitation is
 not stated where the claim appears does not ship either.
 
-**Last completed:** 2026-08-30, commit `085cac8`
+**Last completed:** 2026-08-30, commit `d6ceea2`
 **Completed by:** clean-checkout run + source verification, not from memory
 
 ---
@@ -21,7 +21,7 @@ not stated where the claim appears does not ship either.
 | Measures stiffness in pN/nm | `force_extension.csv`, contract enforces `stiffness_unit` | An apparent stiffness from a non-equilibrium pull, not an equilibrium elastic modulus. |
 | Discriminates load-bearing folds | [RESULTS.md §2](RESULTS.md) — 4 of 13 register, r² 0.52–0.82, others 0% QC | 13 proteins. 1TEN is a known false negative. |
 | Damage is a structural proxy | `app/simulation/damage.py`, `PROXY_TYPE = SIDE_CHAIN_LOSS`, 17 tests | Side-chain truncation to ALA. Not radiation chemistry. |
-| ML model trained on real simulation labels | `models/COSMORA_real_model_bundle.pkl`, `scripts/rebuild_real_bundle.py` | `scientifically_validated: false`. R² −0.004, does not beat the mean. Three unmet criteria recorded in the bundle. |
+| ML model trained on real simulation labels | `models/COSMORA_real_model_bundle.pkl`, `scripts/rebuild_real_bundle.py` | `scientifically_validated: false` — 18 labels of 30 required, 4 proteins of 8, worst label SE 13.6 pp against a 10.0 pp ceiling. Criteria and failures are recorded in the bundle itself. |
 | Dataset is validated | `scripts/validate_dataset.py`, run in CI; 520 rows | Two provenance columns absent (documented producer gap). |
 | Reproducible | `sim_config_hash`, seeded, `deterministic` mode pins CPU to 1 thread | Bit-reproducibility verified on CPU only, not across platforms. |
 
@@ -42,10 +42,16 @@ Verified against `app/simulation/validators.py` and `presets.py`.
 | `exposure_duration_days` | **provenance only** | ✅ |
 | `scenario_id` | **provenance only** | ✅ excluded from the model by construction |
 
-⚠️ **Open gap:** these are stated in warnings and the methodology page, but the
-inputs are not yet individually marked in the UI. That is issue **#17**, still
-open. Until it closes, a demo must say this aloud rather than rely on the
-interface.
+✅ **Closed by #17.** Each input now carries its own badge in the experiment
+form — `affects ML`, `drives simulation`, `not an ML input`, `provenance only` —
+so the interface states the coupling before a run rather than leaving it to a
+warning afterwards.
+
+One correction was needed on top of it: the force control initially read
+"pulling unavailable / future scope", which contradicted the Mechanical Pull
+preset two rows below it in the same form. Steered MD shipped in #9. The badge
+now reads `provenance only`, and the note points at the preset that does set
+the load.
 
 ---
 
@@ -82,15 +88,17 @@ interface.
 
 | Figure | Claimed | Actual | Status |
 |---|---|---|---|
-| Backend tests | 196 (187 fast + 9 slow) | 196 | ✅ corrected this pass |
+| Backend tests | 312 (303 fast + 9 slow) | 312 | ✅ verified |
 | Experiments run | 520 | 520 | ✅ |
 | Rows passing QC | 130 (25%) | 130 | ✅ |
 | Usable labels / proteins | 18 / 4 | 18 / 4 | ✅ |
 | Held-out R² | −0.004 | −0.004 | ✅ |
 
-🔧 **Corrected this pass:** the README claimed both "100 tests" and "147 tests"
-in different sections. Both were stale; both now read 196. This is exactly the
-drift the checklist exists to catch.
+🔧 **Corrected across passes:** the README has twice drifted on this figure —
+"100" and "147" in different sections, then "196" after the suite grew again.
+It now reads 312, and `docs/architecture.md` was corrected with it. Test counts
+drift faster than any other number here, which is why this row is checked
+rather than trusted.
 
 ---
 

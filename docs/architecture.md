@@ -274,7 +274,7 @@ queue plus admission control. The cancel mechanism (a per-job
 | `test_prediction.py` | Bundle load and self-verification, determinism, dose-invariance, OOV detection, envelope warnings, scenario refusal |
 | `test_simulation_validation.py` | Presets and their declared limits, missing-OpenMM degradation, request validation, job lifecycle, precomputed labelling, real OpenMM runs (`-m slow`) |
 
-100 tests. The suite passes with OpenMM absent — the slow tests skip and the
+312 tests. The suite passes with OpenMM absent — the slow tests skip and the
 degradation tests assert that the API reports 503 with remediation rather than
 crashing. Two notable assertions:
 

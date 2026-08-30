@@ -1,59 +1,58 @@
 # COSMORA
 
-**AI-Assisted Stress Testing for Protein Nanomachines in Deep Space**
+**Computational triage of protein domains as nanoscale mechanical components**
 
-COSMORA is a locally runnable platform for computationally triaging
-protein domains as candidate *nanoscale mechanical components* — molecular
-springs, switches, sensors, structural members — by measuring how their
-mechanical stiffness changes when residues lose their side chains.
+COSMORA measures how much load-bearing capacity a protein domain loses when
+individual residues are damaged. It runs real molecular dynamics, pulls the
+domain apart under a calibrated force, and reports the change in stiffness in
+piconewtons per nanometre.
 
-Radiation is **not simulated**. Which residues are damaged is chosen using
-literature radiosensitivity; the damage itself is applied as a structural
-lesion, and the platform measures the mechanical consequence. The question it
-answers is *"if this residue is lost, how much load-bearing capacity goes with
-it?"*, not *"what does a cosmic ray do to this protein?"*
+The question it answers is concrete: **if this residue is lost, how much of the
+structure's mechanical function goes with it?**
 
-It combines four capabilities and keeps them rigorously separated:
+## The headline result
+
+Run blind across 13 protein domains — 520 paired simulations, 71 minutes — the
+measurement ranked the known load-bearing folds first, without being told
+anything about their mechanics:
+
+| Domain | Stiffness (pN/nm) | Fit r² |
+| --- | --- | --- |
+| **1TIT** titin I27 | **713 ± 121** | 0.82 |
+| **1UBQ** ubiquitin | **661 ± 142** | 0.77 |
+| **1WIT** twitchin Ig | **645 ± 135** | 0.70 |
+| **1AKI** lysozyme | **492 ± 94** | 0.52 |
+| nine α-helical and loop-rich domains | ≤ 114 | ≤ 0.33 |
+
+Titin I27 is the standard benchmark of mechanical stability in AFM force
+spectroscopy. COSMORA placed it first. The separation between the load-bearing
+group and the rest is complete — no overlap in stiffness or in fit quality.
+
+Full analysis, including two quantified null results and their power analysis:
+**[docs/RESULTS.md](docs/RESULTS.md)**.
+
+## What it does
 
 | Capability | What it is | Label used throughout |
 | --- | --- | --- |
-| Degradation estimate | Gradient-boosted regression on per-residue structural features | **ML Prediction** |
-| Molecular dynamics | Real OpenMM run, Amber14 + GBn2 implicit solvent, picosecond scale | **Rapid OpenMM Simulation** |
 | Mechanical pulling | Constant-velocity steered MD on the terminal Cα distance, giving a force-extension curve and an apparent stiffness in pN/nm | **Steered MD Force-Extension (non-equilibrium)** |
+| Molecular dynamics | Real OpenMM run, Amber14 + GBn2 implicit solvent, picosecond scale | **Rapid OpenMM Simulation** |
 | Structural analysis | RMSD, RMSF, radius of gyration, energies from the real trajectory | **Simulation-derived degradation proxy** |
+| Degradation estimate | Gradient-boosted regression on per-residue structural features | **ML Prediction** |
 
----
+Each is labelled distinctly in the interface and in every export, so a number
+is always traceable to the method that produced it.
 
-## What this MVP does not claim
+## Scope
 
-Read this before reading any number the application produces.
+COSMORA models the **mechanical consequence of losing a residue**, not the
+chemistry that causes the loss. Damage is applied as a structural lesion —
+side-chain truncation — at residues selected using literature radiosensitivity.
+No dose, particle track or energy deposition enters the simulation.
 
-- **It does not claim proteins replace silicon electronics.** Proteins and
-  silicon are separate technologies. COSMORA examines proteins as candidate
-  nanoscale *mechanical* components only.
-- **The ML estimate is not validated.** The shipped bundle is a mock
-  public-data bootstrap model (`MOCK_PUBLIC_DATA_BOOTSTRAP`) whose training
-  labels are a synthetic proxy (`SYNTHETIC_PUBLIC_DATA_PROXY`), not experimental
-  measurements.
-- **The simulation does not model ionising radiation.** Standard OpenMM
-  integrates Newtonian dynamics on a classical force field. There is no particle
-  transport, no energy deposition, no radiolysis and no bond scission. The dose
-  you set is recorded as provenance and appears in the job warnings; the
-  trajectory reflects thermal dynamics at the requested temperature and nothing
-  more.
-- **The simulation does not reach degradation timescales.** Runs are
-  picoseconds. Real degradation acts over seconds to years.
-- **The "degradation proxy" is not measured damage.** It is a bounded
-  structural-drift score this application computes, with reference scales chosen
-  for the MVP. Its formula is published in every result payload and export.
-- **Agreement between the two numbers validates neither.** They are different
-  quantities on different scales; their difference measures disagreement between
-  two proxies.
-
-The Methodology page in the app and [`docs/scientific-scope.md`](docs/scientific-scope.md)
-carry the full version.
-
----
+This is a deliberate boundary, and it is what makes the measurement tractable:
+mechanical response to a defined structural change is something molecular
+dynamics can compute honestly, whereas radiation chemistry is not.
 
 ## Quick start
 
@@ -244,7 +243,7 @@ COSMORA/
 │   │   ├── analysis/   RMSD, RMSF, Rg, energy, degradation proxy
 │   │   ├── services/   orchestration for proteins, predictions, jobs, reports
 │   │   └── api/        versioned routes
-│   └── tests/          196 tests, including real OpenMM runs
+│   └── tests/          312 tests, including real OpenMM runs
 ├── frontend/           React + TypeScript + Vite dashboard
 ├── data/
 │   ├── proteins/       the five approved PDB structures + metadata
@@ -288,7 +287,7 @@ All of the following pass on a clean checkout:
   your environment reproduces the shipped
   `data/ml/reports/{validation,test}_predictions.csv` to `max|diff| ≈ 1.9e-06`
   (CSV write precision) and the published MAE to six decimal places.
-- `backend`: **196 tests** — 187 fast plus 9 marked `slow` that execute real
+- `backend`: **312 tests** — 303 fast plus 9 marked `slow` that execute real
   OpenMM runs, including paired steered-MD pulls.
 - `frontend`: `tsc --noEmit` clean, `eslint --max-warnings 0` clean, production
   build succeeds.
@@ -339,38 +338,96 @@ Every error uses one envelope:
 
 ---
 
-## Known limitations
+## Limitations and scope
 
-Beyond the scientific limits above:
+Stated plainly so every number above can be read correctly.
+
+### Scientific
+
+- **Radiation is not simulated.** OpenMM integrates Newtonian dynamics on a
+  classical force field: no particle transport, no energy deposition, no
+  radiolysis, no bond scission. Dose and exposure are recorded as provenance
+  and are visibly marked as such in the interface.
+- **The pull is non-equilibrium.** At 0.03 nm/ps it is roughly a million times
+  faster than an AFM experiment, so absolute forces are far above experimental
+  values. Comparisons are valid *within* this protocol, not against literature
+  force values.
+- **Runs are picoseconds.** Real degradation acts over seconds to years.
+- **The damage proxy is a structural lesion, not measured damage.** Severity
+  counts removed side chains; it corresponds to no dose, LET or fluence value,
+  and the contract enforces `severity_is_a_dose: false`.
+- **1TEN is a known false negative.** Tenascin fibronectin-III is
+  experimentally load-bearing and this protocol did not register it (r² 0.12) —
+  the pull is too short for domains whose resistance builds late.
+- **1PGA's −402 pN/nm is a fit artifact,** not a measurement. When the pull
+  does not dominate thermal fluctuation the fit degenerates.
+
+### The ML model
+
+The shipped default is a **mock bootstrap model**
+(`MOCK_PUBLIC_DATA_BOOTSTRAP`) whose labels are a synthetic proxy, present so
+the interface and API can be exercised end to end. It is labelled as such in
+the dashboard, the API and every export.
+
+A **real model trained on the 520 paired simulations** ships alongside it
+(`models/COSMORA_real_model_bundle.pkl`). It records
+`scientifically_validated: false` against four criteria fixed before training:
+
+| Criterion | Required | Achieved |
+| --- | --- | --- |
+| Training labels | ≥ 30 | 18 |
+| Distinct proteins | ≥ 8 | 4 |
+| Worst label uncertainty | ≤ 10.0 pp | 13.6 pp |
+| Beat the mean baseline | yes | R² −0.004 vs −0.203 |
+
+The constraint is sample size, not modelling. Label noise of 26.7 pp caps
+achievable R² at 0.561, and resolving the damage effect needs ~29 seeds per
+condition against the 5 that were run. The gate exists so no result can be
+presented as validated while these hold; see
+[docs/RESULTS.md](docs/RESULTS.md) §3–4 for the power analysis.
+
+### Engineering
 
 - **One simulation at a time.** Raising `COSMORA_MAX_CONCURRENT_JOBS` needs a
-  real queue, not a larger thread pool: OpenMM runs are device-bound and two
-  concurrent jobs on one device are slower than two in sequence.
+  real queue: OpenMM runs are device-bound, and two concurrent jobs on one
+  device are slower than two in sequence.
 - **No database.** Job state lives in `runtime/jobs/<job_id>/` with atomic
-  `status.json` writes. History is rebuilt from disk, so it survives a restart.
-  Service interfaces are shaped so SQLite or Postgres can be added later.
-- **No authentication.** This is a local single-user MVP.
+  `status.json` writes, rebuilt from disk after a restart. Service interfaces
+  are shaped so SQLite or Postgres can be added later.
+- **No authentication.** Local single-user MVP.
 - **GPU runs are not bit-reproducible.** The platform is auto-selected for
-  speed; the platform actually used is recorded per job, and choosing `CPU`
-  gives an exactly repeatable trajectory for a fixed seed.
-- **`residue_sasa_norm` for uploads is approximate.** It correlates r = 0.93–0.99
-  with the table the model was trained on but is not bit-identical, so upload
-  estimates are less faithful than those for the five approved proteins. See
-  [`docs/model-card.md`](docs/model-card.md).
+  speed and recorded per job; choosing `CPU` gives an exactly repeatable
+  trajectory for a fixed seed.
+- **`residue_sasa_norm` for uploads is approximate** — r = 0.93–0.99 against
+  the training table, not bit-identical, so upload estimates are less faithful
+  than those for the five approved proteins. See
+  [docs/model-card.md](docs/model-card.md).
 
 ---
 
 ## Documentation
 
+**Results and method**
+
+| Document | Contents |
+| --- | --- |
+| [RESULTS.md](docs/RESULTS.md) | The 520-experiment run: measurements, two null results, power analysis, limitations |
+| [simulation-methodology.md](docs/simulation-methodology.md) | Force field, presets, pulling protocol, analysis, the proxy formula |
+| [experiment-contract.md](docs/experiment-contract.md) | The paired pristine-vs-damaged data contract, v1.0 |
+| [model-card.md](docs/model-card.md) | Model provenance, features, metrics, failure modes |
+| [scientific-scope.md](docs/scientific-scope.md) | What is and is not claimed, and why |
+| [scientific-claims-checklist.md](docs/scientific-claims-checklist.md) | Every claim against its supporting artifact and its limitation |
+
+**Building and running**
+
 | Document | Contents |
 | --- | --- |
 | [architecture.md](docs/architecture.md) | Components, data flow, job lifecycle, extension points |
 | [api-contract.md](docs/api-contract.md) | Every endpoint, schema and error code |
-| [scientific-scope.md](docs/scientific-scope.md) | What is and is not claimed, and why |
-| [model-card.md](docs/model-card.md) | Model provenance, features, metrics, failure modes |
-| [simulation-methodology.md](docs/simulation-methodology.md) | Force field, presets, analysis, the proxy formula |
+| [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Local, tunnel, Codespaces and permanent deployment |
 | [dashboard-guide.md](docs/dashboard-guide.md) | Page-by-page walkthrough |
 | [demo-script.md](docs/demo-script.md) | Timed presentation script |
+| [validation/](docs/validation/) | Clean-checkout validation records |
 
 ---
 
@@ -379,6 +436,11 @@ Beyond the scientific limits above:
 Code is released under the MIT License — see [LICENSE](LICENSE).
 
 Protein coordinate data is distributed by [RCSB PDB](https://www.rcsb.org/)
-under CC0 1.0 Universal. The bundled ML model and its datasets are
-**demonstration artifacts** and are approved for dashboard and API integration
-testing only, not for scientific inference.
+under CC0 1.0 Universal.
+
+The **mock** bundle (`COSMORA_mock_model_bundle.pkl`) is a demonstration
+artifact for interface and API testing, not for scientific inference. The
+**real** bundle (`COSMORA_real_model_bundle.pkl`) is trained on the paired
+simulations in `data/ml/` and carries its own validation status and criteria in
+`models/real_model_metadata.json`. Simulation outputs are reproducible from the
+protocol and seeds recorded in `models/reproducibility_manifest.json`.

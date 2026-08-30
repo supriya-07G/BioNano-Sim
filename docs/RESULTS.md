@@ -3,6 +3,27 @@
 **Run date:** 2026-08-30 · **Config hash:** `779b297ee54d560c…` ·
 **520 paired experiments in 71 minutes** · `is_synthetic: false`
 
+## Summary
+
+**The measurement works.** Run blind across 13 domains, it separated the four
+load-bearing folds from the nine that are not, with no overlap in stiffness or
+fit quality — and ranked titin I27 first, which is the standard experimental
+benchmark for mechanical stability. Nothing in the pipeline was told which
+proteins were expected to be stiff.
+
+**Single-residue damage is not resolvable at this sample size.** The effect is
+smaller than run-to-run noise of 26.7 pp. This is quantified rather than
+asserted: ~29 seeds per condition would resolve it against the 5 that were run.
+
+**Stiffness is not predictable from sequence composition** with 13 proteins and
+five features. No model beat its own baseline under leave-one-protein-out
+cross-validation.
+
+The second and third are reported as null results with their power analysis,
+because a measurement that discriminates is worth more than a model that does
+not, and knowing the sample size required is worth more than an unreliable
+number.
+
 ## 1. What was run
 
 Every experiment is a *paired* comparison: one pristine pull and one damaged

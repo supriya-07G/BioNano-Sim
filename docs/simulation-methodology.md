@@ -39,9 +39,11 @@ Radiation reaches COSMORA's output **only** through the ML model's
 categorical scenario feature — and that model was fitted on synthetic proxy
 labels. Nothing in the physics path is radiation-aware.
 
-Similarly, `mechanical_force_pn` is recorded but **no external pulling force is
-applied**. Steered molecular dynamics is future scope, and a non-zero value
-produces its own warning.
+`mechanical_force_pn` is recorded for provenance and **does not set the load**.
+Steered molecular dynamics is implemented — see the Mechanical Pull preset
+below — but the load comes from that preset's spring constant and pulling
+velocity, not from this field, and a non-zero value produces its own warning
+saying so.
 
 ### The project's original radiation script
 
@@ -123,7 +125,51 @@ repeatable trajectory for a fixed seed.
 You can see this in practice: two runs of 1UBQ with identical settings and seed
 42 on OpenCL gave final RMSD 0.1442 nm and 0.1360 nm.
 
-## 5. Progress reporting
+## 5. Steered molecular dynamics: the Mechanical Pull preset
+
+The pulling protocol is what produces a stiffness in pN/nm, and it is the
+measurement the project's primary result rests on.
+
+**How the force is applied.** A `CustomBondForce` holds a harmonic restraint
+between the first and last Cα of the chain — the N- and C-terminal anchors —
+and its centre is moved outward at constant velocity. The molecule resists; the
+force carried by the restraint is what gets recorded.
+
+| Parameter | Value |
+|---|---|
+| Force field | `amber14-all.xml` + `implicit/gbn2.xml` |
+| Minimisation / equilibration / pull | 500 / 1,000 / 10,000 steps |
+| Timestep | 2.0 fs |
+| Spring constant | 1,000 kJ/mol/nm² |
+| Pulling velocity | 0.05 nm/ps |
+| Restraint centre updated every | 10 steps |
+| Sampled every | 50 steps |
+
+**Units.** Force is converted to piconewtons on write, at 1 kJ/mol/nm =
+1.6605 pN. Storing kJ/mol/nm and calling it pN would inflate every stiffness by
+three orders of magnitude, so `stiffness_unit` is a literal type in the data
+contract and a wrong unit fails validation rather than propagating.
+
+**`force_extension.csv`** carries seven columns, units in the names:
+`time_ps`, `restraint_center_nm`, `end_to_end_nm`, `extension_nm`, `force_pn`,
+`work_kj_mol`, `potential_energy_kj_mol`.
+
+**How stiffness is fitted.** Linear least squares of force against extension,
+but not over the whole curve. Early samples are dominated by thermal
+fluctuation rather than the applied load, so the fit starts where force first
+exceeds 3× the noise floor estimated from the pre-pull baseline, block-averages
+over 25 samples, and requires at least 5 points. A fit that cannot meet those
+conditions is returned with `reliable: false` and a list of reasons rather than
+a number that looks usable.
+
+**What this protocol is not.** At 0.05 nm/ps the pull is roughly a million
+times faster than an AFM experiment. Absolute forces are therefore far above
+experimental values, and a stiffness from this protocol is comparable only to
+another run of the same protocol — never to a literature force. The protocol is
+hashed into `sim_config_hash`, and the dataset validator refuses to pool rows
+produced under different hashes for exactly this reason.
+
+## 6. Progress reporting
 
 Progress comes from the integrator's own step counter, never a timer. The
 production loop advances in 250-step chunks and publishes after each:
@@ -141,7 +187,7 @@ Stage weights for the overall percentage are declared in
 production the fraction is the real step ratio, so the bar tracks actual work
 rather than interpolating.
 
-## 6. Analysis
+## 7. Analysis
 
 All metrics are computed from the real trajectory. MDTraj is used when
 importable; otherwise a self-contained DCD reader in `app/simulation/engine.py`
@@ -164,7 +210,7 @@ come out as A:76 (0.370 nm), A:75 (0.233 nm), A:74 (0.147 nm) — the C-terminal
 tail, which is exactly what the experimental ubiquitin literature reports as the
 most flexible region.
 
-## 7. The degradation proxy
+## 8. The degradation proxy
 
 The single most easily misread number in the application.
 
@@ -222,7 +268,7 @@ A typical 1UBQ run gives ML ≈ 49.5 % against a proxy ≈ 18 %, i.e. "divergent
 That is the expected outcome for two unrelated proxies on different scales, and
 the UI says so rather than implying one is wrong.
 
-## 8. Stability verdict
+## 9. Stability verdict
 
 | Final Cα RMSD | Verdict |
 | --- | --- |
@@ -234,7 +280,7 @@ the UI says so rather than implying one is wrong.
 Presentational heuristics for this MVP, not published stability criteria. The
 threshold note travels with the verdict in every response.
 
-## 9. Safety limits
+## 10. Safety limits
 
 | Limit | Default | Rationale |
 | --- | --- | --- |
@@ -246,7 +292,7 @@ threshold note travels with the verdict in every response.
 | Temperature | 100 – 500 K | Below ~100 K the implicit-solvent model and HBonds constraints are not meaningful; above ~500 K a 2 fs timestep is unstable |
 | Upload size | 8 MiB | With 100,000 atom and 2,000 residue caps |
 
-## 10. Job directory
+## 11. Job directory
 
 ```
 runtime/jobs/<job_id>/
@@ -277,7 +323,7 @@ a dedicated path that sets `failed`/`cancelled`, records `error_code` and
 attaches a retry hint. `GET /simulations/{job_id}/results` returns 404 for any
 non-completed job.
 
-## 11. Reproducing a run
+## 12. Reproducing a run
 
 Every job records what is needed to repeat it: structure identity and chain,
 scenario, preset, force field, solvent model, constraints, cutoff, integrator,
