@@ -130,7 +130,13 @@ export function Starfield({ className, density = 0.00013, animated = true }: Sta
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className={cn('pointer-events-none absolute inset-0 h-full w-full', className)}
+      // `absolute inset-0` sized this canvas to the whole scrollable
+      // document -- 7113 px tall on the landing page -- so every animation
+      // frame cleared and repainted that entire surface and blocked the
+      // main thread. Fixed positioning sizes it to the viewport instead,
+      // which is what a background should do anyway: stay put while the
+      // page scrolls past it.
+      className={cn('pointer-events-none fixed inset-0 h-screen w-screen', className)}
     />
   )
 }

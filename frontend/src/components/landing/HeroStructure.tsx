@@ -84,7 +84,6 @@ export function HeroStructure({ className }: { className?: string }) {
           error={structure.error}
           mode="cartoon"
           colourMode="chain"
-          autoSpin
           transparent
           showControls={false}
           screenshotName={`COSMORA-${selected.pdbId}`}
