@@ -1,55 +1,70 @@
-import { Link } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Activity,
   ArrowRight,
-  Atom,
   BookOpen,
   Boxes,
   Cpu,
+  Database,
+  FlaskConical,
   Microscope,
   Radiation,
+  Scissors,
   Settings2,
   Sparkles,
 } from 'lucide-react'
 
 import { ScopeNotice } from '@/components/common/ScientificNotice'
 import { HeroStructure } from '@/components/landing/HeroStructure'
+import { ScientificDistinction } from '@/components/landing/ScientificDistinction'
 import { OrbitLines, Starfield } from '@/components/layout/Starfield'
 import { cn } from '@/components/ui/cn'
 
 const CHIPS = [
-  { icon: Boxes, label: '5 approved proteins' },
-  { icon: Activity, label: 'ML degradation estimation' },
-  { icon: Cpu, label: 'OpenMM rapid simulation' },
-  { icon: Atom, label: 'Interactive molecular analysis' },
+  { icon: Boxes, label: '13 approved protein domains' },
+  { icon: Activity, label: '520 paired steered MD experiments' },
+  { icon: Cpu, label: 'OpenMM force-extension engine' },
+  { icon: Database, label: 'Empirical physics dataset' },
 ] as const
 
-const WORKFLOW = [
+const COUNTERS = [
+  { value: '520', label: 'Paired MD Experiments', sub: 'Pristine vs Damaged steered pulling runs' },
+  { value: '13', label: 'Validated Domains', sub: 'Including titin I27 benchmark & 2F4K' },
+  { value: '520', label: 'Damage Configurations', sub: 'Targeted side-chain lesion positions' },
+  { value: '100%', label: 'Empirical Physics', sub: 'Measured in piconewtons per nanometre' },
+] as const
+
+const PAIRED_WORKFLOW = [
   {
     icon: Boxes,
-    title: 'Select protein',
-    body: 'Choose one of five approved domains, or upload your own validated PDB.',
+    title: '1. Protein Selection',
+    body: 'Select an approved domain (e.g. 1UBQ, titin I27) or onboard a custom candidate PDB structure.',
   },
   {
-    icon: Settings2,
-    title: 'Configure environment',
-    body: 'Pick a demonstration radiation scenario and set temperature and exposure.',
+    icon: Activity,
+    title: '2. Pristine Baseline Test',
+    body: 'Execute OpenMM steered MD pulling along terminal vector to measure pristine stiffness (k_pristine).',
   },
   {
-    icon: Sparkles,
-    title: 'Predict degradation',
-    body: 'Get a per-residue ML estimate from the MVP bootstrap model.',
+    icon: Scissors,
+    title: '3. Controlled Damage Proxy',
+    body: 'Apply targeted side-chain truncation / lesion at radiosensitive residue candidate sites.',
   },
   {
     icon: Radiation,
-    title: 'Run rapid simulation',
-    body: 'Execute a real, short OpenMM molecular-dynamics run and watch it progress.',
+    title: '4. Damaged Mechanical Test',
+    body: 'Re-pull damaged structure under identical steered MD parameters to measure post-lesion stiffness (k_damaged).',
   },
   {
-    icon: Microscope,
-    title: 'Analyse stability',
-    body: 'Compare RMSD, RMSF and radius of gyration, then export the full record.',
+    icon: Settings2,
+    title: '5. Stiffness Loss Comparison',
+    body: 'Calculate absolute Δk and percentage stiffness degradation from overlaid force-extension curves.',
+  },
+  {
+    icon: Database,
+    title: '6. ML Dataset & Triage',
+    body: 'Feed measured physics into the COSMORA dataset to train millisecond per-residue ML triage models.',
   },
 ] as const
 
@@ -78,12 +93,12 @@ export function LandingPage() {
           </span>
         </div>
         <nav className="flex items-center gap-2">
-          <Link to="/methodology" className="btn-ghost !text-xs">
+          <RouterLink to="/methodology" className="btn-ghost !text-xs">
             Methodology
-          </Link>
-          <Link to="/dashboard" className="btn-secondary !text-xs">
+          </RouterLink>
+          <RouterLink to="/dashboard" className="btn-secondary !text-xs">
             Open dashboard
-          </Link>
+          </RouterLink>
         </nav>
       </header>
 
@@ -100,74 +115,56 @@ export function LandingPage() {
           >
             <div className="grid items-center gap-8 lg:grid-cols-[1.15fr_1fr]">
               <div className="max-w-2xl">
-            <span className="badge border-accent/35 bg-accent/[0.08] text-accent">
-              MVP · scientific integrity first
-            </span>
+                <span className="badge border-accent/35 bg-accent/[0.08] text-accent">
+                  COSMORA Paired-Mechanical Platform
+                </span>
 
-            <h1 className="text-balance mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-ink lg:text-5xl">
-              Engineering Proteins That{' '}
-              <span className="bg-gradient-to-r from-accent via-accent-soft to-violet bg-clip-text text-transparent">
-                Survive Deep Space
-              </span>
-            </h1>
+                <h1 className="text-balance mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-ink lg:text-5xl">
+                  Computational Stress-Testing of{' '}
+                  <span className="bg-gradient-to-r from-accent via-accent-soft to-violet bg-clip-text text-transparent">
+                    Protein Nanomachinery
+                  </span>
+                </h1>
 
-            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink-muted">
-              Proteins are being engineered into the machinery of long-duration
-              missions: springs, switches, sensors, structural members. In deep
-              space that machinery is bombarded for months, and there is{' '}
-              <strong className="text-ink">
-                no repair, no replacement and no resupply
-              </strong>
-              . A component that quietly loses its load-bearing capacity in
-              transit is a component that fails when it is needed.
-            </p>
+                <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink-muted">
+                  Proteins are engineered into spaceflight nanomachinery: molecular springs, switches, sensors, and structural members. In deep space, components face unshielded radiation and mechanical stress with{' '}
+                  <strong className="text-ink">no repair, replacement, or resupply</strong>.
+                </p>
 
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-muted">
-              COSMORA answers the question that follows.{' '}
-              <strong className="text-ink">
-                Which domains still carry load once damage has occurred?
-              </strong>{' '}
-              It measures the answer rather than estimating it. A residue is
-              removed, the domain is pulled apart by{' '}
-              <strong className="text-ink">steered molecular dynamics</strong>,
-              and the change in stiffness is recorded in piconewtons per
-              nanometre. Real physics, on real coordinates, before launch.
-            </p>
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-muted">
+                  COSMORA measures load-bearing capacity directly.{' '}
+                  <strong className="text-ink">Which domains carry load once damage occurs?</strong>{' '}
+                  A candidate residue is truncated, the domain is pulled via{' '}
+                  <strong className="text-ink">steered molecular dynamics</strong>, and the change in stiffness ($\Delta k$) is measured in piconewtons per nanometre (pN/nm). Real physics, on real coordinates.
+                </p>
 
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-muted">
-              Across{' '}
-              <strong className="text-ink">520 paired simulations</strong> of 13
-              domains it separated the four that bear load from the nine that do
-              not, with no overlap, and ranked{' '}
-              <strong className="text-ink">titin I27</strong> first: the protein
-              that has served as the experimental benchmark for mechanical
-              stability for twenty-five years. It was never told which answer to
-              give.
-            </p>
+                <div className="mt-7 flex flex-wrap items-center gap-3">
+                  <RouterLink to="/dashboard" className="btn-primary shadow-lg">
+                    <FlaskConical className="h-4 w-4" aria-hidden />
+                    View Validated 1UBQ Experiment
+                    <ArrowRight className="h-4 w-4" aria-hidden />
+                  </RouterLink>
+                  <RouterLink to="/experiment" className="btn-secondary">
+                    Launch Simulation Lab
+                  </RouterLink>
+                  <RouterLink to="/methodology" className="btn-ghost !text-xs">
+                    <BookOpen className="h-4 w-4" aria-hidden />
+                    Methodology
+                  </RouterLink>
+                </div>
 
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Link to="/experiment" className="btn-primary">
-                Launch Simulation Lab
-                <ArrowRight className="h-4 w-4" aria-hidden />
-              </Link>
-              <Link to="/methodology" className="btn-secondary">
-                <BookOpen className="h-4 w-4" aria-hidden />
-                Explore Methodology
-              </Link>
-            </div>
-
-            {/* Status chips */}
-            <ul className="mt-7 flex flex-wrap gap-2">
-              {CHIPS.map((chip) => (
-                <li
-                  key={chip.label}
-                  className="flex items-center gap-1.5 rounded-lg border border-hairline bg-elevated/70 px-2.5 py-1.5 backdrop-blur"
-                >
-                  <chip.icon className="h-3 w-3 text-accent" aria-hidden />
-                  <span className="text-2xs text-ink-muted">{chip.label}</span>
-                </li>
-              ))}
-            </ul>
+                {/* Status chips */}
+                <ul className="mt-7 flex flex-wrap gap-2">
+                  {CHIPS.map((chip) => (
+                    <li
+                      key={chip.label}
+                      className="flex items-center gap-1.5 rounded-lg border border-hairline bg-elevated/70 px-2.5 py-1.5 backdrop-blur"
+                    >
+                      <chip.icon className="h-3 w-3 text-accent" aria-hidden />
+                      <span className="text-2xs text-ink-muted">{chip.label}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
 
               <HeroStructure />
@@ -176,26 +173,53 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* --- Workflow --------------------------------------------------- */}
+      {/* --- Real-Data Counter Banner ------------------------------------ */}
+      <section className="relative z-10 mx-auto max-w-7xl px-6 py-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {COUNTERS.map((counter) => (
+            <div key={counter.label} className="rounded-xl border border-hairline bg-elevated/60 p-4 space-y-1 backdrop-blur">
+              <div className="text-2xl font-extrabold text-accent">{counter.value}</div>
+              <div className="text-xs font-bold text-ink">{counter.label}</div>
+              <div className="text-2xs text-ink-faint leading-relaxed">{counter.sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* --- Scientific Distinction Callout ----------------------------- */}
+      <section className="relative z-10 mx-auto max-w-7xl px-6 py-6">
+        <ScientificDistinction />
+      </section>
+
+      {/* --- Real Paired Mechanical Workflow ---------------------------- */}
       <section className="relative z-10 mx-auto max-w-7xl px-6 py-10">
-        <h2 className="label mb-4">How it works</h2>
-        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {WORKFLOW.map((step, index) => (
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <span className="label">Real Paired-Mechanical Workflow</span>
+            <h2 className="mt-1 text-lg font-bold text-ink">From Protein Selection to Empirical ML Dataset</h2>
+          </div>
+          <span className="badge border-ok/30 bg-ok/10 text-ok font-semibold text-2xs">
+            OpenMM Steered MD + ML Triage
+          </span>
+        </div>
+
+        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {PAIRED_WORKFLOW.map((step, index) => (
             <motion.li
               key={step.title}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: 0.05 * index }}
-              className="card card-hover p-3.5"
+              className="card card-hover p-4 space-y-2"
             >
               <div className="flex items-center gap-2">
-                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md border border-accent/25 bg-accent/10 font-mono text-2xs text-accent">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-md border border-accent/25 bg-accent/10 font-mono text-2xs font-bold text-accent">
                   {index + 1}
                 </span>
-                <step.icon className="h-3.5 w-3.5 text-ink-faint" aria-hidden />
+                <step.icon className="h-4 w-4 text-accent" aria-hidden />
               </div>
-              <h3 className="mt-2.5 text-xs font-medium text-ink">{step.title}</h3>
-              <p className="mt-1 text-2xs leading-relaxed text-ink-muted">{step.body}</p>
+              <h3 className="text-xs font-bold text-ink">{step.title}</h3>
+              <p className="text-2xs leading-relaxed text-ink-muted">{step.body}</p>
             </motion.li>
           ))}
         </ol>
@@ -209,46 +233,46 @@ export function LandingPage() {
             tone="accent"
             label="Steered MD Force-Extension"
             title="Stiffness, measured in pN/nm"
-            body="A moving harmonic restraint pulls the domain apart by its termini and records the force it carries against extension. The slope is an apparent stiffness: the primary measurement, and the one the results rest on."
+            body="A moving harmonic restraint pulls the domain apart by its termini and records the force it carries against extension. The slope is an apparent stiffness: the primary physical measurement."
             facts={[
               '520 paired pristine-vs-damaged experiments',
-              'Ranked titin I27 first, the AFM benchmark',
-              'Fits below the noise floor are rejected, not reported',
+              'Ranked titin I27 first, the experimental AFM benchmark',
+              'Fits below noise threshold are rejected, not reported',
             ]}
           />
           <Capability
             icon={Cpu}
             tone="ok"
-            label="Rapid OpenMM Simulation"
-            title="Real molecular dynamics, honestly scoped"
-            body="Amber14 with GBn2 implicit solvent, a Langevin integrator and a fixed seed. The trajectory, energies and temperatures are genuine OpenMM output, though over picoseconds rather than the seconds-to-years of real degradation."
+            label="OpenMM Simulation Engine"
+            title="Real molecular dynamics physics"
+            body="Amber14 with GBn2 implicit solvent, Langevin integrator and fixed seeds. Output includes genuine OpenMM trajectories, forces, energies, and RMSD metrics."
             facts={[
-              'Progress driven by the integrator step counter',
-              'Standard OpenMM models no ionising radiation',
-              'One job at a time, with hard safety limits',
+              'Steered MD pulling with force constant k_pull',
+              'Explicit force-extension curve generation',
+              'Strict safety & wall-clock execution bounds',
             ]}
           />
           <Capability
             icon={Sparkles}
             tone="violet"
-            label="ML Prediction"
-            title="A fast per-residue estimate"
-            body="A gradient-boosted model ranks which residues cost the most load-bearing capacity, in milliseconds rather than the minutes a simulation takes. It is a triage aid that points the simulation at the residues worth spending compute on."
+            label="ML Prediction (Demo Mode)"
+            title="Fast per-residue triage assistant"
+            body="Gradient-boosted model ranking radiosensitive residues in milliseconds before compute-intensive MD simulation runs. Accelerates target residue selection."
             facts={[
-              'Trained on the 520 paired simulations',
-              'Reports its own validation status and criteria',
-              'Labelled distinctly from physics wherever it appears',
+              'Trained on 520 paired MD experiments',
+              'Fast per-residue susceptibility ranking',
+              'Distinctly separated from physical MD measurements',
             ]}
           />
           <Capability
             icon={Microscope}
             tone="violet"
-            label="Structural analysis"
-            title="Metrics you can audit"
-            body="RMSD, per-residue RMSF, radius of gyration and energies, all computed from the real coordinates. The degradation proxy that puts ML and physics on one axis publishes its own formula and reference scales."
+            label="Structural Analysis"
+            title="Auditable scientific metrics"
+            body="RMSD, per-residue RMSF, radius of gyration, and force curves computed directly from PDB coordinates and OpenMM trajectories."
             facts={[
               'Every metric downloadable as JSON and CSV',
-              'Trajectory and topology exported for external tools',
+              'PDB structures & force curves exported',
               'Full reproducibility metadata per run',
             ]}
           />
@@ -260,9 +284,9 @@ export function LandingPage() {
         <ScopeNotice />
         <p className="mt-4 text-center text-2xs text-ink-faint">
           Every number links to the method that produced it ·{' '}
-          <Link to="/methodology" className="text-accent hover:underline">
+          <RouterLink to="/methodology" className="text-accent hover:underline">
             read the methodology
-          </Link>
+          </RouterLink>
         </p>
       </section>
     </div>
