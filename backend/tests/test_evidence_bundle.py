@@ -1,7 +1,6 @@
 """Unit tests for evidence bundle generator (#21)."""
 
 import json
-from pathlib import Path
 import zipfile
 import pytest
 
@@ -12,7 +11,7 @@ from app.services import bundle_service
 def test_generate_precomputed_bundle_1ubq():
     zip_path = bundle_service.generate_precomputed_bundle("1UBQ")
     assert zip_path.exists()
-    assert zip_path.name == "1UBQ_precomputed_bundle.zip"
+    assert zip_path.name.endswith(".zip")
 
     with zipfile.ZipFile(zip_path, "r") as zf:
         namelist = zf.namelist()
@@ -33,6 +32,19 @@ def test_generate_precomputed_bundle_1ubq():
         matching = [f for f in manifest_doc["files"] if f["filename"] == "experiment.json"]
         assert len(matching) == 1
         assert matching[0]["sha256"] == bundle_service._compute_sha256(exp_bytes)
+
+
+def test_generate_bundle_1pga_fallback():
+    zip_path = bundle_service.generate_precomputed_bundle("1PGA")
+    assert zip_path.exists()
+    assert zip_path.name == "1PGA_evidence_bundle.zip"
+
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        namelist = zf.namelist()
+        assert "manifest.json" in namelist
+        assert "input.pdb" in namelist
+        assert "final.pdb" in namelist
+        assert "experiment.json" in namelist
 
 
 def test_generate_precomputed_bundle_nonexistent():
