@@ -2,19 +2,9 @@ name: backend-ci
 
 on:
   push:
-    paths:
-      - 'backend/**'
-      - 'models/**'
-      - 'data/**'
-      - 'scripts/**'
-      - '.github/workflows/backend-ci.yml'
+    branches: [ main ]
   pull_request:
-    paths:
-      - 'backend/**'
-      - 'models/**'
-      - 'data/**'
-      - 'scripts/**'
-      - '.github/workflows/backend-ci.yml'
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
