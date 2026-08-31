@@ -363,3 +363,39 @@
   background-color: var(--theme-surface);
   color: var(--theme-text);
 }
+
+/* --- Print Styles for PDF Report --------------------------------------- */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  #print-scientific-report,
+  #print-scientific-report * {
+    visibility: visible !important;
+  }
+  #print-scientific-report {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 24px !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    overflow: visible !important;
+    font-size: 12pt !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+  }
+}
