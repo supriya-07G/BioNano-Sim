@@ -1,0 +1,11 @@
+{
+  "name": "cosmora-root",
+  "version": "0.1.0",
+  "description": "COSMORA — Engineering proteins that survive deep space",
+  "scripts": {
+    "start": "python start.py",
+    "dev": "python start.py",
+    "setup": "python scripts/setup_local.py"
+  },
+  "private": true
+}

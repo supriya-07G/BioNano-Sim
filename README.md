@@ -56,58 +56,23 @@ dynamics can compute honestly, whereas radiation chemistry is not.
 
 ## Quick start
 
-Requirements: **Python 3.11** (not 3.12+), **Node 18+**, and about 1.5 GB of
-disk for dependencies. A GPU is optional — it makes a demo run ~5× faster.
+Requirements: **Python 3.9+** and **Node 18+**.
 
-### One-shot setup
+### One-Command Quickstart (Zero Configuration)
 
-```bash
-make setup && make validate
-```
-
-Then, in two terminals:
+Run **one single command** from the repository root — it automatically installs dependencies, prepares local PDB structures, launches both backend and frontend servers in parallel, and opens your browser:
 
 ```bash
-make backend
+python start.py
 ```
 
-```bash
-make frontend
-```
+*Or choose your preferred runner:*
+- **Windows**: Double-click `start.bat` or run `python start.py`
+- **Linux / macOS**: Run `./start.sh` or `python3 start.py`
+- **npm**: Run `npm start` at repo root
 
-### Windows without `make`
-
-`make` is not installed by default on Windows. Run the same four steps
-directly — this path is verified in
-[docs/validation](docs/validation/2026-08-30-clean-checkout.md):
-
-```bash
-uv venv .venv311 --python 3.11 && uv pip install --python .venv311 -r backend/requirements-dev.txt
-```
-
-```bash
-.venv311/Scripts/python.exe scripts/setup_local.py && cd frontend && npm install && cd ..
-```
-
-```bash
-.venv311/Scripts/python.exe scripts/validate_environment.py && .venv311/Scripts/python.exe scripts/validate_model.py
-```
-
-Then the two servers, in separate terminals:
-
-```bash
-cd backend && ../.venv311/Scripts/python.exe -m uvicorn app.main:app --port 8000
-```
-
-```bash
-cd frontend && npm run dev
-```
-
-If you do not have [uv](https://docs.astral.sh/uv/), substitute
-`python3.11 -m venv .venv311` and `.venv311/Scripts/python.exe -m pip install`.
-
-- Dashboard: <http://localhost:5173>
-- API: <http://localhost:8000>
+- Web App: <http://localhost:5173>
+- API Docs: <http://127.0.0.1:8000/docs>
 - API docs: <http://localhost:8000/docs>
 
 ### Manual setup
