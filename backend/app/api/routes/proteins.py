@@ -1,17 +1,18 @@
-"""Protein registry, structure serving and upload."""
+"""Protein registry, structure serving, upload, and candidate onboarding routes."""
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
-from fastapi import APIRouter, File, Query, UploadFile
+from fastapi import APIRouter, File, Form, Query, UploadFile
 from fastapi.responses import FileResponse, PlainTextResponse
 
 from app.config import settings
 from app.core.exceptions import InvalidProteinError
 from app.core.security import new_job_id
+from app.schemas.onboarding import CandidateRecord, CandidateReviewAction, CandidateSubmission
 from app.schemas.protein import ProteinDetail, ProteinSummary, UploadedProtein
-from app.services import protein_service
+from app.services import protein_onboarding_service, protein_service
 
 router = APIRouter(prefix="/proteins", tags=["proteins"])
 
@@ -19,6 +20,44 @@ router = APIRouter(prefix="/proteins", tags=["proteins"])
 @router.get("", response_model=list[ProteinSummary], summary="List approved proteins")
 def list_proteins() -> list[dict[str, Any]]:
     return protein_service.list_proteins()
+
+
+@router.get("/onboard/candidates", response_model=list[CandidateRecord], summary="List onboarding candidates")
+def list_onboarding_candidates(
+    state: Optional[str] = Query(default=None, description="Filter by state: pending, approved, or rejected")
+) -> list[dict[str, Any]]:
+    return protein_onboarding_service.list_candidates(state)
+
+
+@router.post("/onboard/submit", response_model=CandidateRecord, summary="Submit a candidate for onboarding")
+async def submit_candidate(
+    file: UploadFile = File(...),
+    pdb_id: str = Form(...),
+    name: str = Form(...),
+    uniprot: str = Form("N/A"),
+    proposed_role: str = Form(...),
+    why_selected: str = Form(...),
+    chain_id: str = Form("A"),
+    source: str = Form("RCSB PDB (files.rcsb.org)"),
+    license_note: str = Form("PDB coordinate data is distributed by RCSB PDB under CC0 1.0 Universal."),
+) -> dict[str, Any]:
+    content = await file.read()
+    submission = CandidateSubmission(
+        pdb_id=pdb_id,
+        name=name,
+        uniprot=uniprot,
+        proposed_role=proposed_role,
+        why_selected=why_selected,
+        chain_id=chain_id,
+        source=source,
+        license_note=license_note,
+    )
+    return protein_onboarding_service.submit_candidate(content, submission)
+
+
+@router.post("/onboard/review", response_model=CandidateRecord, summary="Review a candidate (approve/reject)")
+def review_candidate(action: CandidateReviewAction) -> dict[str, Any]:
+    return protein_onboarding_service.review_candidate(action)
 
 
 @router.get("/{pdb_id}", response_model=ProteinDetail, summary="Protein detail")
@@ -36,11 +75,7 @@ def get_protein(
     responses={200: {"content": {"chemical/x-pdb": {}}}},
 )
 def get_structure(pdb_id: str) -> FileResponse:
-    """Serve the PDB file for the molecular viewer.
-
-    Returned as a file response so the viewer can stream it and the browser can
-    cache it; the registry lookup rejects anything that is not an approved id.
-    """
+    """Serve the PDB file for the molecular viewer."""
     path = protein_service.structure_path(pdb_id)
     return FileResponse(
         path,
@@ -56,11 +91,7 @@ def get_structure(pdb_id: str) -> FileResponse:
     summary="Upload and validate a custom PDB",
 )
 async def upload_protein(file: UploadFile = File(...)) -> dict[str, Any]:
-    """Validate an uploaded structure and stage it under ``runtime/uploads``.
-
-    The body is read with a hard cap so an oversized upload is rejected without
-    being buffered in full.
-    """
+    """Validate an uploaded structure and stage it under ``runtime/uploads``."""
     limit = settings.max_upload_bytes
     chunks: list[bytes] = []
     total = 0
