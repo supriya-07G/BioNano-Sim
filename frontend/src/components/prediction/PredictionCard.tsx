@@ -3,6 +3,7 @@ import { Layers, Loader2, Play, Sparkles } from 'lucide-react'
 import { ConfidencePanel } from './ConfidencePanel'
 import { FeatureSummary } from './FeatureSummary'
 import { RiskGauge } from './RiskGauge'
+import { ExplainabilityPanel } from '@/components/predictions/ExplainabilityPanel'
 import { ErrorState } from '@/components/common/ErrorState'
 import { ScientificNotice } from '@/components/common/ScientificNotice'
 import { ResultLabel } from '@/components/common/StatusBadge'
@@ -136,6 +137,16 @@ export function PredictionCard({
             note={prediction.held_out_error.note}
             validation={prediction.held_out_error.validation}
             test={prediction.held_out_error.test}
+          />
+
+          <ExplainabilityPanel
+            uncertaintyBounds={prediction.uncertainty_bounds}
+            applicabilityDomain={prediction.applicability_domain}
+            nearestNeighbors={prediction.nearest_neighbors}
+            localAttributions={prediction.local_feature_attributions}
+            globalImportance={prediction.global_feature_importance}
+            attributionDisclaimer={prediction.attribution_disclaimer}
+            degradationPercent={prediction.degradation_percent}
           />
 
           {model && model.top_feature_importances.length > 0 && (

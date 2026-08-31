@@ -158,4 +158,29 @@ export interface PredictionResponse {
     validation: HeldOutMetrics | null
     test: HeldOutMetrics | null
   }
+  uncertainty_bounds?: {
+    sigma: number
+    lower_bound_pct: number
+    upper_bound_pct: number
+    confidence_level: string
+  }
+  applicability_domain?: {
+    classification: 'IN_DOMAIN' | 'CAUTION' | 'OUT_OF_DOMAIN' | string
+    score: number
+    reasons: string[]
+  }
+  nearest_neighbors?: Array<{
+    pdb_id: string
+    name: string
+    similarity_pct: number
+    distance: number
+  }>
+  local_feature_attributions?: Array<{
+    feature: string
+    value: string
+    contribution: number
+    direction: 'increase' | 'decrease'
+  }>
+  global_feature_importance?: Record<string, number>
+  attribution_disclaimer?: string
 }
