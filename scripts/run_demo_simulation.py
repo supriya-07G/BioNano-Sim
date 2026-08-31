@@ -36,6 +36,58 @@ REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "backend"))
 
 
+def print_results_summary(results: dict) -> None:
+    """Print the run summary for either a dynamics or a minimisation-only run.
+
+    A minimisation-only preset runs no dynamics, so there is no trajectory and
+    therefore no RMSD, RMSF, radius of gyration or temperature series. The
+    engine correctly omits those keys and says so via ``dynamics_run``.
+
+    Printing them unconditionally is what made this script exit 1 on exactly
+    the preset CI invokes it with, while the simulation underneath had
+    succeeded -- a reporting crash reported as a simulation failure.
+    """
+    metrics = results["metrics"]
+    proxy = metrics.get("degradation_proxy") or {}
+
+    print(f"  label            : {results['result_label']}")
+    print(f"  platform         : {results['metadata']['topology'].get('platform')}")
+    print(f"  frames           : {metrics['n_frames']} over {metrics['simulated_time_ps']} ps")
+
+    if metrics.get("dynamics_run"):
+        print(f"  final RMSD       : {metrics['rmsd_nm']['final']} nm")
+        print(f"  mean RMSF        : {metrics['rmsf_nm']['mean']} nm")
+        print(f"  Rg change        : {metrics['radius_of_gyration_nm']['relative_change']}")
+        print(f"  mean temperature : {metrics['temperature_kelvin']['mean']} K")
+        print(f"  drift proxy      : {proxy.get('percent')} % ({proxy.get('label')})")
+    else:
+        minimisation = metrics.get("minimisation") or {}
+        print("  dynamics         : none (minimisation-only preset)")
+        print(
+            f"  energy           : {minimisation.get('potential_energy_before_kj_mol')}"
+            f" -> {minimisation.get('potential_energy_after_kj_mol')} kJ/mol"
+            f" (delta {minimisation.get('delta_kj_mol')})"
+        )
+        print("  drift proxy      : unavailable without a trajectory")
+
+    print(f"  stability        : {results['stability_summary']['verdict']}")
+
+    comparison = results["comparison"]
+    proxy_pct = comparison.get("simulation_degradation_proxy_percent")
+    if proxy_pct is None:
+        print(
+            f"  ML vs simulation : ML {comparison['ml_degradation_percent']} %; "
+            f"no simulation proxy to compare against ({comparison['agreement']})"
+        )
+    else:
+        print(
+            f"  ML vs simulation : ML {comparison['ml_degradation_percent']} % vs proxy "
+            f"{proxy_pct} % "
+            f"(delta {comparison['difference_percentage_points']} pp, "
+            f"{comparison['agreement']})"
+        )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--pdb-id", default="1UBQ")
@@ -140,23 +192,7 @@ def main() -> int:
     # --- 3. Results ------------------------------------------------------
     print("\n[3] Results")
     results = simulation_service.job_results(job_id)
-    metrics = results["metrics"]
-    proxy = metrics.get("degradation_proxy", {})
-    print(f"  label            : {results['result_label']}")
-    print(f"  platform         : {results['metadata']['topology'].get('platform')}")
-    print(f"  frames           : {metrics['n_frames']} over {metrics['simulated_time_ps']} ps")
-    print(f"  final RMSD       : {metrics['rmsd_nm']['final']} nm")
-    print(f"  mean RMSF        : {metrics['rmsf_nm']['mean']} nm")
-    print(f"  Rg change        : {metrics['radius_of_gyration_nm']['relative_change']}")
-    print(f"  mean temperature : {metrics['temperature_kelvin']['mean']} K")
-    print(f"  drift proxy      : {proxy.get('percent')} % ({proxy.get('label')})")
-    print(f"  stability        : {results['stability_summary']['verdict']}")
-    comparison = results["comparison"]
-    print(
-        f"  ML vs simulation : ML {comparison['ml_degradation_percent']} % vs proxy "
-        f"{comparison['simulation_degradation_proxy_percent']} % "
-        f"(delta {comparison['difference_percentage_points']} pp, {comparison['agreement']})"
-    )
+    print_results_summary(results)
 
     # --- 4. Freeze as precomputed fallback -------------------------------
     if args.write_precomputed:
