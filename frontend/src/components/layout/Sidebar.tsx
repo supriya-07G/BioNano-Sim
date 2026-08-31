@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   Atom,
+  Award,
   BookOpen,
   ChevronLeft,
   ChevronRight,
@@ -23,6 +24,7 @@ const NAV = [
   { to: '/simulation', label: 'Simulation', icon: Radiation },
   { to: '/results', label: 'Results', icon: Atom },
   { to: '/compare', label: 'Compare', icon: GitCompare },
+  { to: '/ranking', label: 'Ranking', icon: Award },
   { to: '/history', label: 'History', icon: History },
   { to: '/methodology', label: 'Methodology', icon: BookOpen },
 ] as const

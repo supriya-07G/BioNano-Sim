@@ -8,6 +8,7 @@ import { HistoryPage } from '@/pages/HistoryPage'
 import { LandingPage } from '@/pages/LandingPage'
 import { MethodologyPage } from '@/pages/MethodologyPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { RankingPage } from '@/pages/RankingPage'
 import { ResultsPage } from '@/pages/ResultsPage'
 import { SimulationPage } from '@/pages/SimulationPage'
 
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
       { path: '/results/precomputed/:pdbId', element: <ResultsPage /> },
       { path: '/compare', element: <ComparePage /> },
       { path: '/compare/:jobIdA/:jobIdB', element: <ComparePage /> },
+      { path: '/ranking', element: <RankingPage /> },
       { path: '/history', element: <HistoryPage /> },
       { path: '/methodology', element: <MethodologyPage /> },
       { path: '*', element: <NotFoundPage /> },
