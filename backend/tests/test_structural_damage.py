@@ -3,16 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 import pytest
 
 from app.analysis.structural_damage import (
     NON_CAUSATION_CAVEAT,
     analyze_structural_damage,
-    classify_secondary_structure,
     compare_contact_maps,
     compute_contact_map,
     compute_sasa,
-    count_hydrogen_bonds,
     parse_pdb_atoms,
 )
 

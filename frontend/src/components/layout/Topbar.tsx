@@ -35,7 +35,7 @@ export function Topbar({ className }: { className?: string }) {
             COSMORA
           </span>
           <span className="block text-2xs text-ink-faint">
-            Protein nanomachine stress testing
+            Mechanical screening of protein nanomachinery
           </span>
         </span>
       </Link>

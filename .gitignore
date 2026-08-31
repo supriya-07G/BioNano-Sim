@@ -89,3 +89,6 @@ notebooks/**/*.ipynb_checkpoints/
 # Generated experiment outputs (trajectories, force-extension curves)
 runtime/experiments/
 runtime/*_test/
+# Written by the test suite and by ad-hoc runs; not inputs to anything.
+runtime/bundles/
+runtime/sweeps/

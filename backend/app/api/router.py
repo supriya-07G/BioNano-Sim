@@ -4,7 +4,16 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from app.api.routes import experiments, health, predictions, proteins, ranking, reports, simulations, sweeps
+from app.api.routes import (
+    experiments,
+    health,
+    predictions,
+    proteins,
+    ranking,
+    reports,
+    simulations,
+    sweeps,
+)
 
 api_router = APIRouter()
 api_router.include_router(health.router)

@@ -102,11 +102,33 @@ class PredictionResponse(BaseModel):
     residue_predictions: list[ResiduePredictionOut] = Field(default_factory=list)
     aggregation: dict[str, Any] = Field(default_factory=dict)
     held_out_error: dict[str, Any] = Field(default_factory=dict)
-    uncertainty_bounds: dict[str, Any] = Field(default_factory=dict)
-    applicability_domain: dict[str, Any] = Field(default_factory=dict)
-    nearest_neighbors: list[dict[str, Any]] = Field(default_factory=list)
-    local_feature_attributions: list[dict[str, Any]] = Field(default_factory=list)
-    global_feature_importance: dict[str, float] = Field(default_factory=dict)
+    prediction_dispersion: dict[str, Any] = Field(
+        default_factory=dict,
+        description=(
+            "Spread of the per-residue predictions behind the protein-level "
+            "figure. Not a confidence interval: the bundle exposes no "
+            "calibrated uncertainty, so no coverage probability applies."
+        ),
+    )
+    applicability_domain: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Residue-vocabulary coverage of the input. Carries no numeric score.",
+    )
+    nearest_neighbors: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description=(
+            "Closest proteins in the measured dataset by scaled sequence-descriptor "
+            "distance. Empty when the queried protein is not itself measured."
+        ),
+    )
+    local_feature_attributions: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Exact tree SHAP contributions for the top-ranked candidate residue.",
+    )
+    global_feature_importance: dict[str, float] = Field(
+        default_factory=dict,
+        description="The fitted estimator's own feature importances, largest first.",
+    )
     attribution_disclaimer: str | None = None
 
 

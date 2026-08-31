@@ -110,30 +110,7 @@
       "structure_file": "1PGA.pdb",
       "source": "RCSB PDB (files.rcsb.org)",
       "license_note": "PDB coordinate data is distributed by RCSB PDB under CC0 1.0 Universal."
-    },
-    {
-      "pdb_id": "2F4K",
-      "name": "Barnase ribonuclease domain",
-      "uniprot": "P00648",
-      "proposed_role": "Rigid structural connector",
-      "why_selected": "High-resolution bacterial ribonuclease domain used as a mechanical reference",
-      "experiment_method": "X-Ray / AlphaFold Model",
-      "resolution_angstrom": 2.0,
-      "deposited": "31-AUG-2026",
-      "n_models_in_file": 1,
-      "pdb_title": "Barnase ribonuclease domain (Onboarded Candidate)",
-      "chain_id": "A",
-      "protein_length": 76,
-      "molecular_weight": 8360.0,
-      "hydrophobic_fraction": 0.3684210526315789,
-      "charged_fraction": 0.3026315789473684,
-      "n_reference_residues": 76,
-      "ml_dataset_split": "train",
-      "structure_file": "2F4K.pdb",
-      "source": "RCSB PDB",
-      "license_note": "CC0 1.0 Universal",
-      "sha256_structure_hash": "d0c59461a71ad274f796afce2ef12b46b7c775496d7f3106c81a1a57bee7fb64",
-      "sha256_metadata_hash": "ec60e3b69f0a359738569b1e777467fc27efdc0eb1548a6cabbf1faa19cbd4ca"
     }
-  ]
+  ],
+  "_withdrawn_2F4K": "2F4K withdrawn: data/proteins/pdb/2F4K.pdb contains ubiquitin coordinates (identical to 1UBQ, header DBREF P62988), not barnase (P00648) and not the villin headpiece that PDB 2F4K designates. Re-add once a genuine structure is fetched and its identifiers agree with the file."
 }

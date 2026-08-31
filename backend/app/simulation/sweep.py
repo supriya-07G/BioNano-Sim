@@ -6,10 +6,6 @@ existing runtime experiments, and severity-response curve aggregation.
 
 from __future__ import annotations
 
-import math
-from pathlib import Path
-from typing import Any
-
 import numpy as np
 
 from app.core.exceptions import ValidationFailedError

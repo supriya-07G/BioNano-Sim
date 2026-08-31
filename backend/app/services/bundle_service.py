@@ -4,12 +4,12 @@ Creates self-contained, auditable .zip evidence bundles containing raw structure
 force-extension CSVs, metadata JSON, and a manifest.json with SHA-256 hashes.
 """
 
-from datetime import datetime, timezone
 import hashlib
 import json
+import zipfile
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
-import zipfile
 
 from app.config import settings
 from app.core.exceptions import NotFoundError
@@ -81,7 +81,7 @@ def generate_evidence_bundle(job_id: str) -> Path:
             "pdb_id": job.pdb_id,
             "scenario_id": job.scenario_id,
             "preset_id": job.preset_id,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "files": manifest_files,
         }
         manifest_bytes = json.dumps(manifest_doc, indent=2).encode("utf-8")
@@ -177,7 +177,7 @@ def generate_precomputed_bundle(pdb_id: str) -> Path:
             "manifest_version": "1.0",
             "pdb_id": pid,
             "experiment_type": "PRECOMPUTED_REFERENCE_STRESS_TEST",
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "files": manifest_files,
         }
         manifest_bytes = json.dumps(manifest_doc, indent=2).encode("utf-8")

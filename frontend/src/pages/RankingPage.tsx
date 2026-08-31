@@ -10,18 +10,15 @@ import { fetchRankings, RankingWeights } from '@/services/ranking'
 
 export function RankingPage() {
   const [weights, setWeights] = useState<RankingWeights>({
-    stiffness_retention: 0.35,
-    baseline_strength: 0.20,
-    structural_stability: 0.20,
+    stiffness_retention: 0.4,
+    baseline_strength: 0.3,
+    measurement_confidence: 0.3,
     uncertainty_penalty: 0.15,
-    out_of_domain_penalty: 0.10,
   })
 
-  const [allowMock, setAllowMock] = useState(false)
-
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['candidates-ranking', weights, allowMock],
-    queryFn: ({ signal }) => fetchRankings(weights, allowMock, signal),
+    queryKey: ['candidates-ranking', weights],
+    queryFn: ({ signal }) => fetchRankings(weights, signal),
     staleTime: 5000,
   })
 
@@ -45,17 +42,33 @@ export function RankingPage() {
 
   const handleExportCsv = () => {
     if (!data) return
-    const headers = ['Rank', 'PDB_ID', 'Name', 'Composite_Score', 'Pareto_Optimal', 'Stiffness_Retained_Pct', 'Baseline_pNnm', 'Uncertainty_Sigma', 'OOD_Distance']
+    const headers = [
+      'Rank',
+      'PDB_ID',
+      'Name',
+      'Resolved',
+      'Composite_Score',
+      'Pareto_Optimal',
+      'Baseline_Stiffness_pNnm',
+      'Baseline_SD_pNnm',
+      'Stiffness_Retained_Pct',
+      'Mean_Fit_R2',
+      'Runs_Passing_QC',
+      'Runs_Screened',
+    ]
     const rows = data.candidates.map((c) => [
-      c.rank,
+      c.rank ?? '',
       c.pdb_id,
       `"${c.name}"`,
-      c.composite_score,
+      c.resolved ? 'YES' : 'NO',
+      c.composite_score ?? '',
       c.is_pareto_optimal ? 'YES' : 'NO',
-      c.stiffness_retained_pct,
-      c.baseline_stiffness_pnnm,
-      c.uncertainty_sigma,
-      c.ood_distance,
+      c.baseline_stiffness_pnnm ?? '',
+      c.baseline_stiffness_sd ?? '',
+      c.stiffness_retained_pct ?? '',
+      c.mean_fit_quality ?? '',
+      c.runs_passing_qc,
+      c.runs_screened,
     ])
     const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n')
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
@@ -73,8 +86,8 @@ export function RankingPage() {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-hairline pb-4">
         <div>
           <PageHeader
-            title="Multi-Objective Candidate Ranking"
-            description="Rank protein mechanical components using multi-objective trade-offs, Pareto-optimality, and simulation evidence."
+            title="Multi-objective candidate ranking"
+            description="Rank protein mechanical components on measured steered-MD results: stiffness retention, pristine strength, fit quality and seed spread."
           />
         </div>
 
@@ -103,17 +116,28 @@ export function RankingPage() {
       {data && (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-hairline/80 bg-surface px-4 py-3 shadow-xs">
           <div className="flex items-center gap-2.5">
-            <ShieldCheck className="h-5 w-5 text-emerald-500" />
+            <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-500" aria-hidden />
             <div>
-              <span className="text-xs font-bold text-ink">Scientific Execution Mode: </span>
-              <span className="font-mono text-xs font-black text-emerald-500">{data.mode}</span>
+              <p className="text-xs font-bold text-ink">
+                {data.ranked_candidates} of {data.total_candidates} candidates have a usable
+                measurement
+              </p>
+              <p className="text-2xs text-ink-muted">
+                {data.dataset.runs_passing_qc} of {data.dataset.runs_screened} runs across{' '}
+                {data.dataset.proteins_screened} domains passed the dataset quality gate.
+                Source: <span className="font-mono">{data.dataset.source_file}</span>
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-2xs text-ink-muted">
-            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-            <span>Pareto Frontier: </span>
-            <span className="font-mono font-bold text-amber-500">{data.pareto_frontier_ids.join(', ')}</span>
-          </div>
+          {data.pareto_frontier_ids.length > 0 && (
+            <div className="flex items-center gap-2 text-2xs text-ink-muted">
+              <Sparkles className="h-3.5 w-3.5 text-amber-500" aria-hidden />
+              <span>Pareto frontier: </span>
+              <span className="font-mono font-bold text-amber-500">
+                {data.pareto_frontier_ids.join(', ')}
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -162,16 +186,16 @@ export function RankingPage() {
 
               <div>
                 <div className="flex justify-between text-xs font-semibold text-ink mb-1">
-                  <span>Structural Stability (SASA)</span>
-                  <span className="font-mono text-accent">{(weights.structural_stability * 100).toFixed(0)}%</span>
+                  <span>Measurement confidence (R²)</span>
+                  <span className="font-mono text-accent">{(weights.measurement_confidence * 100).toFixed(0)}%</span>
                 </div>
                 <input
                   type="range"
                   min="0"
                   max="1"
                   step="0.05"
-                  value={weights.structural_stability}
-                  onChange={(e) => handleSliderChange('structural_stability', parseFloat(e.target.value))}
+                  value={weights.measurement_confidence}
+                  onChange={(e) => handleSliderChange('measurement_confidence', parseFloat(e.target.value))}
                   className="w-full accent-accent cursor-pointer"
                 />
               </div>
@@ -194,34 +218,19 @@ export function RankingPage() {
                 />
               </div>
 
-              <div>
-                <div className="flex justify-between text-xs font-semibold text-ink mb-1">
-                  <span>OOD Distance Penalty</span>
-                  <span className="font-mono text-amber-500">{(weights.out_of_domain_penalty * 100).toFixed(0)}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={weights.out_of_domain_penalty}
-                  onChange={(e) => handleSliderChange('out_of_domain_penalty', parseFloat(e.target.value))}
-                  className="w-full accent-amber-500 cursor-pointer"
-                />
-              </div>
             </div>
 
-            <div className="mt-5 border-t border-hairline/60 pt-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={allowMock}
-                  onChange={(e) => setAllowMock(e.target.checked)}
-                  className="rounded border-hairline text-accent focus:ring-accent"
-                />
-                <span className="text-2xs text-ink-muted">Allow Mock Demo Mode Ranking</span>
-              </label>
-            </div>
+            {/*
+              Two sliders used to sit here -- SASA preservation and an
+              out-of-domain distance -- alongside a "mock demo mode" checkbox.
+              None of the three changed a number: the values behind them were
+              constants, and the checkbox only swapped a banner label. A control
+              that does nothing is worse than a missing one.
+            */}
+            <p className="mt-5 border-t border-hairline/60 pt-3 text-2xs leading-relaxed text-ink-faint">
+              Weights are renormalised over the three positive objectives, so moving one
+              changes the balance rather than the total.
+            </p>
           </div>
         </div>
 

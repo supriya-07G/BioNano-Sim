@@ -10,14 +10,12 @@ import datetime
 import hashlib
 import json
 import shutil
-from pathlib import Path
 from typing import Any
 
 from app.config import settings
 from app.core.exceptions import InvalidProteinError, NotFoundError, ValidationFailedError
 from app.core.logging import get_logger
 from app.schemas.onboarding import (
-    CandidateRecord,
     CandidateReviewAction,
     CandidateSubmission,
     CandidateValidationReport,
@@ -159,7 +157,7 @@ def submit_candidate(pdb_bytes: bytes, submission: CandidateSubmission) -> dict[
         "source": submission.source,
         "license_note": submission.license_note,
         "review_state": "pending",
-        "submitted_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "submitted_at": datetime.datetime.now(datetime.UTC).isoformat(),
         "reviewed_by": None,
         "reviewed_at": None,
         "review_notes": None,
@@ -196,7 +194,7 @@ def review_candidate(action: CandidateReviewAction) -> dict[str, Any]:
     new_state = "approved" if action.action == "approve" else "rejected"
     record["review_state"] = new_state
     record["reviewed_by"] = action.reviewer
-    record["reviewed_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    record["reviewed_at"] = datetime.datetime.now(datetime.UTC).isoformat()
     record["review_notes"] = action.notes
 
     save_candidates(candidates)
@@ -224,7 +222,7 @@ def review_candidate(action: CandidateReviewAction) -> dict[str, Any]:
                 "why_selected": record["why_selected"],
                 "experiment_method": record["experiment_method"],
                 "resolution_angstrom": record["resolution_angstrom"],
-                "deposited": datetime.datetime.now(datetime.timezone.utc).strftime("%d-%b-%Y").upper(),
+                "deposited": datetime.datetime.now(datetime.UTC).strftime("%d-%b-%Y").upper(),
                 "n_models_in_file": 1,
                 "pdb_title": f"{record['name']} (Onboarded Candidate)",
                 "chain_id": record["chain_id"],

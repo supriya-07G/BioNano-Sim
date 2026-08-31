@@ -8,7 +8,7 @@ from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / "backend"))
 
-from app.cli.onboard_protein import main
+from app.cli.onboard_protein import main  # noqa: E402  (needs the sys.path insert above)
 
 if __name__ == "__main__":
     main()

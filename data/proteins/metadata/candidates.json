@@ -1,29 +1,4 @@
 {
-  "candidates": [
-    {
-      "candidate_id": "2F4K",
-      "pdb_id": "2F4K",
-      "name": "Barnase ribonuclease domain",
-      "uniprot": "P00648",
-      "proposed_role": "Rigid structural connector",
-      "why_selected": "High-resolution bacterial ribonuclease domain used as a mechanical reference",
-      "chain_id": "A",
-      "protein_length": 76,
-      "molecular_weight": 8360.0,
-      "hydrophobic_fraction": 0.3684210526315789,
-      "charged_fraction": 0.3026315789473684,
-      "experiment_method": "X-Ray / AlphaFold Model",
-      "resolution_angstrom": 2.0,
-      "source": "RCSB PDB",
-      "license_note": "CC0 1.0 Universal",
-      "review_state": "approved",
-      "submitted_at": "2026-08-31T00:27:23.548368+00:00",
-      "reviewed_by": "supriya-07G",
-      "reviewed_at": "2026-08-31T00:52:53.480034+00:00",
-      "review_notes": "",
-      "sha256_structure_hash": "d0c59461a71ad274f796afce2ef12b46b7c775496d7f3106c81a1a57bee7fb64",
-      "sha256_metadata_hash": "ec60e3b69f0a359738569b1e777467fc27efdc0eb1548a6cabbf1faa19cbd4ca",
-      "structure_file": "2F4K.pdb"
-    }
-  ]
+  "candidates": [],
+  "_withdrawn_2F4K": "2F4K withdrawn: data/proteins/pdb/2F4K.pdb contains ubiquitin coordinates (identical to 1UBQ, header DBREF P62988), not barnase (P00648) and not the villin headpiece that PDB 2F4K designates. Re-add once a genuine structure is fetched and its identifiers agree with the file."
 }

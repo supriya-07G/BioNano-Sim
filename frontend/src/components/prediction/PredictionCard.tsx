@@ -140,7 +140,7 @@ export function PredictionCard({
           />
 
           <ExplainabilityPanel
-            uncertaintyBounds={prediction.uncertainty_bounds}
+            dispersion={prediction.prediction_dispersion}
             applicabilityDomain={prediction.applicability_domain}
             nearestNeighbors={prediction.nearest_neighbors}
             localAttributions={prediction.local_feature_attributions}

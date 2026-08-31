@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any, Literal
+from typing import Any, Literal
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.contracts.paired_experiment import (
     ExperimentStatus,
     ProxyType,
-    ResidueId,
     SeverityLabel,
     StiffnessFit,
     StiffnessUnit,

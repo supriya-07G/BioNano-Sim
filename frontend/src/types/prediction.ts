@@ -158,26 +158,42 @@ export interface PredictionResponse {
     validation: HeldOutMetrics | null
     test: HeldOutMetrics | null
   }
-  uncertainty_bounds?: {
-    sigma: number
-    lower_bound_pct: number
-    upper_bound_pct: number
-    confidence_level: string
+  /**
+   * Spread of the per-residue predictions behind the protein-level figure.
+   * Not a confidence interval -- the bundle exposes no calibrated uncertainty,
+   * so there is no coverage probability to report and no `confidence_level`.
+   */
+  prediction_dispersion?: {
+    available: boolean
+    note: string
+    basis?: string
+    sd?: number
+    min_pct?: number
+    max_pct?: number
+    mean_pct?: number
+    n_residues?: number
   }
   applicability_domain?: {
-    classification: 'IN_DOMAIN' | 'CAUTION' | 'OUT_OF_DOMAIN' | string
-    score: number
+    classification: 'IN_VOCABULARY' | 'CAUTION' | 'OUT_OF_DOMAIN' | string
+    basis: string
     reasons: string[]
+    note: string
   }
+  /**
+   * Closest proteins in the measured dataset by scaled sequence-descriptor
+   * distance. No similarity percentage: the distance has no principled mapping
+   * onto one. Empty when the queried protein is not itself measured.
+   */
   nearest_neighbors?: Array<{
     pdb_id: string
-    name: string
-    similarity_pct: number
     distance: number
+    baseline_stiffness_pnnm: number
+    resolved: boolean
   }>
+  /** Exact tree SHAP contributions for the top-ranked candidate residue. */
   local_feature_attributions?: Array<{
     feature: string
-    value: string
+    value: string | number | null
     contribution: number
     direction: 'increase' | 'decrease'
   }>

@@ -23,8 +23,10 @@ from typing import Any
 
 import numpy as np
 
+from app.analysis import measured_stiffness
 from app.core.exceptions import ModelUnavailableError, PredictionError
 from app.core.logging import get_logger
+from app.ml import explainability
 from app.ml.feature_schema import FeatureSchema
 from app.ml.loader import ModelState
 
@@ -88,71 +90,29 @@ class ResiduePrediction:
 
 
 @dataclass
-class UncertaintyBounds:
-    sigma: float
-    lower_bound_pct: float
-    upper_bound_pct: float
-    confidence_level: str = "95%"
-
-    def as_dict(self) -> dict[str, Any]:
-        return {
-            "sigma": round(self.sigma, 4),
-            "lower_bound_pct": round(self.lower_bound_pct, 4),
-            "upper_bound_pct": round(self.upper_bound_pct, 4),
-            "confidence_level": self.confidence_level,
-        }
-
-
-@dataclass
 class ApplicabilityDomain:
-    classification: str  # IN_DOMAIN, CAUTION, OUT_OF_DOMAIN
-    score: float  # 0.0 to 1.0 (1.0 = ideal in-domain)
+    """Whether an input is one the model was trained to handle.
+
+    Carries no numeric score. The bundle ships no training feature matrix, so
+    the only membership test it genuinely supports is vocabulary coverage; a
+    0-to-1 "domain score" would be a number with nothing behind it.
+    """
+
+    classification: str  # IN_VOCABULARY, CAUTION, OUT_OF_DOMAIN
+    basis: str
     reasons: list[str]
+    note: str
 
     def as_dict(self) -> dict[str, Any]:
         return {
             "classification": self.classification,
-            "score": round(self.score, 4),
+            "basis": self.basis,
             "reasons": self.reasons,
+            "note": self.note,
         }
 
 
-@dataclass
-class TrainingNeighbor:
-    pdb_id: str
-    name: str
-    similarity_pct: float
-    distance: float
-
-    def as_dict(self) -> dict[str, Any]:
-        return {
-            "pdb_id": self.pdb_id,
-            "name": self.name,
-            "similarity_pct": round(self.similarity_pct, 2),
-            "distance": round(self.distance, 4),
-        }
-
-
-@dataclass
-class FeatureAttribution:
-    feature: str
-    value: Any
-    contribution: float
-    direction: str  # increase or decrease
-
-    def as_dict(self) -> dict[str, Any]:
-        return {
-            "feature": self.feature,
-            "value": self.value,
-            "contribution": round(self.contribution, 4),
-            "direction": self.direction,
-        }
-
-
-ATTRIBUTION_DISCLAIMER = (
-    "Feature attributions represent mathematical decision-tree split contributions "
-    "and correlative patterns within the public training dataset, NOT causal physical mechanisms."
-)
+ATTRIBUTION_DISCLAIMER = explainability.ATTRIBUTION_DISCLAIMER
 
 
 @dataclass
@@ -168,7 +128,7 @@ class PredictionResult:
     residue_predictions: list[ResiduePrediction] = field(default_factory=list)
     aggregation: dict[str, Any] = field(default_factory=dict)
     held_out_error: dict[str, Any] = field(default_factory=dict)
-    uncertainty_bounds: dict[str, Any] = field(default_factory=dict)
+    prediction_dispersion: dict[str, Any] = field(default_factory=dict)
     applicability_domain: dict[str, Any] = field(default_factory=dict)
     nearest_neighbors: list[dict[str, Any]] = field(default_factory=list)
     local_feature_attributions: list[dict[str, Any]] = field(default_factory=list)
@@ -188,7 +148,7 @@ class PredictionResult:
             "residue_predictions": [r.as_dict() for r in self.residue_predictions],
             "aggregation": self.aggregation,
             "held_out_error": self.held_out_error,
-            "uncertainty_bounds": self.uncertainty_bounds,
+            "prediction_dispersion": self.prediction_dispersion,
             "applicability_domain": self.applicability_domain,
             "nearest_neighbors": self.nearest_neighbors,
             "local_feature_attributions": self.local_feature_attributions,
@@ -438,68 +398,57 @@ def aggregate_prediction(
         "test": metadata.get("test_metrics"),
     }
 
-    # --- Explainability Payload (#31) ---
-    # 1. Uncertainty Bounds
-    std_err = float(used.std(ddof=0)) if used.size > 1 else 3.2
-    sigma = max(2.5, round(std_err, 4))
-    lower_ci = max(0.0, round(mean - 1.96 * sigma, 4))
-    upper_ci = min(100.0, round(mean + 1.96 * sigma, 4))
-    uncertainty = UncertaintyBounds(
-        sigma=sigma,
-        lower_bound_pct=lower_ci,
-        upper_bound_pct=upper_ci,
-        confidence_level="95%",
-    ).as_dict()
+    # --- Explainability payload (#31) ---
+    # Every field below is computed from the fitted model or the measured
+    # dataset. See app/ml/explainability.py for why that matters here.
+    uncertainty = explainability.dispersion(used, mean)
 
-    # 2. Applicability Domain Classification
+    # Applicability domain. The only membership test this bundle actually
+    # supports is its residue vocabulary: a residue type it never saw is
+    # genuinely outside the domain. Anything finer -- a distance to the
+    # training manifold -- would need the training features, and the bundle
+    # does not carry them, so no numeric domain score is invented.
     domain_reasons: list[str] = []
     if excluded > 0:
         domain_reasons.append(
-            f"{excluded} candidate residue(s) fall outside the model's 14-amino-acid vocabulary."
+            f"{excluded} candidate residue(s) fall outside the model's "
+            f"{len(schema.residue_vocabulary) if getattr(schema, 'residue_vocabulary', None) else 14}"
+            "-value residue vocabulary and were dropped from the mean."
         )
     if extra_warnings:
         domain_reasons.extend(extra_warnings)
 
-    if excluded > 3:
+    if excluded and excluded >= len(values) / 2:
         domain_classif = "OUT_OF_DOMAIN"
-        domain_score = 0.35
-    elif excluded > 0 or len(domain_reasons) > 0:
+    elif domain_reasons:
         domain_classif = "CAUTION"
-        domain_score = 0.72
     else:
-        domain_classif = "IN_DOMAIN"
-        domain_score = 0.95
-        domain_reasons.append("Input structure, sequence, and scenario lie fully inside the training domain envelope.")
+        domain_classif = "IN_VOCABULARY"
+        domain_reasons.append(
+            "Every candidate residue type is one the model was trained on."
+        )
 
     app_domain = ApplicabilityDomain(
         classification=domain_classif,
-        score=domain_score,
+        basis="residue_type_vocabulary",
         reasons=domain_reasons,
+        note=(
+            "Vocabulary membership only. The bundle ships no training feature "
+            "matrix, so distance to the training distribution is not computed "
+            "and no domain score is reported."
+        ),
     ).as_dict()
 
-    # 3. Nearest Training Neighbors
-    neighbors = [
-        TrainingNeighbor(pdb_id="1UBQ", name="Ubiquitin Reference", similarity_pct=95.0, distance=0.05).as_dict(),
-        TrainingNeighbor(pdb_id="1PGA", name="Protein G B1 Domain", similarity_pct=91.5, distance=0.08).as_dict(),
-        TrainingNeighbor(pdb_id="1TIT", name="Titin I27 Benchmark", similarity_pct=86.2, distance=0.14).as_dict(),
-    ]
+    # Nearest measured proteins, by scaled distance over the sequence
+    # descriptors the model consumes. Empty when this protein is not itself in
+    # the measured set -- there is no basis for a neighbour list then.
+    neighbors = measured_stiffness.nearest_measured(
+        str((input_summary.get("structure") or {}).get("identifier") or "")
+    )
 
-    # 4. Local Feature Attributions (Waterfall SHAP-style breakdown)
-    local_attributions = [
-        FeatureAttribution(feature="residue_sasa_norm", value="High (Solvent Exposed)", contribution=4.25, direction="increase").as_dict(),
-        FeatureAttribution(feature="residue_contact_count", value="Low Density (< 25 contacts)", contribution=3.10, direction="increase").as_dict(),
-        FeatureAttribution(feature="environment", value="Deep Space GCR", contribution=2.40, direction="increase").as_dict(),
-        FeatureAttribution(feature="b_factor_norm", value="Moderate Rigidity", contribution=-1.85, direction="decrease").as_dict(),
-    ]
-
-    # 5. Global Feature Importances
-    global_importance = {
-        "residue_sasa_norm": 0.385,
-        "residue_contact_count": 0.262,
-        "b_factor_norm": 0.178,
-        "environment": 0.105,
-        "radiation_class": 0.070,
-    }
+    # Exact tree SHAP contributions for the top-ranked candidate residue.
+    local_attributions = explainability.local_attributions(state.pipeline, frame, row=0)
+    global_importance = explainability.global_importance(state.pipeline)
 
     return PredictionResult(
         prediction_id=str(uuid.uuid4()),
@@ -507,13 +456,13 @@ def aggregate_prediction(
         model_status=state.scientific_status,
         degradation_percent=mean,
         risk_level=risk_level(mean),
-        confidence=None,  # bundle exposes no calibrated uncertainty; individual bounds in uncertainty_bounds
+        confidence=None,  # bundle exposes no calibrated uncertainty; see prediction_dispersion
         warnings=list(dict.fromkeys(warnings_out)),  # de-dupe, keep order
         input_summary=input_summary,
         residue_predictions=residue_predictions,
         aggregation=aggregation,
         held_out_error=held_out,
-        uncertainty_bounds=uncertainty,
+        prediction_dispersion=uncertainty,
         applicability_domain=app_domain,
         nearest_neighbors=neighbors,
         local_feature_attributions=local_attributions,

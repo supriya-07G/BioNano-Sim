@@ -157,7 +157,7 @@ def _featurise_structure_pure_python(
     *,
     pdb_id: str = "UPLOAD",
 ) -> ChainFeatures:
-    from app.analysis.structural_damage import parse_pdb_atoms, compute_sasa
+    from app.analysis.structural_damage import compute_sasa, parse_pdb_atoms
 
     atoms = parse_pdb_atoms(pdb_path)
     chain_atoms = [a for a in atoms if a.chain_id == chain_id and a.res_name in _THREE_TO_ONE]

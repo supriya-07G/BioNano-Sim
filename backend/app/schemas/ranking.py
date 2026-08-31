@@ -1,6 +1,14 @@
-"""Multi-Objective Candidate Ranking Schemas (#30)."""
+"""Multi-Objective Candidate Ranking Schemas (#30).
+
+The objectives here are exactly those the measured dataset can support. Two
+earlier ones -- SASA preservation and an out-of-domain distance -- were dropped
+rather than kept and filled with constants: an objective nothing measures is a
+weight the user can move for no effect, which is worse than an absent control
+because it looks like it works.
+"""
 
 from typing import Any, Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -8,57 +16,113 @@ class RankingWeights(BaseModel):
     """User-adjustable weights for multi-objective candidate ranking."""
 
     stiffness_retention: float = Field(
-        default=0.35, ge=0.0, le=1.0, description="Weight for % stiffness retained post-damage"
+        default=0.40,
+        ge=0.0,
+        le=1.0,
+        description="Weight for % of baseline stiffness retained after damage",
     )
     baseline_strength: float = Field(
-        default=0.20, ge=0.0, le=1.0, description="Weight for pristine mechanical stiffness (pN/nm)"
+        default=0.30,
+        ge=0.0,
+        le=1.0,
+        description="Weight for measured pristine stiffness (pN/nm)",
     )
-    structural_stability: float = Field(
-        default=0.20, ge=0.0, le=1.0, description="Weight for SASA and hydrophobic core preservation"
+    measurement_confidence: float = Field(
+        default=0.30,
+        ge=0.0,
+        le=1.0,
+        description="Weight for mean force-extension fit quality (R^2) across passing runs",
     )
     uncertainty_penalty: float = Field(
-        default=0.15, ge=0.0, le=1.0, description="Penalty multiplier for prediction variance (sigma)"
-    )
-    out_of_domain_penalty: float = Field(
-        default=0.10, ge=0.0, le=1.0, description="Penalty multiplier for out-of-domain distance"
+        default=0.15,
+        ge=0.0,
+        le=1.0,
+        description="Penalty multiplier for seed-to-seed spread (SD / mean of baseline stiffness)",
     )
 
 
 class CandidateObjectiveScore(BaseModel):
     """Multi-objective score breakdown for a single candidate protein."""
 
-    rank: int = Field(..., description="1-indexed rank position")
+    rank: int | None = Field(
+        ..., description="1-indexed rank position; null for unresolved candidates"
+    )
     pdb_id: str = Field(..., description="PDB accession code")
     name: str = Field(..., description="Protein name")
     uniprot: str = Field(..., description="UniProt accession")
-    
-    # Raw Objective Metrics
-    baseline_stiffness_pnnm: float = Field(..., description="Pristine stiffness in pN/nm")
-    damaged_stiffness_pnnm: float = Field(..., description="Damaged stiffness in pN/nm")
-    stiffness_retained_pct: float = Field(..., description="Percentage of stiffness retained")
-    uncertainty_sigma: float = Field(..., description="Model prediction uncertainty (sigma)")
-    sasa_preservation_pct: float = Field(..., description="SASA compactness preservation %")
-    ood_distance: float = Field(..., description="Out-of-domain distance metric (0 = in-domain)")
-    
-    # Normalized Sub-Scores (0 to 100)
-    subscores: dict[str, float] = Field(..., description="Normalized 0..100 objective subscores")
-    penalties: dict[str, float] = Field(..., description="Deducted penalty points")
-    
-    # Composite Final Score & Pareto Status
-    composite_score: float = Field(..., description="Final multi-objective composite score (0..100)")
-    is_pareto_optimal: bool = Field(..., description="True if candidate lies on the non-dominated Pareto frontier")
-    
+
+    # Measured objective metrics. Null where the domain produced no run that
+    # passed the dataset's quality gate.
+    baseline_stiffness_pnnm: float | None = Field(
+        ..., description="Mean pristine stiffness over passing runs, pN/nm"
+    )
+    baseline_stiffness_sd: float | None = Field(
+        ..., description="Standard deviation of pristine stiffness across seeds, pN/nm"
+    )
+    damaged_stiffness_pnnm: float | None = Field(
+        ..., description="Mean post-damage stiffness over passing runs, pN/nm"
+    )
+    stiffness_retained_pct: float | None = Field(
+        ..., description="Damaged stiffness as a percentage of baseline"
+    )
+    relative_sd: float | None = Field(
+        ..., description="Seed spread as a fraction of the mean; the uncertainty term"
+    )
+    mean_fit_quality: float | None = Field(
+        ..., description="Mean R^2 of the force-extension fit over passing runs"
+    )
+
+    runs_passing_qc: int = Field(..., description="Runs that passed the dataset quality gate")
+    runs_screened: int = Field(..., description="Runs attempted for this domain")
+    resolved: bool = Field(
+        ..., description="True when at least one run yielded a usable elastic constant"
+    )
+    unresolved_reason: str | None = Field(
+        default=None, description="Why no usable stiffness could be read, when resolved is false"
+    )
+    qc_failure_reasons: list[str] = Field(
+        default_factory=list, description="Distinct rejection reasons recorded by the producer"
+    )
+
+    subscores: dict[str, float] = Field(
+        default_factory=dict, description="Normalized 0..100 objective subscores"
+    )
+    penalties: dict[str, float] = Field(
+        default_factory=dict, description="Deducted penalty points"
+    )
+
+    composite_score: float | None = Field(
+        ..., description="Final composite score (0..100); null for unresolved candidates"
+    )
+    is_pareto_optimal: bool = Field(
+        default=False, description="True if the candidate lies on the non-dominated frontier"
+    )
+
     explanation: str = Field(..., description="Human-readable justification of score and rank")
-    provenance: dict[str, Any] = Field(..., description="Experiment & model provenance details")
+    provenance: dict[str, Any] = Field(..., description="Measurement provenance details")
 
 
 class RankingResponse(BaseModel):
     """Response payload for multi-objective candidate ranking query."""
 
-    mode: Literal["REAL_EMPIRICAL_PARETO", "MOCK_DEMO_RANKING"] = Field(
-        ..., description="Execution mode: REAL_EMPIRICAL_PARETO or MOCK_DEMO_RANKING"
+    mode: Literal["MEASURED_STEERED_MD", "NO_MEASUREMENTS_AVAILABLE"] = Field(
+        ...,
+        description=(
+            "MEASURED_STEERED_MD when scores come from the measured dataset; "
+            "NO_MEASUREMENTS_AVAILABLE when that dataset is absent from the checkout"
+        ),
     )
     total_candidates: int = Field(..., description="Number of evaluated candidates")
-    pareto_frontier_ids: list[str] = Field(..., description="PDB IDs on the non-dominated Pareto frontier")
+    ranked_candidates: int = Field(
+        ..., description="Candidates with a usable measurement, and therefore a rank"
+    )
+    pareto_frontier_ids: list[str] = Field(
+        ..., description="PDB IDs on the non-dominated Pareto frontier"
+    )
     weights_used: RankingWeights = Field(..., description="Weights applied in calculation")
-    candidates: list[CandidateObjectiveScore] = Field(..., description="Ranked list of candidates")
+    dataset: dict[str, Any] = Field(
+        default_factory=dict, description="Provenance of the measurements behind these scores"
+    )
+    candidates: list[CandidateObjectiveScore] = Field(
+        ..., description="Ranked candidates first, then unresolved ones"
+    )

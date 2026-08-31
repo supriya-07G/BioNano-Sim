@@ -24,13 +24,11 @@ from app.schemas.sweep import (
     SweepDetail,
     SweepItem,
     SweepPreviewResponse,
-    SweepStatus,
 )
 from app.services import experiment_service
 from app.simulation.sweep import (
     aggregate_severity_response,
     estimate_sweep_cost,
-    expand_sweep_grid,
 )
 
 logger = get_logger("COSMORA.services.sweep")

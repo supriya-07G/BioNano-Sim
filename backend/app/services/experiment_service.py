@@ -15,7 +15,6 @@ from typing import Any
 
 from app.config import settings
 from app.contracts.paired_experiment import (
-    FORCE_EXTENSION_COLUMNS,
     validate_result_payload,
 )
 from app.core.exceptions import (

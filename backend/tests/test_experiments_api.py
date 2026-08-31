@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import csv
 import json
-from pathlib import Path
+
 import pytest
 
 
 @pytest.fixture
 def sample_experiment(tmp_path, monkeypatch):
-    from app.services import experiment_service
     from app.config import settings
 
     root = tmp_path / "runtime" / "experiments"

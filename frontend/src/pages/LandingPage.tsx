@@ -22,7 +22,7 @@ import { OrbitLines, Starfield } from '@/components/layout/Starfield'
 import { cn } from '@/components/ui/cn'
 
 const CHIPS = [
-  { icon: Boxes, label: '13 approved protein domains' },
+  { icon: Boxes, label: '13 domains screened, 4 resolved' },
   { icon: Activity, label: '520 paired steered MD experiments' },
   { icon: Cpu, label: 'OpenMM force-extension engine' },
   { icon: Database, label: 'Empirical physics dataset' },
@@ -120,14 +120,14 @@ export function LandingPage() {
                 </span>
 
                 <h1 className="text-balance mt-4 text-4xl font-semibold leading-[1.1] tracking-tight text-ink lg:text-5xl">
-                  Computational Stress-Testing of{' '}
+                  Engineering Proteins That{' '}
                   <span className="bg-gradient-to-r from-accent via-accent-soft to-violet bg-clip-text text-transparent">
-                    Protein Nanomachinery
+                    Survive Deep Space
                   </span>
                 </h1>
 
                 <p className="mt-5 max-w-2xl text-sm leading-relaxed text-ink-muted">
-                  Proteins are engineered into spaceflight nanomachinery: molecular springs, switches, sensors, and structural members. In deep space, components face unshielded radiation and mechanical stress with{' '}
+                  Proteins are engineered into spaceflight nanomachinery: molecular springs, switches, sensors, and structural members. In deep space, components face unshielded radiation and sustained mechanical load with{' '}
                   <strong className="text-ink">no repair, replacement, or resupply</strong>.
                 </p>
 
@@ -135,7 +135,7 @@ export function LandingPage() {
                   COSMORA measures load-bearing capacity directly.{' '}
                   <strong className="text-ink">Which domains carry load once damage occurs?</strong>{' '}
                   A candidate residue is truncated, the domain is pulled via{' '}
-                  <strong className="text-ink">steered molecular dynamics</strong>, and the change in stiffness ($\Delta k$) is measured in piconewtons per nanometre (pN/nm). Real physics, on real coordinates.
+                  <strong className="text-ink">steered molecular dynamics</strong>, and the change in stiffness is measured in piconewtons per nanometre (pN/nm). Real physics, on real coordinates.
                 </p>
 
                 <div className="mt-7 flex flex-wrap items-center gap-3">

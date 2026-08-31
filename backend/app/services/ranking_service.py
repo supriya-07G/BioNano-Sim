@@ -1,268 +1,284 @@
 """Multi-Objective Candidate Ranking Engine (#30).
 
-Ranks candidate protein mechanical components using real simulation metrics,
-Pareto-optimality, uncertainty penalties, and out-of-domain distance.
+Ranks candidate protein mechanical components on measured steered-MD results:
+stiffness retention, pristine strength, fit quality, seed spread, and
+Pareto-optimality across those objectives.
+
+Every number served here is aggregated from the measured dataset by
+``app.analysis.measured_stiffness``. This module previously carried its own
+table of stiffness constants; they disagreed with the measurements by three to
+five times and ranked first a domain whose fits are negative, which is the one
+outcome the real data rules out. There is no local table any more, so there is
+nothing left to diverge.
+
+A domain that produced no run passing the dataset's quality gate is listed
+without a rank rather than scored. Nine of the thirteen screened domains are in
+that state, and saying so is the result -- a screen that resolves four of
+thirteen is a finding, whereas thirteen confident scores would be a fiction.
 """
 
 from typing import Any
-from app.schemas.ranking import CandidateObjectiveScore, RankingResponse, RankingWeights
+
+from app.analysis import measured_stiffness
+from app.schemas.ranking import (
+    CandidateObjectiveScore,
+    RankingResponse,
+    RankingWeights,
+)
 from app.services import protein_service
 
-
-# Reference data for approved candidates:
-# (baseline_stiffness_pnnm, damaged_stiffness_pnnm, uncertainty_sigma, sasa_preservation_pct, ood_distance)
-_CANDIDATE_METRICS: dict[str, dict[str, Any]] = {
-    "1UBQ": {
-        "baseline_stiffness": 142.5,
-        "damaged_stiffness": 89.2,
-        "uncertainty_sigma": 0.04,
-        "sasa_preservation": 86.0,
-        "ood_distance": 0.05,
-        "provenance": {
-            "dataset": "Steered MD 520 Paired Runs",
-            "validation": "PASSED_VALIDATION",
-            "model_version": "v1.0-empirical",
-        },
-    },
-    "1TIT": {
-        "baseline_stiffness": 185.0,
-        "damaged_stiffness": 115.0,
-        "uncertainty_sigma": 0.06,
-        "sasa_preservation": 84.5,
-        "ood_distance": 0.08,
-        "provenance": {
-            "dataset": "Titin I27 Steered MD Benchmark",
-            "validation": "PASSED_VALIDATION",
-            "model_version": "v1.0-empirical",
-        },
-    },
-    "1TEN": {
-        "baseline_stiffness": 120.0,
-        "damaged_stiffness": 74.4,
-        "uncertainty_sigma": 0.09,
-        "sasa_preservation": 82.0,
-        "ood_distance": 0.12,
-        "provenance": {
-            "dataset": "FNIII Domain Steered MD",
-            "validation": "PASSED_VALIDATION",
-            "model_version": "v1.0-empirical",
-        },
-    },
-    "1PGA": {
-        "baseline_stiffness": 130.0,
-        "damaged_stiffness": 106.0,
-        "uncertainty_sigma": 0.05,
-        "sasa_preservation": 87.7,
-        "ood_distance": 0.06,
-        "provenance": {
-            "dataset": "Protein G Steered MD",
-            "validation": "PASSED_VALIDATION",
-            "model_version": "v1.0-empirical",
-        },
-    },
-    "2SPC": {
-        "baseline_stiffness": 95.0,
-        "damaged_stiffness": 58.9,
-        "uncertainty_sigma": 0.14,
-        "sasa_preservation": 78.0,
-        "ood_distance": 0.22,
-        "provenance": {
-            "dataset": "Spectrin Repeat MD",
-            "validation": "PASSED_VALIDATION",
-            "model_version": "v1.0-empirical",
-        },
-    },
-    "2F4K": {
-        "baseline_stiffness": 110.0,
-        "damaged_stiffness": 82.5,
-        "uncertainty_sigma": 0.18,
-        "sasa_preservation": 81.0,
-        "ood_distance": 0.35,
-        "provenance": {
-            "dataset": "Barnase Candidate Onboarded",
-            "validation": "CANDIDATE_ONBOARDED",
-            "model_version": "v1.0-empirical",
-        },
-    },
-}
+#: Objectives maximised on the Pareto frontier. Retention is omitted where a
+#: domain has no baseline to divide by; such domains never reach this stage.
+_PARETO_OBJECTIVES = (
+    "stiffness_retained_pct",
+    "baseline_stiffness_pnnm",
+    "mean_fit_quality",
+)
 
 
-def _compute_pareto_frontier(candidates_raw: list[dict[str, Any]]) -> set[str]:
-    """Identify non-dominated candidates across the selected positive objectives.
+def _pareto_frontier(rows: list[dict[str, Any]]) -> set[str]:
+    """PDB ids not dominated by any other candidate.
 
-    Candidate A dominates candidate B if A is >= B in all positive objectives
-    AND strictly > B in at least one positive objective.
-    Objectives evaluated:
-      - Stiffness Retained % (higher is better)
-      - Baseline Stiffness pN/nm (higher is better)
-      - Low Uncertainty (lower sigma is better -> 1 - sigma)
-      - Structural Stability % (higher is better)
+    A candidate is dominated when another is at least equal on every objective
+    and strictly better on one. Comparison is over measured quantities only.
     """
-    pareto_set: set[str] = set()
-
-    for i, c1 in enumerate(candidates_raw):
-        c1_id = c1["pdb_id"]
-        v1 = (
-            c1["stiffness_retained_pct"],
-            c1["baseline_stiffness_pnnm"],
-            1.0 - c1["uncertainty_sigma"],
-            c1["sasa_preservation_pct"],
-        )
-        is_dominated = False
-
-        for j, c2 in enumerate(candidates_raw):
-            if i == j:
-                continue
-            v2 = (
-                c2["stiffness_retained_pct"],
-                c2["baseline_stiffness_pnnm"],
-                1.0 - c2["uncertainty_sigma"],
-                c2["sasa_preservation_pct"],
+    frontier: set[str] = set()
+    for row in rows:
+        mine = tuple(row[key] for key in _PARETO_OBJECTIVES)
+        dominated = any(
+            other is not row
+            and all(
+                theirs >= ours
+                for ours, theirs in zip(
+                    mine,
+                    tuple(other[key] for key in _PARETO_OBJECTIVES),
+                    strict=True,
+                )
             )
+            and any(
+                theirs > ours
+                for ours, theirs in zip(
+                    mine,
+                    tuple(other[key] for key in _PARETO_OBJECTIVES),
+                    strict=True,
+                )
+            )
+            for other in rows
+        )
+        if not dominated:
+            frontier.add(row["pdb_id"])
+    return frontier
 
-            # Check if c2 dominates c1
-            if all(x2 >= x1 for x1, x2 in zip(v1, v2)) and any(x2 > x1 for x1, x2 in zip(v1, v2)):
-                is_dominated = True
-                break
 
-        if not is_dominated:
-            pareto_set.add(c1_id)
-
-    return pareto_set
-
-
-def rank_candidates(weights: RankingWeights | None = None, allow_mock: bool = False) -> RankingResponse:
-    """Evaluate and rank all approved candidate proteins using multi-objective scoring."""
+def rank_candidates(weights: RankingWeights | None = None) -> RankingResponse:
+    """Score and rank approved proteins against the measured dataset."""
     if weights is None:
         weights = RankingWeights()
 
-    # Normalize weights so sum of positive weights == 1.0
-    w_stiff = weights.stiffness_retention
-    w_base = weights.baseline_strength
-    w_stab = weights.structural_stability
-    w_unc = weights.uncertainty_penalty
-    w_ood = weights.out_of_domain_penalty
+    summary = measured_stiffness.dataset_summary()
+    approved = protein_service.list_proteins()
 
-    total_pos_weight = max(1e-6, w_stiff + w_base + w_stab)
+    resolved_rows: list[dict[str, Any]] = []
+    unresolved: list[CandidateObjectiveScore] = []
 
-    # 1. Fetch metadata from registry
-    approved_list = protein_service.list_proteins()
-    
-    raw_eval: list[dict[str, Any]] = []
+    for protein in approved:
+        pdb_id = protein["pdb_id"]
+        measured = measured_stiffness.get(pdb_id)
+        common = {
+            "pdb_id": pdb_id,
+            "name": protein.get("name", pdb_id),
+            "uniprot": protein.get("uniprot") or (measured.uniprot_id if measured else "") or "N/A",
+        }
 
-    for prot in approved_list:
-        pid = prot["pdb_id"]
-        m = _CANDIDATE_METRICS.get(
-            pid,
+        if measured is None:
+            unresolved.append(
+                _unmeasured(common, screened=0, reason=(
+                    "This protein does not appear in the measured dataset, so no "
+                    "mechanical result exists for it yet."
+                ))
+            )
+            continue
+
+        if not measured.resolved:
+            unresolved.append(
+                CandidateObjectiveScore(
+                    rank=None,
+                    **common,
+                    baseline_stiffness_pnnm=None,
+                    baseline_stiffness_sd=None,
+                    damaged_stiffness_pnnm=None,
+                    stiffness_retained_pct=None,
+                    relative_sd=None,
+                    mean_fit_quality=None,
+                    runs_passing_qc=0,
+                    runs_screened=measured.n_screened,
+                    resolved=False,
+                    unresolved_reason=measured.unresolved_reason,
+                    qc_failure_reasons=measured.qc_failure_reasons,
+                    composite_score=None,
+                    explanation=(
+                        f"Not ranked. All {measured.n_screened} runs were rejected by "
+                        f"the dataset's quality gate ("
+                        f"{'; '.join(measured.qc_failure_reasons) or 'no reason recorded'}"
+                        "). No elastic constant can be read from these fits."
+                    ),
+                    provenance=_provenance(measured),
+                )
+            )
+            continue
+
+        resolved_rows.append(
             {
-                "baseline_stiffness": 100.0,
-                "damaged_stiffness": 65.0,
-                "uncertainty_sigma": 0.15,
-                "sasa_preservation": 80.0,
-                "ood_distance": 0.20,
-                "provenance": {"dataset": "Standard Registry", "validation": "REGISTERED"},
-            },
+                **common,
+                "baseline_stiffness_pnnm": round(measured.baseline.mean, 1),
+                "baseline_stiffness_sd": round(measured.baseline.sd, 1),
+                "damaged_stiffness_pnnm": round(measured.damaged.mean, 1),
+                "stiffness_retained_pct": measured.retained_pct,
+                "relative_sd": measured.relative_sd,
+                "mean_fit_quality": round(measured.fit_quality, 3),
+                "runs_passing_qc": measured.n_runs,
+                "runs_screened": measured.n_screened,
+                "measured": measured,
+            }
         )
 
-        base_k = float(m["baseline_stiffness"])
-        dam_k = float(m["damaged_stiffness"])
-        stiff_ret_pct = round((dam_k / base_k) * 100.0, 1) if base_k > 0 else 0.0
+    if not resolved_rows:
+        return RankingResponse(
+            mode="NO_MEASUREMENTS_AVAILABLE" if not summary["available"] else "MEASURED_STEERED_MD",
+            total_candidates=len(approved),
+            ranked_candidates=0,
+            pareto_frontier_ids=[],
+            weights_used=weights,
+            dataset=summary,
+            candidates=unresolved,
+        )
 
-        raw_eval.append({
-            "pdb_id": pid,
-            "name": prot.get("name", pid),
-            "uniprot": prot.get("uniprot", "N/A"),
-            "baseline_stiffness_pnnm": base_k,
-            "damaged_stiffness_pnnm": dam_k,
-            "stiffness_retained_pct": stiff_ret_pct,
-            "uncertainty_sigma": float(m["uncertainty_sigma"]),
-            "sasa_preservation_pct": float(m["sasa_preservation"]),
-            "ood_distance": float(m["ood_distance"]),
-            "provenance": m.get("provenance", {}),
-        })
+    frontier = _pareto_frontier(resolved_rows)
+    max_baseline = max(row["baseline_stiffness_pnnm"] for row in resolved_rows) or 1.0
+    total_positive = max(
+        1e-6,
+        weights.stiffness_retention
+        + weights.baseline_strength
+        + weights.measurement_confidence,
+    )
 
-    # 2. Compute Pareto Frontier
-    pareto_frontier = _compute_pareto_frontier(raw_eval)
+    scored: list[CandidateObjectiveScore] = []
+    for row in resolved_rows:
+        measured = row["measured"]
 
-    # 3. Calculate Normalized Subscores & Penalties
-    max_baseline = max(c["baseline_stiffness_pnnm"] for c in raw_eval) if raw_eval else 1.0
+        # Retention can exceed 100% -- damage sometimes leaves a domain
+        # marginally stiffer, which is itself a result. It is clamped for
+        # scoring only, so a null result cannot outscore a real improvement,
+        # while the raw percentage is still reported untouched.
+        s_retention = min(100.0, max(0.0, row["stiffness_retained_pct"]))
+        s_strength = round((row["baseline_stiffness_pnnm"] / max_baseline) * 100.0, 1)
+        s_confidence = round(row["mean_fit_quality"] * 100.0, 1)
 
-    scored_candidates: list[CandidateObjectiveScore] = []
+        weighted = (
+            weights.stiffness_retention * s_retention
+            + weights.baseline_strength * s_strength
+            + weights.measurement_confidence * s_confidence
+        ) / total_positive
 
-    for c in raw_eval:
-        # Subscores (0..100)
-        s_stiff = c["stiffness_retained_pct"]  # already 0..100 %
-        s_base = round((c["baseline_stiffness_pnnm"] / max_baseline) * 100.0, 1)
-        s_stab = c["sasa_preservation_pct"]
+        # The spread across seeds is the honest uncertainty here, and it is
+        # large: 15-25% of the mean even for domains that resolve cleanly.
+        penalty = round(weights.uncertainty_penalty * (row["relative_sd"] or 0.0) * 100.0, 1)
+        composite = round(max(0.0, weighted - penalty), 1)
 
-        # Penalties (0..100 scale)
-        p_unc = round(c["uncertainty_sigma"] * 100.0, 1)
-        p_ood = round(c["ood_distance"] * 100.0, 1)
-
-        # Weighted Composite Score
-        pos_score = (w_stiff * s_stiff + w_base * s_base + w_stab * s_stab) / total_pos_weight
-        penalty_deduction = (w_unc * p_unc + w_ood * p_ood)
-
-        final_composite = max(0.0, round(pos_score - penalty_deduction, 1))
-
-        is_pareto = c["pdb_id"] in pareto_frontier
-
-        # Explanation string
-        explanation_parts = [
-            f"Stiffness retention: {c['stiffness_retained_pct']}% ({s_stiff:.1f} pts)",
-            f"Baseline strength: {c['baseline_stiffness_pnnm']} pN/nm ({s_base:.1f} pts)",
-            f"Structural stability: {c['sasa_preservation_pct']}% SASA retained",
-        ]
-        if p_unc > 10.0:
-            explanation_parts.append(f"Deducted {p_unc * w_unc:.1f} pts for prediction uncertainty (σ = {c['uncertainty_sigma']})")
-        if p_ood > 15.0:
-            explanation_parts.append(f"Deducted {p_ood * w_ood:.1f} pts for out-of-domain distance (dist = {c['ood_distance']})")
-        if is_pareto:
-            explanation_parts.append("★ Pareto-Optimal Candidate: Non-dominated across selected objectives.")
-
-        explanation = ". ".join(explanation_parts) + "."
-
-        scored_candidates.append(
+        scored.append(
             CandidateObjectiveScore(
                 rank=0,  # assigned after sorting
-                pdb_id=c["pdb_id"],
-                name=c["name"],
-                uniprot=c["uniprot"],
-                baseline_stiffness_pnnm=c["baseline_stiffness_pnnm"],
-                damaged_stiffness_pnnm=c["damaged_stiffness_pnnm"],
-                stiffness_retained_pct=c["stiffness_retained_pct"],
-                uncertainty_sigma=c["uncertainty_sigma"],
-                sasa_preservation_pct=c["sasa_preservation_pct"],
-                ood_distance=c["ood_distance"],
+                pdb_id=row["pdb_id"],
+                name=row["name"],
+                uniprot=row["uniprot"],
+                baseline_stiffness_pnnm=row["baseline_stiffness_pnnm"],
+                baseline_stiffness_sd=row["baseline_stiffness_sd"],
+                damaged_stiffness_pnnm=row["damaged_stiffness_pnnm"],
+                stiffness_retained_pct=row["stiffness_retained_pct"],
+                relative_sd=row["relative_sd"],
+                mean_fit_quality=row["mean_fit_quality"],
+                runs_passing_qc=row["runs_passing_qc"],
+                runs_screened=row["runs_screened"],
+                resolved=True,
+                qc_failure_reasons=measured.qc_failure_reasons,
                 subscores={
-                    "stiffness_retention": s_stiff,
-                    "baseline_strength": s_base,
-                    "structural_stability": s_stab,
+                    "stiffness_retention": round(s_retention, 1),
+                    "baseline_strength": s_strength,
+                    "measurement_confidence": s_confidence,
                 },
-                penalties={
-                    "uncertainty": p_unc,
-                    "out_of_domain": p_ood,
-                },
-                composite_score=final_composite,
-                is_pareto_optimal=is_pareto,
-                explanation=explanation,
-                provenance=c["provenance"],
+                penalties={"seed_spread": penalty},
+                composite_score=composite,
+                is_pareto_optimal=row["pdb_id"] in frontier,
+                explanation=_explain(row, s_strength, penalty, row["pdb_id"] in frontier),
+                provenance=_provenance(measured),
             )
         )
 
-    # Sort descending by composite_score
-    scored_candidates.sort(key=lambda x: x.composite_score, reverse=True)
-
-    # Assign rank index 1..N
-    for idx, item in enumerate(scored_candidates, start=1):
-        item.rank = idx
-
-    mode = "MOCK_DEMO_RANKING" if allow_mock else "REAL_EMPIRICAL_PARETO"
+    scored.sort(key=lambda c: c.composite_score or 0.0, reverse=True)
+    for position, candidate in enumerate(scored, start=1):
+        candidate.rank = position
 
     return RankingResponse(
-        mode=mode,
-        total_candidates=len(scored_candidates),
-        pareto_frontier_ids=sorted(list(pareto_frontier)),
+        mode="MEASURED_STEERED_MD",
+        total_candidates=len(approved),
+        ranked_candidates=len(scored),
+        pareto_frontier_ids=sorted(frontier),
         weights_used=weights,
-        candidates=scored_candidates,
+        dataset=summary,
+        candidates=scored + unresolved,
     )
+
+
+def _unmeasured(
+    common: dict[str, Any], *, screened: int, reason: str
+) -> CandidateObjectiveScore:
+    return CandidateObjectiveScore(
+        rank=None,
+        **common,
+        baseline_stiffness_pnnm=None,
+        baseline_stiffness_sd=None,
+        damaged_stiffness_pnnm=None,
+        stiffness_retained_pct=None,
+        relative_sd=None,
+        mean_fit_quality=None,
+        runs_passing_qc=0,
+        runs_screened=screened,
+        resolved=False,
+        unresolved_reason=reason,
+        composite_score=None,
+        explanation=f"Not ranked. {reason}",
+        provenance={"dataset": measured_stiffness.STIFFNESS_CSV.name},
+    )
+
+
+def _explain(
+    row: dict[str, Any], strength_score: float, penalty: float, on_frontier: bool
+) -> str:
+    retained = row["stiffness_retained_pct"]
+    parts = [
+        f"Baseline stiffness {row['baseline_stiffness_pnnm']} "
+        f"+/- {row['baseline_stiffness_sd']} pN/nm over {row['runs_passing_qc']} of "
+        f"{row['runs_screened']} runs that passed QC ({strength_score:.1f} pts).",
+        f"Retains {retained}% of baseline after damage.",
+        f"Mean force-extension fit R^2 {row['mean_fit_quality']}.",
+    ]
+    if retained is not None and retained >= 100.0:
+        parts.append(
+            "Retention at or above 100% means damage produced no measurable loss "
+            "of stiffness in this domain; the seed spread is wider than the effect."
+        )
+    if penalty:
+        parts.append(f"Seed spread costs {penalty} pts.")
+    if on_frontier:
+        parts.append("Pareto-optimal: not dominated on any measured objective.")
+    return " ".join(parts)
+
+
+def _provenance(measured: measured_stiffness.MeasuredProtein) -> dict[str, Any]:
+    return {
+        "dataset": measured_stiffness.STIFFNESS_CSV.name,
+        "runs_passing_qc": measured.n_runs,
+        "runs_screened": measured.n_screened,
+        "measurement": "steered molecular dynamics, force-extension slope",
+        "stiffness_unit": "pN/nm",
+    }

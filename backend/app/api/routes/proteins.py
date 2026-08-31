@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, File, Form, Query, UploadFile
 from fastapi.responses import FileResponse, PlainTextResponse
@@ -24,7 +24,7 @@ def list_proteins() -> list[dict[str, Any]]:
 
 @router.get("/onboard/candidates", response_model=list[CandidateRecord], summary="List onboarding candidates")
 def list_onboarding_candidates(
-    state: Optional[str] = Query(default=None, description="Filter by state: pending, approved, or rejected")
+    state: str | None = Query(default=None, description="Filter by state: pending, approved, or rejected")
 ) -> list[dict[str, Any]]:
     return protein_onboarding_service.list_candidates(state)
 

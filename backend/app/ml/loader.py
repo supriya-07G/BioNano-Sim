@@ -185,7 +185,7 @@ def _load() -> ModelState:
     # Patch SimpleImputer compatibility across scikit-learn version differences
     def _patch_imputers(obj: Any) -> None:
         if hasattr(obj, "_fit_dtype") and not hasattr(obj, "_fill_dtype"):
-            setattr(obj, "_fill_dtype", getattr(obj, "_fit_dtype", None))
+            obj._fill_dtype = getattr(obj, "_fit_dtype", None)
         if hasattr(obj, "transformers_"):
             for _, trans, _ in getattr(obj, "transformers_", []):
                 _patch_imputers(trans)

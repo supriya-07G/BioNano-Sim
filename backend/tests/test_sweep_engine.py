@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import time
+
 import pytest
 
 from app.core.exceptions import ValidationFailedError
 from app.schemas.sweep import SweepConfig, SweepItem
-from app.services import sweep_service
 from app.simulation.sweep import (
     aggregate_severity_response,
     build_experiment_id,

@@ -1,7 +1,8 @@
 """Multi-objective candidate ranking API route (#30)."""
 
 from typing import Any
-from fastapi import APIRouter, Query
+
+from fastapi import APIRouter
 
 from app.schemas.ranking import RankingResponse, RankingWeights
 from app.services import ranking_service
@@ -14,13 +15,9 @@ router = APIRouter(tags=["candidates"])
     response_model=RankingResponse,
     summary="Get multi-objective candidate protein ranking",
 )
-def get_rankings(
-    allow_mock: bool = Query(
-        default=False, description="Set True to allow mock demo mode outputs"
-    )
-) -> Any:
-    """Return candidates evaluated under default conservative weights."""
-    return ranking_service.rank_candidates(weights=RankingWeights(), allow_mock=allow_mock)
+def get_rankings() -> Any:
+    """Return candidates evaluated under default weights."""
+    return ranking_service.rank_candidates(weights=RankingWeights())
 
 
 @router.post(
@@ -28,11 +25,6 @@ def get_rankings(
     response_model=RankingResponse,
     summary="Evaluate candidates under custom objective weights",
 )
-def evaluate_custom_rankings(
-    weights: RankingWeights,
-    allow_mock: bool = Query(
-        default=False, description="Set True to allow mock demo mode outputs"
-    ),
-) -> Any:
+def evaluate_custom_rankings(weights: RankingWeights) -> Any:
     """Return candidates evaluated under custom objective weights."""
-    return ranking_service.rank_candidates(weights=weights, allow_mock=allow_mock)
+    return ranking_service.rank_candidates(weights=weights)

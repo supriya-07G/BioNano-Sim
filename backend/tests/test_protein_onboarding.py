@@ -2,11 +2,12 @@
 
 import json
 from pathlib import Path
+
 import pytest
 
-from app.core.exceptions import InvalidProteinError, NotFoundError, ValidationFailedError
+from app.core.exceptions import InvalidProteinError
 from app.schemas.onboarding import CandidateReviewAction, CandidateSubmission
-from app.services import protein_onboarding_service, protein_service
+from app.services import protein_onboarding_service
 
 
 @pytest.fixture
