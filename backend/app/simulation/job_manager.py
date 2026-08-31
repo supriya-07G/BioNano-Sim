@@ -103,6 +103,16 @@ class JobManager:
                 "created_at": utc_now_iso(),
                 "stages": _initial_stages(),
             }
+        # Reconcile orphan running/queued jobs left by a backend server restart
+        if status.get("status") in (JobStatus.RUNNING.value, JobStatus.QUEUED.value):
+            with self._lock:
+                is_live = job_id in self._live
+            if not is_live:
+                status["status"] = JobStatus.FAILED.value
+                status["error_code"] = "PROCESS_INTERRUPTED"
+                status["error_message"] = "Simulation process was interrupted by a backend server restart."
+                status["finished_at"] = status.get("finished_at") or utc_now_iso()
+                self._write_status(job_dir, status)
         return status
 
     # ------------------------------------------------------------------ #
