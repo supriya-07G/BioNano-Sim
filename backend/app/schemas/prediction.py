@@ -102,6 +102,12 @@ class PredictionResponse(BaseModel):
     residue_predictions: list[ResiduePredictionOut] = Field(default_factory=list)
     aggregation: dict[str, Any] = Field(default_factory=dict)
     held_out_error: dict[str, Any] = Field(default_factory=dict)
+    uncertainty_bounds: dict[str, Any] = Field(default_factory=dict)
+    applicability_domain: dict[str, Any] = Field(default_factory=dict)
+    nearest_neighbors: list[dict[str, Any]] = Field(default_factory=list)
+    local_feature_attributions: list[dict[str, Any]] = Field(default_factory=list)
+    global_feature_importance: dict[str, float] = Field(default_factory=dict)
+    attribution_disclaimer: str | None = None
 
 
 class ModelInfoResponse(BaseModel):
