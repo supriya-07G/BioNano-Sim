@@ -14,7 +14,7 @@ class ResizeObserverMock {
   disconnect() {}
 }
 
-global.ResizeObserver = ResizeObserverMock as any
+global.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
 
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
