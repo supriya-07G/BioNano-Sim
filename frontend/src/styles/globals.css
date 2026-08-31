@@ -366,35 +366,83 @@
 
 /* --- Print Styles for PDF Report --------------------------------------- */
 @media print {
-  body {
+  /* Hide navigation, toolbars, buttons, and app sidebars */
+  nav,
+  header,
+  aside,
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Reset root containers */
+  html,
+  body,
+  #root {
     background: #ffffff !important;
     color: #0f172a !important;
+    height: auto !important;
+    overflow: visible !important;
   }
-  body * {
-    visibility: hidden !important;
-  }
-  #print-scientific-report,
-  #print-scientific-report * {
-    visibility: visible !important;
-  }
-  #print-scientific-report {
+
+  /* Reset fixed modal overlay position for printing */
+  .fixed.inset-0 {
     position: absolute !important;
     left: 0 !important;
     top: 0 !important;
     width: 100% !important;
+    height: auto !important;
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    z-index: 99999 !important;
+  }
+
+  #print-scientific-report {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
-    padding: 24px !important;
+    padding: 16px !important;
     border: none !important;
     box-shadow: none !important;
     background: #ffffff !important;
     color: #0f172a !important;
     overflow: visible !important;
-    font-size: 12pt !important;
   }
-  .no-print {
-    display: none !important;
+
+  /* Force all text inside print report to be dark slate and legible */
+  #print-scientific-report * {
+    color: #0f172a !important;
+    background-color: transparent !important;
+    border-color: #e2e8f0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
+
+  #print-scientific-report h1 {
+    color: #0284c7 !important; /* Deep Cyan */
+  }
+
+  #print-scientific-report h3,
+  #print-scientific-report th {
+    color: #0369a1 !important; /* Ocean Blue */
+  }
+
+  #print-scientific-report .text-warn {
+    color: #d97706 !important; /* Amber */
+  }
+
+  #print-scientific-report .text-danger {
+    color: #dc2626 !important; /* Red */
+  }
+
+  #print-scientific-report .text-ok {
+    color: #16a34a !important; /* Green */
+  }
+
   .print-avoid-break {
     page-break-inside: avoid !important;
   }
