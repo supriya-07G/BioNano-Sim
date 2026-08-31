@@ -319,6 +319,16 @@ ${candidates
     setExporting(null)
   }
 
+  const handleDownloadBundle = () => {
+    setExporting('bundle')
+    const bundleUrl = `/api/v1/precomputed/${pdbId}/bundle`
+    const link = document.createElement('a')
+    link.href = bundleUrl
+    link.download = `${pdbId}_evidence_bundle.zip`
+    link.click()
+    setTimeout(() => setExporting(null), 1000)
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
       {/* Modal Container */}
@@ -331,8 +341,8 @@ ${candidates
               <FileText className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-ink">Scientific Report Generator</h2>
-              <p className="text-2xs text-ink-muted">Download valid multi-page PDF document or raw scientific formats</p>
+              <h2 className="text-base font-bold text-ink">Scientific Report & Bundle Generator</h2>
+              <p className="text-2xs text-ink-muted">Download valid multi-page PDF document or raw evidence bundle (.zip)</p>
             </div>
           </div>
 
@@ -344,6 +354,14 @@ ${candidates
             >
               <Download className="h-4 w-4" />
               <span>{exporting === 'pdf' ? 'Generating PDF…' : 'Download PDF Report'}</span>
+            </button>
+            <button
+              onClick={handleDownloadBundle}
+              disabled={Boolean(exporting)}
+              className="flex items-center gap-1.5 rounded-lg border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-bold text-accent hover:bg-accent/20 transition-colors disabled:opacity-50"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span>Evidence Bundle (.zip)</span>
             </button>
             <button
               onClick={handlePrintPdf}

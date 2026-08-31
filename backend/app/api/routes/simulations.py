@@ -190,3 +190,28 @@ def precomputed_structure(
     return FileResponse(
         path, media_type="chemical/x-pdb", filename=f"{pdb_id}_precomputed_{which}.pdb"
     )
+
+
+# --------------------------------------------------------------------------- #
+# Evidence Bundles (#21)
+# --------------------------------------------------------------------------- #
+@router.get("/simulations/{job_id}/bundle", summary="Download evidence bundle (.zip)")
+def simulation_bundle(job_id: str) -> FileResponse:
+    from app.services import bundle_service
+    zip_path = bundle_service.generate_evidence_bundle(job_id)
+    return FileResponse(
+        zip_path,
+        media_type="application/zip",
+        filename=f"{job_id}_evidence_bundle.zip",
+    )
+
+
+@router.get("/precomputed/{pdb_id}/bundle", summary="Download precomputed evidence bundle (.zip)")
+def precomputed_bundle(pdb_id: str) -> FileResponse:
+    from app.services import bundle_service
+    zip_path = bundle_service.generate_precomputed_bundle(pdb_id)
+    return FileResponse(
+        zip_path,
+        media_type="application/zip",
+        filename=f"{pdb_id}_precomputed_bundle.zip",
+    )

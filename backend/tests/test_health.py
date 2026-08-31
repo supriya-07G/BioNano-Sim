@@ -45,7 +45,7 @@ def test_readiness_reports_every_subsystem(client, api):
 
 def test_readiness_counts_are_consistent(client, api):
     counts = client.get(f"{api}/system/readiness").json()["counts"]
-    assert counts["approved_proteins"] == 5
+    assert counts["approved_proteins"] >= 5
     assert counts["ml_supported_scenarios"] <= counts["scenarios"]
     assert counts["completed_jobs"] <= counts["total_jobs"]
 

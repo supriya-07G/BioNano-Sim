@@ -1,4 +1,4 @@
-import { Braces, Download, FileSpreadsheet, FileText, Orbit } from 'lucide-react'
+import { Archive, Braces, Download, FileSpreadsheet, FileText, Orbit } from 'lucide-react'
 
 import { Tooltip } from '@/components/ui/Tooltip'
 import { cn } from '@/components/ui/cn'
@@ -21,6 +21,15 @@ export function ExportPanel({
   const short = jobId.slice(0, 8)
 
   const reports = [
+    {
+      icon: Archive,
+      label: 'Evidence bundle (.zip)',
+      href: isPrecomputed ? `/precomputed/${jobId}/bundle` : `/simulations/${jobId}/bundle`,
+      filename: `${short}-evidence-bundle.zip`,
+      help:
+        'Self-contained auditable evidence archive containing raw structures, ' +
+        'force-extension CSVs, metadata JSON, and a manifest.json with SHA-256 hashes.',
+    },
     {
       icon: Braces,
       label: 'Experiment report (JSON)',
