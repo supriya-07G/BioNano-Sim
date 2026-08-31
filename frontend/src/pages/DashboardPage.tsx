@@ -15,6 +15,7 @@ import {
 
 import { EmptyState } from '@/components/common/EmptyState'
 import { MissionBrief } from '@/components/dashboard/MissionBrief'
+import { PairedExperimentCard } from '@/components/dashboard/PairedExperimentCard'
 import { ErrorState } from '@/components/common/ErrorState'
 import { SkeletonCard, SkeletonRows } from '@/components/common/LoadingState'
 import { ScopeNotice } from '@/components/common/ScientificNotice'
@@ -150,6 +151,9 @@ export function DashboardPage() {
 
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
         <div className="space-y-4">
+          {/* --- Paired mechanical experiment showcase (#5) ------------- */}
+          <PairedExperimentCard />
+
           {/* --- Quick start ------------------------------------------- */}
           <section className="card p-4">
             <div className="mb-3 flex items-center justify-between">

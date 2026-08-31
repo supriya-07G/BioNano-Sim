@@ -244,5 +244,9 @@ def review_candidate(action: CandidateReviewAction) -> dict[str, Any]:
             doc["approved_proteins"] = approved_list
             meta_json_path.write_text(json.dumps(doc, indent=2), encoding="utf-8")
 
+            # Clear memory cache so API immediately reflects the newly approved protein
+            from app.services import protein_service
+            protein_service.clear_protein_cache()
+
     logger.info("Candidate '%s' reviewed: %s by %s.", candidate_id, new_state, action.reviewer)
     return record

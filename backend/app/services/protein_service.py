@@ -53,6 +53,11 @@ def _registry() -> dict[str, dict[str, Any]]:
     return {r["pdb_id"]: r for r in doc.get("approved_proteins", [])}
 
 
+def clear_protein_cache() -> None:
+    """Invalidate the protein registry cache when new candidates are onboarded."""
+    _registry.cache_clear()
+
+
 @lru_cache
 def _reference_tables() -> tuple[Any, Any]:
     """The two CSVs the ML bundle was trained from."""
