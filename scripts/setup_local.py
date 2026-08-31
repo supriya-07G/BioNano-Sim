@@ -20,7 +20,7 @@ from pathlib import Path
 # scripts/ is not a package, so the shared console helper is imported by
 # path. init_console() must run before any output is written.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _console import init_console  # noqa: E402
+from _console import init_console
 
 init_console()
 
@@ -177,7 +177,7 @@ def regenerate_metadata() -> None:
                 "molecular_weight": float(first["molecular_weight"]),
                 "hydrophobic_fraction": float(first["hydrophobic_fraction"]),
                 "charged_fraction": float(first["charged_fraction"]),
-                "n_reference_residues": int(len(rows)),
+                "n_reference_residues": len(rows),
                 "ml_dataset_split": info["split"],
                 "structure_file": f"{pdb_id}.pdb",
                 "source": "RCSB PDB (files.rcsb.org)",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Simulate the remaining architecture blueprint items.
+r"""Simulate the remaining architecture blueprint items.
 
 This script intentionally stays within the project's scientific guardrails:
 - The "radiation-inspired damage proxy" is a controlled structural ablation and
@@ -120,7 +120,13 @@ def run_openmm_damaged_pull(damaged_pdb: Path, *, steps: int = 10) -> dict[str, 
         Simulation,
         StateDataReporter,
     )
-    from openmm.unit import femtoseconds, kelvin, kilojoule_per_mole, nanometer, picosecond
+    from openmm.unit import (
+        femtoseconds,
+        kelvin,
+        kilojoule_per_mole,
+        nanometer,
+        picosecond,
+    )
 
     pdb = PDBFile(str(damaged_pdb))
     forcefield = ForceField("amber14-all.xml", "implicit/gbn2.xml")
@@ -206,7 +212,7 @@ def train_xgboost_surrogate(df: pd.DataFrame) -> tuple[xgb.XGBRegressor, pd.Data
     """Train an XGBoost surrogate from the derived before/after dataset and summarise SHAP."""
     feature_cols = ["num_nodes", "num_edges", "avg_degree", "density", "node_retention", "edge_retention"]
     target_col = "damage_label"
-    X = df[feature_cols].astype(float)  # noqa: N806 - sklearn convention
+    X = df[feature_cols].astype(float)
     y = df[target_col].astype(float)
 
     model = xgb.XGBRegressor(n_estimators=60, max_depth=3, learning_rate=0.12, random_state=42)
@@ -222,7 +228,7 @@ def train_xgboost_surrogate(df: pd.DataFrame) -> tuple[xgb.XGBRegressor, pd.Data
     prediction = model.predict(X)
     summary = {
         "model_type": "XGBoostRegressor",
-        "training_rows": int(len(df)),
+        "training_rows": len(df),
         "predicted_before": float(prediction[0]),
         "predicted_after": float(prediction[1]),
         "shap_top_feature": importance.iloc[0]["feature"],

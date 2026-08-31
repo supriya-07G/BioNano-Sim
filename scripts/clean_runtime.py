@@ -16,7 +16,7 @@ from pathlib import Path
 # scripts/ is not a package, so the shared console helper is imported by
 # path. init_console() must run before any output is written.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _console import init_console  # noqa: E402
+from _console import init_console
 
 init_console()
 

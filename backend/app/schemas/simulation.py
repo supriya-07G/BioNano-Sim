@@ -8,7 +8,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
-class JobStatus(str, Enum):
+class JobStatus(str, Enum):  # noqa: UP042
     QUEUED = "queued"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -20,7 +20,7 @@ class JobStatus(str, Enum):
         return self in {JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED}
 
 
-class JobStage(str, Enum):
+class JobStage(str, Enum):  # noqa: UP042
     """The eight reported stages (spec 5D). Order is significant."""
 
     INPUT_VALIDATION = "input_validation"

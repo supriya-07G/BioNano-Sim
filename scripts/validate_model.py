@@ -22,7 +22,7 @@ from pathlib import Path
 # scripts/ is not a package, so the shared console helper is imported by
 # path. init_console() must run before any output is written.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _console import init_console  # noqa: E402
+from _console import init_console
 
 init_console()
 
@@ -159,7 +159,7 @@ def main() -> int:
         if not (split_path.exists() and report_path.exists()):
             all_ok &= check(False, f"{split} split and report present")
             continue
-        X = pd.read_csv(split_path)  # noqa: N806 - sklearn convention
+        X = pd.read_csv(split_path)
         shipped = pd.read_csv(report_path)
         predicted = np.asarray(pipeline.predict(X[features]), dtype=float)
         reference = shipped["predicted_mechanical_degradation_pct"].to_numpy(dtype=float)

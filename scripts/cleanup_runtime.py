@@ -26,8 +26,8 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "backend"))
 
-from app.config import settings  # noqa: E402
-from app.core import diagnostics, storage  # noqa: E402
+from app.config import settings
+from app.core import diagnostics, storage
 
 
 def human(num_bytes: int) -> str:

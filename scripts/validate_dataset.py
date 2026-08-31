@@ -43,13 +43,13 @@ from typing import Any
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "backend"))
 
-from app.contracts.paired_experiment import (  # noqa: E402
+from app.contracts.paired_experiment import (
     CONTRACT_VERSION,
     STIFFNESS_CSV_COLUMNS,
     validate_stiffness_row,
 )
-from app.simulation.quality_gates import check_fit, check_units  # noqa: E402
-from pydantic import ValidationError  # noqa: E402
+from app.simulation.quality_gates import check_fit, check_units
+from pydantic import ValidationError
 
 DEFAULT_DATASET = REPO / "data" / "ml" / "stiffness_results_REAL_v1.csv"
 

@@ -88,7 +88,7 @@ def library_versions() -> dict[str, Any]:
             versions[name] = None
 
     try:
-        from openmm import Platform  # noqa: PLC0415
+        from openmm import Platform
 
         versions["openmm_platforms"] = [
             Platform.getPlatform(i).getName()
@@ -102,8 +102,9 @@ def library_versions() -> dict[str, Any]:
 def protocol_block() -> dict[str, Any]:
     """The frozen protocol, read from the producer rather than restated here."""
     try:
-        from scripts.run_paired_experiment import (  # noqa: PLC0415
-            protocol_config, sim_config_hash,
+        from scripts.run_paired_experiment import (
+            protocol_config,
+            sim_config_hash,
         )
 
         config = protocol_config()
@@ -131,8 +132,8 @@ def dig(payload: dict[str, Any], dotted: str) -> Any:
 
 def build() -> dict[str, Any]:
     sys.path.insert(0, str(REPO))
-    from app.contracts.paired_experiment import CONTRACT_VERSION  # noqa: PLC0415
-    from app.simulation.damage import PROXY_TYPE, PROXY_VERSION  # noqa: PLC0415
+    from app.contracts.paired_experiment import CONTRACT_VERSION
+    from app.simulation.damage import PROXY_TYPE, PROXY_VERSION
 
     dataset_manifest_path = (
         REPO / "data" / "ml" / "stiffness_results_REAL_v1.manifest.json"

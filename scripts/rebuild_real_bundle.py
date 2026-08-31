@@ -160,7 +160,7 @@ def main() -> int:
         "feature_columns": FEATURE_COLS + CAT_COLS,
         "numeric_features": FEATURE_COLS,
         "categorical_features": CAT_COLS,
-        "n_training_labels": int(len(train)),
+        "n_training_labels": len(train),
         "n_proteins": int(n_groups),
         "proteins": sorted(train["protein_id"].unique().tolist()),
         "seeds_per_label_median": float(train["n_seeds"].median()),
@@ -179,10 +179,10 @@ def main() -> int:
                                         "verified against NASA references"),
         },
         "limitations": [
-            "Radiation is not simulated. The damage proxy is a side-chain truncation "
-            "at residues selected for literature radiosensitivity.",
-            "Pulls are 40 ps of non-equilibrium steered MD, ~1e6 times faster than "
-            "an AFM experiment. Absolute forces are not comparable to experiment.",
+            ("Radiation is not simulated. The damage proxy is a side-chain truncation "
+             "at residues selected for literature radiosensitivity."),
+            ("Pulls are 40 ps of non-equilibrium steered MD, ~1e6 times faster than "
+             "an AFM experiment. Absolute forces are not comparable to experiment."),
             "Severity is a count of removed side chains and is not a dose.",
             "The target carries measurable run-to-run noise; see label_sem_pp_median.",
         ],

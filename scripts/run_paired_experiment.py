@@ -34,8 +34,9 @@ from typing import Any
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "backend"))
 
-import numpy as np  # noqa: E402
-from app.simulation.damage import (  # noqa: E402
+import numpy as np
+from app.analysis.structural_damage import analyze_structural_damage
+from app.simulation.damage import (
     PROXY_TYPE,
     SEVERITY_LEVELS,
     DamageTarget,
@@ -43,10 +44,9 @@ from app.simulation.damage import (  # noqa: E402
     damage_rejection_reason,
     sha256_file,
 )
-from app.simulation.engine import load_trajectory, run_simulation  # noqa: E402
-from app.simulation.presets import MECHANICAL_PULL  # noqa: E402
-from app.simulation.pulling import PullConfig  # noqa: E402
-from app.analysis.structural_damage import analyze_structural_damage  # noqa: E402
+from app.simulation.engine import load_trajectory, run_simulation
+from app.simulation.presets import MECHANICAL_PULL
+from app.simulation.pulling import PullConfig
 
 SCHEMA_VERSION = "1.0"
 SCENARIO_VERSION = "1.0"
@@ -154,7 +154,7 @@ def sim_config_hash() -> str:
 def git_commit() -> str:
     try:
         out = subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True, timeout=15
+            ["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True, timeout=15, check=False
         )
         return out.stdout.strip() or "UNKNOWN"
     except Exception:  # noqa: BLE001
@@ -388,7 +388,7 @@ def main() -> int:
     # damage step re-checks against the real anchors and hard-fails on a mismatch.
     ca_seqs = ca_residue_seqs(source_early, args.chain)
     predicted_pull = (ca_seqs[0], ca_seqs[-1]) if len(ca_seqs) >= 2 else ()
-    from app.simulation.damage import residue_types_in  # noqa: E402
+    from app.simulation.damage import residue_types_in
     structure_types = residue_types_in(source_early, args.chain)
 
     n_damage = SEVERITY_LEVELS[args.severity]
@@ -701,16 +701,16 @@ def main() -> int:
         },
         "limitations": [
             *baseline.notes[:0],
-            "Implicit solvent (GBn2): there is no water model, no box, no barostat "
-            "and therefore no density. Pressure is not defined for these runs.",
-            "50 ps of pulling at 0.02 nm/ps is a non-equilibrium loading rate around "
-            "a million times faster than an AFM experiment. Absolute forces are far "
-            "above experimental values; only baseline-vs-damaged comparisons under "
-            "this identical protocol are meaningful.",
-            "The damage proxy is a controlled side-chain truncation, not radiation "
-            "chemistry. No dose or LET value was used.",
-            "Runs on the auto-selected platform are not bit-reproducible. Repeat "
-            "seeds are the intended way to capture run-to-run variation.",
+            ("Implicit solvent (GBn2): there is no water model, no box, no barostat "
+             "and therefore no density. Pressure is not defined for these runs."),
+            ("50 ps of pulling at 0.02 nm/ps is a non-equilibrium loading rate around "
+             "a million times faster than an AFM experiment. Absolute forces are far "
+             "above experimental values; only baseline-vs-damaged comparisons under "
+             "this identical protocol are meaningful."),
+            ("The damage proxy is a controlled side-chain truncation, not radiation "
+             "chemistry. No dose or LET value was used."),
+            ("Runs on the auto-selected platform are not bit-reproducible. Repeat "
+             "seeds are the intended way to capture run-to-run variation."),
         ],
         "status": status,
         "qc_failures": qc_failures,
