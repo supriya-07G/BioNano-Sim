@@ -60,7 +60,7 @@ export function CandidateRankingCard({ candidate }: CandidateRankingCardProps) {
           )}
           <span className="flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-2xs font-semibold text-emerald-500">
             <CheckCircle2 className="h-3 w-3" />
-            {candidate.provenance.validation ?? 'EMPIRICAL'}
+            {String(candidate.provenance.validation ?? 'EMPIRICAL')}
           </span>
         </div>
       </div>

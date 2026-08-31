@@ -31,7 +31,7 @@ export interface CandidateObjectiveScore {
   composite_score: number
   is_pareto_optimal: boolean
   explanation: string
-  provenance: Record<string, any>
+  provenance: Record<string, unknown>
 }
 
 export interface RankingResponse {
